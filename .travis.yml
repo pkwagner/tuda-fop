@@ -1,0 +1,25 @@
+language: c
+
+# To use Travis CI's newer container infrastructure, use the following
+# line. (Also be sure RACKET_DIR is set to somewhere like ~/racket
+# that doesn't require sudo.)
+sudo: false
+
+env:
+  global:
+    # This is where Racket will be installed. A good idea is to use ~/racket because
+    # that doesn't require sudo to install and is therefore compatible
+    # with Travis CI's newer container infrastructure.
+    - RACKET_DIR=~/racket
+    # Test against the newest Racket release version
+    - RACKET_VERSION=RELEASE
+
+# Download and install racket
+install:
+  - git clone https://github.com/greghendershott/travis-racket.git
+  - cat travis-racket/install-racket.sh | bash # pipe to bash not sh!
+  - export PATH="${RACKET_DIR}/bin:${PATH}" #install-racket.sh can't set for us
+
+# Actual testing here
+script:
+  -  raco test -x .

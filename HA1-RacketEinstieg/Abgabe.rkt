@@ -35,8 +35,8 @@
 	(expt (- (/ capitalAfter capitalBefore) 1) (/ 1 duration)))
 
 ;; Tests
-(check-within (average-yearly-return 100 101 1) 1 0.001)
-(check-within (average-yearly-return 100 225 2) 50 0.001)
+(check-within (average-yearly-return 100 101 1) 0.01 0.001)
+(check-within (average-yearly-return 100 225 2) 0.5 0.001)
 
 ;; 9.4
 ;; best-savings-plan::

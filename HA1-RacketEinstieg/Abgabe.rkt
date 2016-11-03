@@ -11,6 +11,11 @@
 ;; * TODOs in code...
 
 ;; 9.1
+;; add-interest::
+;;
+;; 
+;; 
+;; Ex:
 (define (add-interest capital interestRate) 
 	(* capital (+ interestRate 1)))
 
@@ -21,6 +26,11 @@
 (check-expect (add-interest -1 0.01) -1)
 
 ;; 9.2
+;; average-yearly-return::
+;;
+;; 
+;; 
+;; Ex:
 (define (average-yearly-return capitalBefore capitalAfter duration) 
 	(expt (- (/ capitalAfter capitalBefore) 1) (/ 1 duration)))
 
@@ -29,6 +39,11 @@
 (check-within (average-yearly-return 100 225 2) 50 0.001)
 
 ;; 9.4
+;; best-savings-plan::
+;;
+;; 
+;; 
+;; Ex:
 (define (best-savings-plan capital duration)
 	(if (>= (average-yearly-return capital (savings-plan-a capital duration) duration)
                 (average-yearly-return capital (savings-plan-b capital duration) duration))
@@ -40,6 +55,11 @@
 (check-expect (best-savings-plan 100 3) 'SavingsPlanB)
 
 ;; 9.3
+;; savings-plan-a::
+;;
+;; 
+;; 
+;; Ex:
 ;; TODO round (floor) duration
 (define (savings-plan-a capital duration)
 	(if (= duration 0) capital (savings-plan-a (add-interest capital (/
@@ -57,6 +77,11 @@
 (check-within (savings-plan-a 100 3) 133.027 0.001)
 
 ;; TODO round (floor) duration
+;; savings-plan-b::
+;;
+;; 
+;; 
+;; Ex:
 (define (savings-plan-b capital duration)
 	(if (= duration 0)
             capital

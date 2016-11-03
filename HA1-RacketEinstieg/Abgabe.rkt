@@ -11,13 +11,16 @@
 ;; * TODOs in code...
 
 ;; 9.1
-;; add-interest::
-;;
-;; 
-;; 
-;; Ex:
-(define (add-interest capital interestRate) 
-	(* capital (+ interestRate 1)))
+;; add-interest:: number number -> number
+;; returns the new capital after adding the interest rate
+;; Example: (add-interest 10000 0.025) should return 10250
+(define (add-interest capital interestRate)
+  (cond	[(< interestRate 0) (error "no negative interest rates allowed")]
+        [(<= capital 0) (+ capital 0)] ;; Racket is not doing (capital), there has to be a function!
+        [(> capital 0) (* capital (+ interestRate 1))]
+  )
+)
+	
 
 ;; Tests
 (check-error (add-interest 100 -0.01) "no negative interest rates allowed")

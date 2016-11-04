@@ -2,6 +2,12 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-beginner-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
+;; Authors:
+;; Alexander Siegler
+;; Paul Konstantin Wagner
+;; Yoshua Hitzel
+;; Marcel Lackovic
+
 ;; Constants
 (define tolerance 0.001)
 (define base-interest 0.005)
@@ -27,8 +33,6 @@
 (check-expect (add-interest 0 0.01) 0)
 (check-expect (add-interest -1 0.01) -1)
 
-
-
 ;; 9.2
 ;; average-yearly-return:: number number number -> number
 ;;
@@ -52,6 +56,7 @@
 
 ;; 9.3
 
+
 ;; savings-plan-a:: number number -> number
 ;;
 ;; Berechnet das Endkapital nach Ablauf einer Zeitperiode 
@@ -64,8 +69,14 @@
   (cond
     [(or (< duration 1) (> duration 3)) (error "invalid runtime")]
     [(= (floor duration) 1) (add-interest capital base-interest)]
-    [(= (floor duration) 2) (add-interest (savings-plan-a capital (- duration 1)) (* base-interest 2))]
-    [(= (floor duration) 3) (add-interest (savings-plan-a capital (- duration 1)) (* base-interest 3))]))
+    [(>= (floor duration) 2) (add-interest
+                              ; Rufe zuerst rekursiv auf
+                              ; damit das Startkapital mit dem Startprozentsatz (base-interest)
+                              ; zuerst verrechnet wird und dem höchsten Wert am Schluss
+                              (savings-plan-a capital (- duration 1))
+                              (* base-interest duration))]
+    )
+  )
 
 ;; Tests
 (check-error (savings-plan-a 100 0) "invalid runtime")

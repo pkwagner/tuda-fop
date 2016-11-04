@@ -15,21 +15,21 @@
 
 
 
-;; round-down:: number -> number
+;; round-down : number -> number
 ;;
 ;; Returns the down-rounded value of a given number
 ;;
-;; Example: (round-down 3.7) -> 3.0
+;; Example: (round-down 3.7) = 3.0
 (define (round-down num) (round (- num 0.499)))
 
 
 
 ;; 9.1
-;; add-interest:: number number -> number
+;; add-interest : number number -> number
 ;; 
 ;; Returns the new capital after adding the interest rate
 ;; 
-;; Example: (add-interest 10000 0.025) should return 10250
+;; Example: (add-interest 10000 0.025) = 10250
 (define (add-interest capital interestRate)
   (cond [(< interestRate 0) (error "no negative interest rates allowed")]
         [(<= capital 0) capital] 
@@ -44,12 +44,12 @@
 (check-expect (add-interest -1 0.01) -1)
 
 ;; 9.2
-;; average-yearly-return:: number number number -> number
+;; average-yearly-return : number number number -> number
 ;;
 ;; Returns the average of yearly interest rates based on the start and end capital
 ;; and the duration in years
 ;;
-;; Ex: (average-yearly-return 3000 1000 1) = 2
+;; Example: (average-yearly-return 3000 1000 1) = 2
 (define (average-yearly-return capitalBefore capitalAfter duration)
   (if (and (> duration 0) (> capitalAfter capitalBefore))
       (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)
@@ -65,12 +65,12 @@
 
 
 ;; 9.3
-;; savings-plan:: number number -> number
+;; savings-plan : number number -> number
 ;; 
 ;; This method checks the correct usage of the parameters in the savings-plan-X
 ;; methods and calculates the basic case for having saving-plan for just one year.
 ;;
-;; Ex: (savings-plan 100 1) = 100.5
+;; Example: (savings-plan 100 1) = 100.5
 (define (savings-plan capital duration)
   (cond
     ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
@@ -90,7 +90,7 @@
 
 
 
-;; savings-plan-a:: number number -> number
+;; savings-plan-a : number number -> number
 ;;
 ;; Returns the result capital after a certain time period of years
 ;; and given a specific start capital
@@ -99,8 +99,8 @@
 ;; Saving-Plan-A starts with 0.5% and increases each year with 0.5%
 ;; up to 1.5% after three years
 ;;
-;; Ex: 100€ Startkapital für 3 Jahre
-;;   (savings-plan-b 100 3) = 133.027 Endkapital
+;; Example: Endkapital für 100€ Startkapital nach 3 Jahren
+;;   (savings-plan-b 100 3) = 133.027
 (define (savings-plan-a capital duration)
   (cond
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
@@ -122,7 +122,7 @@
 
 
 
-;; savings-plan-b:: number number -> number
+;; savings-plan-b : number number -> number
 ;;
 ;; Returns the result capital after a certain time period of years
 ;; and given a specific start capital
@@ -130,8 +130,8 @@
 ;;
 ;; Saving-Plan-B have a constant 0.5% interest value, but you receive a bonus after three years
 ;;
-;; Ex: 100€ Startkapital für 3 Jahre
-;;  (savings-plan-b 100 3) = 101.507 Endkapital
+;; Example: Endkapital für 100€ Startkapital nach 3 Jahren
+;;  (savings-plan-b 100 3) = 101.507
 (define (savings-plan-b capital duration)
   (cond
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
@@ -151,13 +151,13 @@
 
 
 ;; 9.4
-;; best-savings-plan:: number number -> symbol
+;; best-savings-plan : number number -> symbol
 ;;
 ;; Returns the best saving plan for a certain start captial and a duration in years
 ;;
 ;; If the plans are identical the first one (A) will be returned
 ;; 
-;; Ex: (best-savings-plan 100 3) = 'SavingsPlanB 
+;; Example: (best-savings-plan 100 3) = 'SavingsPlanB 
 (define (best-savings-plan capital duration)
   (if (>= (average-yearly-return capital (savings-plan-a capital duration) duration)
           (average-yearly-return capital (savings-plan-b capital duration) duration))

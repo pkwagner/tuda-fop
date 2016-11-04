@@ -10,7 +10,7 @@
 ;; * Tests
 ;; * Korrekter Header/definierte sprache
 ;; * Bisschen schoenere Struktur (insbesondere saving-plans)
-;; * Dynamischer (braucht man das ueberhaupt?)
+;; * Dynamischer (braucht man das ueberhaupt? Ja)
 ;; * TODOs in code...
 
 ;; 9.1
@@ -32,17 +32,22 @@
 (check-expect (add-interest -1 0.01) -1)
 
 ;; 9.2
-;; average-yearly-return::
-;;
-;; 
-;; 
-;; Ex:
-(define (average-yearly-return capitalBefore capitalAfter duration) 
-	(expt (- (/ capitalAfter capitalBefore) 1) (/ 1 duration)))
+;; average-yearly-return:: number number number -> number
+;; returns the average of yearly interest rates based 
+;; Ex: (average-yearly-return X Y Z )
+(define (average-yearly-return capitalBefore capitalAfter duration)
+  (if (> duration 0)
+	(expt (- (/ capitalAfter capitalBefore) 1) (/ 1 duration))
+        (error "no negative duration allowed")
+  )
+)
+
 
 ;; Tests
 (check-within (average-yearly-return 100 101 1) 0.01 tolerance)
 (check-within (average-yearly-return 100 225 2) 0.5 tolerance)
+
+(average-yearly-return 3000 2000 5)
 
 ;; 9.3
 ;; savings-plan-a::
@@ -73,7 +78,6 @@
 ;; 
 ;; Ex:
 (define (savings-plan-b capital duration)
-	(if (= duration 0)
             capital
             (savings-plan-b (+ (add-interest capital base-interest (if (= duration 3) 30 0)) (- duration 1))))
 

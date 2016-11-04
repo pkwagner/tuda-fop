@@ -34,10 +34,10 @@
 ;; 9.2
 ;; average-yearly-return:: number number number -> number
 ;; returns the average of yearly interest rates based 
-;; Ex: (average-yearly-return X Y Z )
+;; Ex: (average-yearly-return 3000 1000 1) should return 2
 (define (average-yearly-return capitalBefore capitalAfter duration)
   (if (> duration 0)
-	(expt (- (/ capitalAfter capitalBefore) 1) (/ 1 duration))
+	(expt (- (/ capitalBefore capitalAfter) 1) (/ 1 duration))
         (error "no negative duration allowed")
   )
 )
@@ -50,8 +50,8 @@
 (average-yearly-return 3000 2000 5)
 
 ;; 9.3
-;; savings-plan-a::
-;;
+;; savings-plan-a:: number number -> number
+;; 
 ;; 
 ;; 
 ;; Ex:
@@ -81,6 +81,7 @@
   (if (= duration 0)
       capital
       (savings-plan-b (+ (add-interest capital base-interest (if (= duration 3) 30 0)) (- duration 1))))
+  )
 
 ;; Tests
 (check-error (savings-plan-b 100 0) "invalid runtime")

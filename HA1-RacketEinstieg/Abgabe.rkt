@@ -1,6 +1,3 @@
-;; The first three lines of this file were inserted by DrRacket. They record metadata
-;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; Constants
 (define tolerance 0.001)
 (define base-interest 0.005)
@@ -57,11 +54,19 @@
 ;; Ex:
 ;; TODO round (floor) duration
 (define (savings-plan-a capital duration)
-	(if (= duration 0) capital (savings-plan-a (add-interest capital 
-		(cond	[(= duration 1) base-interest]
+	(if (= duration 0)
+            capital
+            (savings-plan-a
+             (add-interest capital
+                (cond   [(= duration 1) base-interest]
                         [(= duration 2) (* base-interest 2)]
-                        [(= duration 3) (* base-interest 3)]))
-	(- duration 1))))
+                        [(= duration 3) (* base-interest 3)]
+                )
+             )
+             (- duration 1)
+            )
+    )
+)
 
 ;; Tests
 (check-error (savings-plan-a 100 0) "invalid runtime")

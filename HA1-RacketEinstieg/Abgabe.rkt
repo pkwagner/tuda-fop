@@ -19,8 +19,13 @@
 ;;
 ;; Returns the down-rounded value of a given number
 ;;
-;; Example: (round-down 3.7) = 3.0
+;; Example: (round-down 3.7) = 3
 (define (round-down num) (round (- num 0.499)))
+
+;; Checks
+(check-expect (round-down 7.2) 7)
+(check-expect (round-down 3.9) 3)
+(check-expect (round-down 4) 4)
 
 
 

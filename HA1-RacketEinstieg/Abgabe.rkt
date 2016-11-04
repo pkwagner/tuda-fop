@@ -114,6 +114,7 @@
            ; damit das Startkapital mit dem Startprozentsatz (BASE-INTEREST)
            ; zuerst verrechnet wird und dem höchsten Wert am Schluss
            (savings-plan-a capital (- duration 1))
+           ; Berechne Zinssatz für das entsprechende Jahr (Jahr 1 -> 0.5%=1*0.5*; Jahr 2 -> 1.0%=2*0.5%)
            (* BASE-INTEREST (round-down duration)))])
 )
 

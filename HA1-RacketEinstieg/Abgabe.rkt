@@ -15,6 +15,15 @@
 
 
 
+;; round-down:: number -> number
+;;
+;; Returns the down-rounded value of a given number
+;;
+;; Example: (round-down 3.7) -> 3.0
+(define (round-down num) (round (- num 0.499)))
+
+
+
 ;; 9.1
 ;; add-interest:: number number -> number
 ;; 
@@ -68,7 +77,7 @@
     ; Also überprüfen wir Jahre gleich oder größer 4
     [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
     ; Diese Fall-Unterscheidung bildet den Rekursionsanker beider Funktionenen
-    [(= (floor duration) 1) (add-interest capital base-interest)]
+    [(= (round-down duration) 1) (add-interest capital base-interest)]
     ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
     ; die Berechnung Fälle über ein Jahr
     [else (error "missing implementation")]))
@@ -100,7 +109,7 @@
            ; damit das Startkapital mit dem Startprozentsatz (base-interest)
            ; zuerst verrechnet wird und dem höchsten Wert am Schluss
            (savings-plan-a capital (- duration 1))
-           (* base-interest (floor duration)))]
+           (* base-interest (round-down duration)))]
     )
   )
 
@@ -126,8 +135,8 @@
 (define (savings-plan-b capital duration)
   (cond
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
-    [else (+ (add-interest (savings-plan-b capital (- (floor duration) 1)) base-interest)
-             (if (= (floor duration) 3)
+    [else (+ (add-interest (savings-plan-b capital (- (round-down duration) 1)) base-interest)
+             (if (= (round-down duration) 3)
                  bonus
                  0))]))
 

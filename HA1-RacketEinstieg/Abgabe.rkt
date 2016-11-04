@@ -40,9 +40,8 @@
 (define (add-interest capital interestRate)
   (cond [(< interestRate 0) (error "no negative interest rates allowed")]
         [(<= capital 0) capital] 
-        [(> capital 0) (* capital (+ interestRate 1))]
-        )
-  )
+        [(> capital 0) (* capital (+ interestRate 1))])
+)
 
 ;; Checks
 (check-error (add-interest 100 -0.01) "no negative interest rates allowed")
@@ -58,11 +57,9 @@
 ;;
 ;; Example: (average-yearly-return 3000 1000 1) = 2
 (define (average-yearly-return capitalAfter capitalBefore duration)
-  (cond
-      [(< duration 0) (error "no negative duration allowed")]
-      [(< capitalAfter capitalBefore) (error "no capital decrease allowed")]
-      [ else (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)]
-  )
+  (cond [(< duration 0) (error "no negative duration allowed")]
+        [(< capitalAfter capitalBefore) (error "no capital decrease allowed")]
+        [ else (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)])
 )
 
 ;; Checks
@@ -88,7 +85,8 @@
     [(= (round-down duration) 1) (add-interest capital BASE-INTEREST)]
     ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
     ; die Berechnung Fälle über ein Jahr
-    [else (error "missing implementation")]))
+    [else (error "missing implementation")])
+)
 
 ;; Checks
 (check-error (savings-plan 100 0) "invalid runtime")
@@ -116,9 +114,8 @@
            ; damit das Startkapital mit dem Startprozentsatz (BASE-INTEREST)
            ; zuerst verrechnet wird und dem höchsten Wert am Schluss
            (savings-plan-a capital (- duration 1))
-           (* BASE-INTEREST (round-down duration)))]
-    )
-  )
+           (* BASE-INTEREST (round-down duration)))])
+)
 
 ;; Checks
 (check-error (savings-plan-a 100 0) "invalid runtime")
@@ -139,12 +136,12 @@
 ;; Example: Endkapital für 100€ Startkapital nach 3 Jahren
 ;;  (savings-plan-b 100 3) = 101.507 
 (define (savings-plan-b capital duration)
-  (cond
-    [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
-    [else (+ (add-interest (savings-plan-b capital (- (round-down duration) 1)) BASE-INTEREST)
-             (if (= (round-down duration) 3)
-                 BONUS
-                 0))]))
+  (cond [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
+        [else (+ (add-interest (savings-plan-b capital (- (round-down duration) 1)) BASE-INTEREST)
+              (if (= (round-down duration) 3)
+                BONUS
+                0))])
+)
 
 ;; Checks
 (check-error (savings-plan-b 100 0) "invalid runtime")
@@ -167,9 +164,8 @@
   (if (>= (average-yearly-return (savings-plan-a capital duration) capital duration)
           (average-yearly-return (savings-plan-b capital duration) capital duration))
       'SavingsPlanA
-      'SavingsPlanB
-      )
-  )
+      'SavingsPlanB)
+)
 
 ;; Checks
 (check-expect (best-savings-plan 100 1) 'SavingsPlanA)

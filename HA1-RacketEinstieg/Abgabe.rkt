@@ -26,8 +26,8 @@
   (cond [(< interestRate 0) (error "no negative interest rates allowed")]
         [(<= capital 0) capital] 
         [(> capital 0) (* capital (+ interestRate 1))]
+        )
   )
-)
 
 ;; Tests
 (check-error (add-interest 100 -0.01) "no negative interest rates allowed")
@@ -46,10 +46,10 @@
 ;; Ex: (average-yearly-return 3000 1000 1) = 2
 (define (average-yearly-return capitalBefore capitalAfter duration)
   (if (and (> duration 0) (> capitalAfter capitalBefore))
-    (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)
-    (error "no negative duration allowed")
+      (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)
+      (error "no negative duration allowed")
+      )
   )
-)
 
 ;; Tests
 (check-within (average-yearly-return 100 101 1) 0.01 tolerance)
@@ -112,7 +112,7 @@
 
 
 
-   )
+)
 )
 
 
@@ -125,11 +125,12 @@
 ;; 
 ;; Ex: (best-savings-plan 100 3) = 'SavingsPlanB 
 (define (best-savings-plan capital duration)
-  (if (>= (average-yearly-return capital (savings-plan-a capital duration) duration) (average-yearly-return capital (savings-plan-b capital duration) duration))
-    'SavingsPlanA
-    'SavingsPlanB
+  (if (>= (average-yearly-return capital (savings-plan-a capital duration) duration)
+          (average-yearly-return capital (savings-plan-b capital duration) duration))
+      'SavingsPlanA
+      'SavingsPlanB
+      )
   )
-)
 
 ;; Tests
 (check-expect (best-savings-plan 100 1) 'SavingsPlanA)

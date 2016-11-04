@@ -58,8 +58,6 @@
 ;;
 ;; Ex: 100€ Startkapital für 3 Jahre
 ;;   (savings-plan-b 100 3) = 133.027 Endkapital
-
-;; TODO round (floor) duration
 (define (savings-plan-a capital duration)
 	(if (= duration 0)
             capital
@@ -80,10 +78,7 @@
 (check-error (savings-plan-a 100 4) "invalid runtime")
 (check-expect (savings-plan-a 100 1) 105)
 (check-expect (savings-plan-a 100 1.5) 105)
-;; Includes the bonus
-(check-within (savings-plan-a 100 3) 133.027 tolerance)
-
-;; TODO round (floor) duration
+(check-within (savings-plan-a 100 3) 103.027 tolerance)
 
 ;; savings-plan-b:: number number -> number
 ;;
@@ -106,7 +101,8 @@
 (check-error (savings-plan-b 100 4) "invalid runtime")
 (check-expect (savings-plan-b 100 1) 100.5)
 (check-expect (savings-plan-b 100 1.5) 100.5)
-(check-within (savings-plan-b 100 3) 101.507 tolerance)
+;; Includes the bonus
+(check-within (savings-plan-b 100 3) 131.507 tolerance)
 
 ;; round-down:: number -> number
 ;;
@@ -143,4 +139,5 @@
 
 ;; Tests
 (check-expect (best-savings-plan 100 1) 'SavingsPlanA)
+(check-expect (best-savings-plan 100 2) 'SavingsPlanB)
 (check-expect (best-savings-plan 100 3) 'SavingsPlanB)

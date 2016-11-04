@@ -1,14 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-beginner-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
-;;------------------------------------------------------------;;
-;; TODOs
-;; * Bisschen schoenere Struktur (insbesondere saving-plans)
-;; * Dynamischer (braucht man das ueberhaupt? Ja)
-;; * TODOs in code...
-;;------------------------------------------------------------;;
-
-
 
 ;; Constants
 (define tolerance 0.001)
@@ -110,10 +102,6 @@
 ;; Includes the bonus
 (check-within (savings-plan-b 100 3) 131.507 tolerance)
 
-
-
-)
-)
 
 
 ;; 9.4

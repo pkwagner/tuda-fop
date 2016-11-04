@@ -11,6 +11,7 @@
 ;; Constants
 (define tolerance 0.001)
 (define base-interest 0.005)
+(define bonus 30)
 
 
 
@@ -55,26 +56,38 @@
 
 
 ;; 9.3
+(define (savings-plan capital interest duration)
+  (cond
+    [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
+    [(= (floor duration) 1) (add-interest capital base-interest)]
+    []))
+
+;; Tests
+(check-error (savings-plan 100 0) "invalid runtime")
+(check-error (savings-plan 100 4) "invalid runtime")
 
 
 ;; savings-plan-a:: number number -> number
 ;;
-;; Berechnet das Endkapital nach Ablauf einer Zeitperiode 
-;; Laufzeit (für Jahre) gemäß des Sparplans A 
-;; von einem gewissen Startkapital start-kapital
+;; Returns the result capital after a certain time period of years
+;; and given a specific start capital
+;; based on savings plan A
+;;
+;; Saving-Plan-A starts with 0.5% and increases each year with 0.5%
+;; up to 1.5% after three years
 ;;
 ;; Ex: 100€ Startkapital für 3 Jahre
 ;;   (savings-plan-b 100 3) = 133.027 Endkapital
 (define (savings-plan-a capital duration)
   (cond
-    [(or (< duration 1) (> duration 3)) (error "invalid runtime")]
+    [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
     [(= (floor duration) 1) (add-interest capital base-interest)]
     [(>= (floor duration) 2) (add-interest
                               ; Rufe zuerst rekursiv auf
                               ; damit das Startkapital mit dem Startprozentsatz (base-interest)
                               ; zuerst verrechnet wird und dem höchsten Wert am Schluss
                               (savings-plan-a capital (- duration 1))
-                              (* base-interest duration))]
+                              (* base-interest (floor duration)))]
     )
   )
 
@@ -89,20 +102,22 @@
 
 ;; savings-plan-b:: number number -> number
 ;;
-;; Berechnet das Endkapital nach Ablauf einer Zeitperiode 
-;; Laufzeit (für Jahre) gemäß des Sparplans B 
-;; von einem gewissen Startkapital start-kapital
-;; 
+;; Returns the result capital after a certain time period of years
+;; and given a specific start capital
+;; based on savings plan B
+;;
+;; Saving-Plan-B have a constant 0.5% interest value, but you receive a bonus after three years
+;;
 ;; Ex: 100€ Startkapital für 3 Jahre
 ;;  (savings-plan-b 100 3) = 101.507 Endkapital
 (define (savings-plan-b capital duration)
   (cond
     ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
-    [(or (< duration 1) (> (floor duration) 3)) (error "invalid runtime")]
+    [(or (< duration 1) (>= (floor duration) 4)) (error "invalid runtime")]
     [(= (floor duration) 1) (add-interest capital base-interest)]
     [else (+ (add-interest (savings-plan-b capital (- (floor duration) 1)) base-interest)
              (if (= (floor duration) 3)
-                 30
+                 bonus
                  0))]))
 
 ;; Tests

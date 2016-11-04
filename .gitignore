@@ -5,3 +5,6 @@
 .DS_Store
 *.bak
 TAGS
+
+# Ignore backup merge conflict files created by git
+*.orig

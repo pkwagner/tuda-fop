@@ -47,7 +47,7 @@
 ;; Tests
 (check-within (average-yearly-return 100 101 1) 0.01 tolerance)
 (check-within (average-yearly-return 100 225 2) 0.5 tolerance)
-(check-error (average-yearly-return 100  100 -1) "no negative duration allowed")
+(check-error (average-yearly-return 100 100 -1) "no negative duration allowed")
 
 ;; 9.3
 ;; savings-plan-a:: number number -> number
@@ -107,6 +107,25 @@
 (check-expect (savings-plan-b 100 1) 100.5)
 (check-expect (savings-plan-b 100 1.5) 100.5)
 (check-within (savings-plan-b 100 3) 101.507 tolerance)
+
+;; round-down:: number -> number
+;;
+;; Roundet den Wert, sodass die Nachkommastellen entfernt werden
+;;
+;; Ex: round-down(1.5) = 1
+;;     round-down(2.5) = 2
+(define (round-down val) 
+  (if (integer? val)
+      ;; Zahl muss nicht gerunden werden. Es ist keine Dezimalzahl
+      val
+      ;; Runde die Zahl
+      (round (- val 0.5))))
+
+;; Tests
+(check-expect (round-down 3) 3)
+(check-expect (round-down 1.5) 1)
+(check-expect (round-down 2.5) 2)
+(check-expect (round-down 0.7) 0)
 
 ;; 9.4
 ;; best-savings-plan:: number number -> symbol

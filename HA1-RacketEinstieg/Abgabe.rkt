@@ -56,15 +56,29 @@
 
 
 ;; 9.3
-(define (savings-plan capital interest duration)
+;; savings-plan:: number number -> number
+;; 
+;; This method checks the correct usage of the parameters in the savings-plan-X
+;; methods and calculates the basic case for having saving-plan for just one year.
+;;
+;; Ex: (savings-plan 100 1) = 100.5
+(define (savings-plan capital duration)
   (cond
+    ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
+    ; Also überprüfen wir Jahre gleich oder größer 4
     [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
+    ; Diese Fall-Unterscheidung bildet den Rekursionsanker beider Funktionenen
     [(= (floor duration) 1) (add-interest capital base-interest)]
-    []))
+    ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
+    ; die Berechnung Fälle über ein Jahr
+    [else (error "missing implementation")]))
 
 ;; Tests
 (check-error (savings-plan 100 0) "invalid runtime")
 (check-error (savings-plan 100 4) "invalid runtime")
+(check-error (savings-plan 100 2) "missing implementation")
+(check-expect (savings-plan 100 1) 100.5)
+
 
 
 ;; savings-plan-a:: number number -> number
@@ -80,14 +94,13 @@
 ;;   (savings-plan-b 100 3) = 133.027 Endkapital
 (define (savings-plan-a capital duration)
   (cond
-    [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
-    [(= (floor duration) 1) (add-interest capital base-interest)]
-    [(>= (floor duration) 2) (add-interest
-                              ; Rufe zuerst rekursiv auf
-                              ; damit das Startkapital mit dem Startprozentsatz (base-interest)
-                              ; zuerst verrechnet wird und dem höchsten Wert am Schluss
-                              (savings-plan-a capital (- duration 1))
-                              (* base-interest (floor duration)))]
+    [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
+    [else (add-interest
+           ; Rufe zuerst rekursiv auf
+           ; damit das Startkapital mit dem Startprozentsatz (base-interest)
+           ; zuerst verrechnet wird und dem höchsten Wert am Schluss
+           (savings-plan-a capital (- duration 1))
+           (* base-interest (floor duration)))]
     )
   )
 
@@ -112,9 +125,7 @@
 ;;  (savings-plan-b 100 3) = 101.507 Endkapital
 (define (savings-plan-b capital duration)
   (cond
-    ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
-    [(or (< duration 1) (>= (floor duration) 4)) (error "invalid runtime")]
-    [(= (floor duration) 1) (add-interest capital base-interest)]
+    [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
     [else (+ (add-interest (savings-plan-b capital (- (floor duration) 1)) base-interest)
              (if (= (floor duration) 3)
                  bonus

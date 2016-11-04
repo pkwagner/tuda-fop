@@ -37,8 +37,8 @@
 ;;
 ;; Ex: (average-yearly-return 3000 1000 1) = 2
 (define (average-yearly-return capitalBefore capitalAfter duration)
-  (if (and (> duration 0) (> capitalBefore capitalAfter))
-	(expt (- (/ capitalBefore capitalAfter) 1) (/ 1 duration))
+  (if (and (> duration 0) (> capitalAfter capitalBefore))
+	(- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)
         (error "no negative duration allowed")
   )
 )
@@ -47,6 +47,7 @@
 ;; Tests
 (check-within (average-yearly-return 100 101 1) 0.01 tolerance)
 (check-within (average-yearly-return 100 225 2) 0.5 tolerance)
+(check-error (average-yearly-return 100  100 -1) "no negative duration allowed")
 
 ;; 9.3
 ;; savings-plan-a:: number number -> number

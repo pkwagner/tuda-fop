@@ -1,3 +1,6 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata 
+;; about the language level of this file in a form that our tools can easily process. 
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; Constants
 (define tolerance 0.001)
 (define base-interest 0.005)
@@ -33,7 +36,7 @@
 ;; returns the average of yearly interest rates based 
 ;; Ex: (average-yearly-return 3000 1000 1) should return 2
 (define (average-yearly-return capitalBefore capitalAfter duration)
-  (if (> duration 0)
+  (if (and (> duration 0) (> capitalBefore capitalAfter))
 	(expt (- (/ capitalBefore capitalAfter) 1) (/ 1 duration))
         (error "no negative duration allowed")
   )

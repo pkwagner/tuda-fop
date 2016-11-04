@@ -59,6 +59,7 @@
 
 
 ;; 9.3
+
 ;; savings-plan-a:: number number -> number
 ;;
 ;; Berechnet das Endkapital nach Ablauf einer Zeitperiode 
@@ -68,25 +69,17 @@
 ;; Ex: 100€ Startkapital für 3 Jahre
 ;;   (savings-plan-b 100 3) = 133.027 Endkapital
 (define (savings-plan-a capital duration)
-  (if (= duration 0)
-    capital
-    (savings-plan-a
-      (add-interest capital
-        (cond [(= duration 1) base-interest]
-              [(= duration 2) (* base-interest 2)]
-              [(= duration 3) (* base-interest 3)]
-        )
-      )
-      (- duration 1)
-    )
-  )
-)
+  (cond
+    [(or (< duration 1) (> duration 3)) (error "invalid runtime")]
+    [(= (floor duration) 1) (add-interest capital base-interest)]
+    [(= (floor duration) 2) (add-interest (savings-plan-a capital (- duration 1)) (* base-interest 2))]
+    [(= (floor duration) 3) (add-interest (savings-plan-a capital (- duration 1)) (* base-interest 3))]))
 
 ;; Tests
 (check-error (savings-plan-a 100 0) "invalid runtime")
 (check-error (savings-plan-a 100 4) "invalid runtime")
-(check-expect (savings-plan-a 100 1) 105)
-(check-expect (savings-plan-a 100 1.5) 105)
+(check-expect (savings-plan-a 100 1) 100.5)
+(check-expect (savings-plan-a 100 1.5) 100.5)
 (check-within (savings-plan-a 100 3) 103.027 tolerance)
 
 
@@ -100,14 +93,14 @@
 ;; Ex: 100€ Startkapital für 3 Jahre
 ;;  (savings-plan-b 100 3) = 101.507 Endkapital
 (define (savings-plan-b capital duration)
-  (if (= duration 0)
-    capital
-    (savings-plan-b
-      (+ (add-interest capital base-interest) (if (= duration 3) 30 0))
-      (- duration 1)
-    )
-  )
-)
+  (cond
+    ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
+    [(or (< duration 1) (> (floor duration) 3)) (error "invalid runtime")]
+    [(= (floor duration) 1) (add-interest capital base-interest)]
+    [else (+ (add-interest (savings-plan-b capital (- (floor duration) 1)) base-interest)
+             (if (= (floor duration) 3)
+                 30
+                 0))]))
 
 ;; Tests
 (check-error (savings-plan-b 100 0) "invalid runtime")
@@ -119,27 +112,8 @@
 
 
 
-;; round-down:: number -> number
-;;
-;; Rundet den Wert, sodass die Nachkommastellen entfernt werden
-;;
-;; Ex: round-down(1.5) = 1
-;;     round-down(2.5) = 2
-(define (round-down val) 
-  (if (integer? val)
-    ;; Zahl muss nicht gerunden werden. Es ist keine Dezimalzahl
-    val
-    ;; Runde die Zahl
-    (round (- val 0.5))
    )
 )
-
-;; Tests
-(check-expect (round-down 3) 3)
-(check-expect (round-down 1.5) 1)
-(check-expect (round-down 2.5) 2)
-(check-expect (round-down 0.7) 0)
-
 
 
 ;; 9.4
@@ -159,5 +133,5 @@
 
 ;; Tests
 (check-expect (best-savings-plan 100 1) 'SavingsPlanA)
-(check-expect (best-savings-plan 100 2) 'SavingsPlanB)
+(check-expect (best-savings-plan 100 2) 'SavingsPlanA)
 (check-expect (best-savings-plan 100 3) 'SavingsPlanB)

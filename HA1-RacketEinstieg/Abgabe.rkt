@@ -18,7 +18,7 @@
 ;; Example: (add-interest 10000 0.025) should return 10250
 (define (add-interest capital interestRate)
   (cond	[(< interestRate 0) (error "no negative interest rates allowed")]
-        [(<= capital 0) capital ] 
+        [(<= capital 0) capital] 
         [(> capital 0) (* capital (+ interestRate 1))]
   )
 )	
@@ -95,12 +95,10 @@
 (define (savings-plan-b capital duration)
   (if (= duration 0)
       capital
-      (savings-plan-b (+ (add-interest capital base-interest
-                                       (if (= duration 3)
+      (savings-plan-b (+ (add-interest capital base-interest) (if (= duration 3)
                                            30
-                                           0)
-                                       ) (- duration 1))))
-  )
+                                           0))
+                      (- duration 1))))
 
 ;; Tests
 (check-error (savings-plan-b 100 0) "invalid runtime")

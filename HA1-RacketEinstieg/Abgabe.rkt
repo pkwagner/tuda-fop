@@ -8,10 +8,12 @@
 ;; Yoshua Hitzel
 ;; Marcel Lackovic
 
+
+
 ;; Constants
-(define tolerance 0.001)
-(define base-interest 0.005)
-(define bonus 30)
+(define TOLERANCE 0.001)
+(define BASE-INTEREST 0.005)
+(define BONUS 30)
 
 
 
@@ -42,7 +44,7 @@
         )
   )
 
-;; Tests
+;; Checks
 (check-error (add-interest 100 -0.01) "no negative interest rates allowed")
 (check-expect (add-interest 100 0.01) 101)
 (check-expect (add-interest 0 0.01) 0)
@@ -62,11 +64,10 @@
       )
   )
 
-;; Tests
-(check-within (average-yearly-return 100 101 1) 0.01 tolerance)
-(check-within (average-yearly-return 100 225 2) 0.5 tolerance)
+;; Checks
+(check-within (average-yearly-return 100 101 1) 0.01 TOLERANCE)
+(check-within (average-yearly-return 100 225 2) 0.5 TOLERANCE)
 (check-error (average-yearly-return 100 100 -1) "no negative duration allowed")
-
 
 
 ;; 9.3
@@ -82,17 +83,16 @@
     ; Also überprüfen wir Jahre gleich oder größer 4
     [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
     ; Diese Fall-Unterscheidung bildet den Rekursionsanker beider Funktionenen
-    [(= (round-down duration) 1) (add-interest capital base-interest)]
+    [(= (round-down duration) 1) (add-interest capital BASE-INTEREST)]
     ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
     ; die Berechnung Fälle über ein Jahr
     [else (error "missing implementation")]))
 
-;; Tests
+;; Checks
 (check-error (savings-plan 100 0) "invalid runtime")
 (check-error (savings-plan 100 4) "invalid runtime")
 (check-error (savings-plan 100 2) "missing implementation")
 (check-expect (savings-plan 100 1) 100.5)
-
 
 
 ;; savings-plan-a : number number -> number
@@ -111,20 +111,19 @@
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
     [else (add-interest
            ; Rufe zuerst rekursiv auf
-           ; damit das Startkapital mit dem Startprozentsatz (base-interest)
+           ; damit das Startkapital mit dem Startprozentsatz (BASE-INTEREST)
            ; zuerst verrechnet wird und dem höchsten Wert am Schluss
            (savings-plan-a capital (- duration 1))
-           (* base-interest (round-down duration)))]
+           (* BASE-INTEREST (round-down duration)))]
     )
   )
 
-;; Tests
+;; Checks
 (check-error (savings-plan-a 100 0) "invalid runtime")
 (check-error (savings-plan-a 100 4) "invalid runtime")
 (check-expect (savings-plan-a 100 1) 100.5)
 (check-expect (savings-plan-a 100 1.5) 100.5)
-(check-within (savings-plan-a 100 3) 103.027 tolerance)
-
+(check-within (savings-plan-a 100 3) 103.027 TOLERANCE)
 
 
 ;; savings-plan-b : number number -> number
@@ -140,19 +139,18 @@
 (define (savings-plan-b capital duration)
   (cond
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
-    [else (+ (add-interest (savings-plan-b capital (- (round-down duration) 1)) base-interest)
+    [else (+ (add-interest (savings-plan-b capital (- (round-down duration) 1)) BASE-INTEREST)
              (if (= (round-down duration) 3)
-                 bonus
+                 BONUS
                  0))]))
 
-;; Tests
+;; Checks
 (check-error (savings-plan-b 100 0) "invalid runtime")
 (check-error (savings-plan-b 100 4) "invalid runtime")
 (check-expect (savings-plan-b 100 1) 100.5)
 (check-expect (savings-plan-b 100 1.5) 100.5)
 ;; Includes the bonus
-(check-within (savings-plan-b 100 3) 131.507 tolerance)
-
+(check-within (savings-plan-b 100 3) 131.507 TOLERANCE)
 
 
 ;; 9.4
@@ -171,7 +169,7 @@
       )
   )
 
-;; Tests
+;; Checks
 (check-expect (best-savings-plan 100 1) 'SavingsPlanA)
 (check-expect (best-savings-plan 100 2) 'SavingsPlanA)
 (check-expect (best-savings-plan 100 3) 'SavingsPlanB)

@@ -22,14 +22,14 @@
 ;; Returns the down-rounded value of a given number
 ;;
 ;; Example: (round-down 3.7) = 3
-(define (round-down num) (round (- num 0.499)))
+(define (round-down num)
+  (round (- num 0.499)))
 
-;; Checks
+;; Tests
 (check-expect (round-down 7.2) 7)
 (check-expect (round-down 3.9) 3)
+(check-expect (round-down 3.5) 3)
 (check-expect (round-down 4) 4)
-
-
 
 ;; 9.1
 ;; add-interest : number number -> number
@@ -57,7 +57,7 @@
 ;; and the duration in years
 ;;
 ;; Example: (average-yearly-return 3000 1000 1) = 2
-(define (average-yearly-return capitalBefore capitalAfter duration)
+(define (average-yearly-return capitalAfter capitalBefore duration)
   (if (and (> duration 0) (> capitalAfter capitalBefore))
       (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)
       (error "no negative duration allowed")
@@ -65,10 +65,9 @@
   )
 
 ;; Checks
-(check-within (average-yearly-return 100 101 1) 0.01 TOLERANCE)
-(check-within (average-yearly-return 100 225 2) 0.5 TOLERANCE)
+(check-within (average-yearly-return 101 100 1) 0.01 TOLERANCE)
+(check-within (average-yearly-return 225 100 2) 0.5 TOLERANCE)
 (check-error (average-yearly-return 100 100 -1) "no negative duration allowed")
-
 
 ;; 9.3
 ;; savings-plan : number number -> number
@@ -105,7 +104,7 @@
 ;; up to 1.5% after three years
 ;;
 ;; Example: Endkapital für 100€ Startkapital nach 3 Jahren
-;;   (savings-plan-b 100 3) = 133.027
+;;   (savings-plan-a 100 3) = 133.027
 (define (savings-plan-a capital duration)
   (cond
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
@@ -135,7 +134,7 @@
 ;; Saving-Plan-B have a constant 0.5% interest value, but you receive a bonus after three years
 ;;
 ;; Example: Endkapital für 100€ Startkapital nach 3 Jahren
-;;  (savings-plan-b 100 3) = 101.507
+;;  (savings-plan-b 100 3) = 101.507 
 (define (savings-plan-b capital duration)
   (cond
     [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
@@ -162,8 +161,8 @@
 ;; 
 ;; Example: (best-savings-plan 100 3) = 'SavingsPlanB 
 (define (best-savings-plan capital duration)
-  (if (>= (average-yearly-return capital (savings-plan-a capital duration) duration)
-          (average-yearly-return capital (savings-plan-b capital duration) duration))
+  (if (>= (average-yearly-return (savings-plan-a capital duration) capital duration)
+          (average-yearly-return (savings-plan-b capital duration) capital duration))
       'SavingsPlanA
       'SavingsPlanB
       )

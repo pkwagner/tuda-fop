@@ -78,8 +78,9 @@
 ;; 
 ;; Ex:
 (define (savings-plan-b capital duration)
-            capital
-            (savings-plan-b (+ (add-interest capital base-interest (if (= duration 3) 30 0)) (- duration 1))))
+  (if (= duration 0)
+      capital
+      (savings-plan-b (+ (add-interest capital base-interest (if (= duration 3) 30 0)) (- duration 1))))
 
 ;; Tests
 (check-error (savings-plan-b 100 0) "invalid runtime")

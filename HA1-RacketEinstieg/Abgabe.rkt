@@ -19,7 +19,7 @@
 ;; Example: (add-interest 10000 0.025) should return 10250
 (define (add-interest capital interestRate)
   (cond	[(< interestRate 0) (error "no negative interest rates allowed")]
-        [(<= capital 0) (+ capital 0)] ;; Racket is not doing (capital), there has to be a function!
+        [(<= capital 0) capital ] 
         [(> capital 0) (* capital (+ interestRate 1))]
   )
 )

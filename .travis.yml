@@ -22,4 +22,4 @@ install:
 
 # Actual testing here
 script:
-  -  raco test -x .
+  -  raco test -x $(find -name *.rkt ! -name _*)

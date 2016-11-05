@@ -7,3 +7,57 @@
 ;; Paul Konstantin Wagner
 ;; Yoshua Hitzel
 ;; Marcel Lackovic
+
+;; ====== Structures ======
+
+;; station is a structure representing a train station
+;; name: symbol - the unique name of the station
+;; train-kinds: (listof symbol) - all kinds of trains serving that station
+;;    (e.g. 'SE, 'IC, 'VIAS)
+;; distance-to-next: number - distance to next station in direction of 'Frankfurt/'CStadt
+(define-struct station (name train-kinds distance-to-next))
+
+;; service is a structure representing a train service/line ("Kursbuchlinie")
+;; kind: symbol - kind of train (e.g. 'SE, 'IC, 'VIAS)
+;; from: symbol - the station of initial departure in direction of 'Frankfurt/'CStadt
+;; avg-velocity: number - the average velocity on the tracks, taking into account stops and waits
+(define-struct service (kind from avg-velocity))
+
+;; train is a structure representing a specific train service at a specific time
+;; identifier: symbol - unique train identifier 
+;; start-time: number - time of initial departure in minutes after midnight
+(define-struct train (identifier service start-time))
+
+;; stop is a structure representing an entry in a schedule
+;;    (a train stopping at a specific station at a given time)
+;; train-identifier: symbol - the stopping train's unique identifier
+;; station-name: symbol - the station's name as a symbol
+;; stop-time: number - the time of day for the stop in minutes after midnight
+(define-struct stop (train-identifier station-name stop-time))
+
+;; ====== Smaller dataset =======
+
+;; Network AStadt -> BDorf -> CStadt
+(define a-stadt (make-station 'AStadt '(IC SE) 2.5))
+(define b-dorf  (make-station 'BDorf '(SE) 6))
+(define c-stadt (make-station 'CStadt '(IC SE) 0))
+
+;; An example train network as a (listof station)
+(define test-network (list a-stadt b-dorf c-stadt))
+
+;; Two example services: a SE & an IC from A->C
+(define SE-A-C (make-service 'SE 'AStadt 0.5))
+(define IC-A-C (make-service 'IC 'AStadt 1))
+
+;; An example (listof service)
+(define test-services (list SE-A-C IC-A-C))
+
+;; Two example trains (one of each type)
+(define SE001 (make-train 'SE001 SE-A-C 100))
+(define IC002 (make-train 'IC002 IC-A-C 200))
+
+;; An example (listof train)
+(define test-trains (list SE001 IC002))
+
+;; ========== Problems ==========
+

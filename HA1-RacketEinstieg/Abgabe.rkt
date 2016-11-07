@@ -38,7 +38,7 @@
 ;; 
 ;; Example: (add-interest 10000 0.025) = 10250
 (define (add-interest capital interestRate)
-  (cond [(< interestRate 0) (error "no negative interest rates allowed")]
+  (cond [(< interestRate 0) (error 'add-interest "no negative interest rates allowed")]  ;; Function name has to be mentioned in error
         [(<= capital 0) capital] 
         [(> capital 0) (* capital (+ interestRate 1))])
 )
@@ -57,8 +57,8 @@
 ;;
 ;; Example: (average-yearly-return 3000 1000 1) = 2
 (define (average-yearly-return capitalAfter capitalBefore duration)
-  (cond [(< duration 0) (error "no negative duration allowed")]
-        [(< capitalAfter capitalBefore) (error "no capital decrease allowed")]
+  (cond [(< duration 0) (error 'average-yearly-return "no negative duration allowed")]  ;; Function name has to be mentioned in error
+        [(< capitalAfter capitalBefore) (error 'average-yearly-return "no capital decrease allowed")]  ;; Function name has to be mentioned in error
         [ else (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)])
 )
 
@@ -80,12 +80,12 @@
   (cond
     ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
     ; Also überprüfen wir Jahre gleich oder größer 4
-    [(or (< duration 1) (>= duration 4)) (error "invalid runtime")]
+    [(or (< duration 1) (>= duration 4)) (error 'savings-plan "invalid runtime")]  ;; Function name has to be mentioned in error
     ; Diese Fall-Unterscheidung bildet den Rekursionsanker beider Funktionenen
     [(= (round-down duration) 1) (add-interest capital BASE-INTEREST)]
     ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
     ; die Berechnung Fälle über ein Jahr
-    [else (error "missing implementation")])
+    [else (error 'savings-plan "missing implementation")])  ;; Function name has to be mentioned in error
 )
 
 ;; Checks

@@ -22,8 +22,12 @@
 ;; Returns the down-rounded value of a given number
 ;;
 ;; Example: (round-down 3.7) = 3
-(define (round-down num)
-  (round (- num 0.499)))
+(define (round-down val) 
+  (if (integer? val)
+      ;; Value is already rounded
+      val
+      ;; Round the value 
+      (round (- val 0.5))))
 
 ;; Tests
 (check-expect (round-down 7.2) 7)
@@ -41,7 +45,7 @@
   (cond [(< interestRate 0) (error "add-interest: no negative interest rates allowed")]
         [(<= capital 0) capital] 
         [(> capital 0) (* capital (+ interestRate 1))])
-)
+  )
 
 ;; Checks
 (check-error (add-interest 100 -0.01) "add-interest: no negative interest rates allowed")
@@ -60,7 +64,7 @@
   (cond [(< duration 0) (error "average-yearly-return: no negative duration allowed")] 
         [(< capitalAfter capitalBefore) (error "average-yearly-return: no capital decrease allowed")]
         [ else (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)])
-)
+  )
 
 ;; Checks
 (check-within (average-yearly-return 101 100 1) 0.01 TOLERANCE)
@@ -86,7 +90,7 @@
     ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
     ; die Berechnung Fälle über ein Jahr
     [else (error "savings-plan: missing implementation")])
-)
+  )
 
 ;; Checks
 (check-error (savings-plan 100 0) "savings-plan: invalid runtime")
@@ -116,7 +120,7 @@
            (savings-plan-a capital (- duration 1))
            ; Berechne Zinssatz für das entsprechende Jahr (Jahr 1 -> 0.5%=1*0.5*; Jahr 2 -> 1.0%=2*0.5%)
            (* BASE-INTEREST (round-down duration)))])
-)
+  )
 
 ;; Checks
 (check-error (savings-plan-a 100 0) "savings-plan: invalid runtime")
@@ -139,10 +143,10 @@
 (define (savings-plan-b capital duration)
   (cond [(or (< duration 2) (>= duration 4)) (savings-plan capital duration)]
         [else (+ (add-interest (savings-plan-b capital (- (round-down duration) 1)) BASE-INTEREST)
-              (if (= (round-down duration) 3)
-                BONUS
-                0))])
-)
+                 (if (= (round-down duration) 3)
+                     BONUS
+                     0))])
+  )
 
 ;; Checks
 (check-error (savings-plan-b 100 0) "savings-plan: invalid runtime")
@@ -166,7 +170,7 @@
           (average-yearly-return (savings-plan-b capital duration) capital duration))
       'SavingsPlanA
       'SavingsPlanB)
-)
+  )
 
 ;; Checks
 (check-expect (best-savings-plan 100 1) 'SavingsPlanA)

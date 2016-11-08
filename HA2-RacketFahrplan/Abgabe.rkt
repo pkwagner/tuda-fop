@@ -66,24 +66,24 @@
 ;; Gets a list of stops that all trains at all stations in the network perform
 ;; Example: (all-stops test-network (list SE001)) returns
 ;; (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105) (make-stop 'SE001 'CStadt 117))
-(define (all-stops network trains)
-  (cond
-    ;; no more trains - exit
-    [(empty? trains) empty]
-    [else
-     ;; create schedule for first train in list...
-     (append
-      (train-schedule
-       (find-stops
-        (distance-table
-         network
-         (service-from (train-service (first trains))))
-        (service-kind
-         (train-service
-          (first trains))))
-       (first trains))
-      ;; ... and append it to schedule of remaining trains
-      (all-stops network (rest trains)))]))
+;(define (all-stops network trains)
+;  (cond
+;    ;; no more trains - exit
+;    [(empty? trains) empty]
+;    [else
+;     ;; create schedule for first train in list...
+;     (append
+;      (train-schedule
+;       (find-stops
+;        (distance-table
+;         network
+;         (service-from (train-service (first trains))))
+;        (service-kind
+;         (train-service
+;          (first trains))))
+;       (first trains))
+;      ;; ... and append it to schedule of remaining trains
+;      (all-stops network (rest trains)))]))
 
 ;; Tests (no additional tests required for this procedure!)
 ;(check-expect (all-stops empty empty) empty)
@@ -110,13 +110,13 @@
 ;; = (list
 ;;       (make-stop 'SE001 'AStadt 100)
 ;;       (make-stop 'IC002 'AStadt 200))
-(define (station-schedule lst-stop station)
-  (cond
-    [(empty? lst-stop) empty]
-    [(eq? station (stop-station-name (first lst-stop)))
-     (cons (first lst-stop)
-           (station-schedule (rest lst-stop) station))]
-    [else (station-schedule (rest lst-stop) station)]))
+;(define (station-schedule lst-stop station)
+;  (cond
+;    [(empty? lst-stop) empty]
+;    [(eq? station (stop-station-name (first lst-stop)))
+;     (cons (first lst-stop)
+;           (station-schedule (rest lst-stop) station))]
+;    [else (station-schedule (rest lst-stop) station)]))
 
 ;; Tests
 ;(check-expect (station-schedule (all-stops test-network test-trains) 'AStadt)

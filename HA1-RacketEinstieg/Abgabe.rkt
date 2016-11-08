@@ -38,13 +38,13 @@
 ;; 
 ;; Example: (add-interest 10000 0.025) = 10250
 (define (add-interest capital interestRate)
-  (cond [(< interestRate 0) (error 'add-interest "no negative interest rates allowed")]  ;; Function name has to be mentioned in error
+  (cond [(< interestRate 0) (error "add-interest: no negative interest rates allowed")]
         [(<= capital 0) capital] 
         [(> capital 0) (* capital (+ interestRate 1))])
 )
 
 ;; Checks
-(check-error (add-interest 100 -0.01) "no negative interest rates allowed")
+(check-error (add-interest 100 -0.01) "add-interest: no negative interest rates allowed")
 (check-expect (add-interest 100 0.01) 101)
 (check-expect (add-interest 0 0.01) 0)
 (check-expect (add-interest -1 0.01) -1)
@@ -57,8 +57,8 @@
 ;;
 ;; Example: (average-yearly-return 3000 1000 1) = 2
 (define (average-yearly-return capitalAfter capitalBefore duration)
-  (cond [(< duration 0) (error 'average-yearly-return "no negative duration allowed")]  ;; Function name has to be mentioned in error
-        [(< capitalAfter capitalBefore) (error 'average-yearly-return "no capital decrease allowed")]  ;; Function name has to be mentioned in error
+  (cond [(< duration 0) (error "average-yearly-return: no negative duration allowed")] 
+        [(< capitalAfter capitalBefore) (error "average-yearly-return: no capital decrease allowed")]
         [ else (- (expt (/ capitalAfter capitalBefore) (/ 1 duration)) 1)])
 )
 
@@ -66,8 +66,8 @@
 (check-within (average-yearly-return 101 100 1) 0.01 TOLERANCE)
 (check-within (average-yearly-return 225 100 2) 0.5 TOLERANCE)
 (check-within (average-yearly-return 100 100 2) 0 TOLERANCE)
-(check-error (average-yearly-return 100 100 -1) "no negative duration allowed")
-(check-error (average-yearly-return 80 100 2) "no capital decrease allowed")
+(check-error (average-yearly-return 100 100 -1) "average-yearly-return: no negative duration allowed")
+(check-error (average-yearly-return 80 100 2) "average-yearly-return: no capital decrease allowed")
 
 ;; 9.3
 ;; savings-plan : number number -> number
@@ -80,18 +80,18 @@
   (cond
     ; 3.5 Jahre sollten auch erlaubt werden, da laut Aufgabenstellung nur nicht mehr als 3 komplette Jahre erlaubt sind
     ; Also überprüfen wir Jahre gleich oder größer 4
-    [(or (< duration 1) (>= duration 4)) (error 'savings-plan "invalid runtime")]  ;; Function name has to be mentioned in error
+    [(or (< duration 1) (>= duration 4)) (error "savings-plan: invalid runtime")]
     ; Diese Fall-Unterscheidung bildet den Rekursionsanker beider Funktionenen
     [(= (round-down duration) 1) (add-interest capital BASE-INTEREST)]
     ; Die genauen Spezialisierungen (Plan-A und Plan-B) sollen zuerst aufgerufen werden und dort findet man
     ; die Berechnung Fälle über ein Jahr
-    [else (error 'savings-plan "missing implementation")])  ;; Function name has to be mentioned in error
+    [else (error "savings-plan: missing implementation")])
 )
 
 ;; Checks
-(check-error (savings-plan 100 0) "invalid runtime")
-(check-error (savings-plan 100 4) "invalid runtime")
-(check-error (savings-plan 100 2) "missing implementation")
+(check-error (savings-plan 100 0) "savings-plan: invalid runtime")
+(check-error (savings-plan 100 4) "savings-plan: invalid runtime")
+(check-error (savings-plan 100 2) "savings-plan: missing implementation")
 (check-expect (savings-plan 100 1) 100.5)
 
 
@@ -119,8 +119,8 @@
 )
 
 ;; Checks
-(check-error (savings-plan-a 100 0) "invalid runtime")
-(check-error (savings-plan-a 100 4) "invalid runtime")
+(check-error (savings-plan-a 100 0) "savings-plan: invalid runtime")
+(check-error (savings-plan-a 100 4) "savings-plan: invalid runtime")
 (check-expect (savings-plan-a 100 1) 100.5)
 (check-expect (savings-plan-a 100 1.5) 100.5)
 (check-within (savings-plan-a 100 3) 103.027 TOLERANCE)
@@ -145,8 +145,8 @@
 )
 
 ;; Checks
-(check-error (savings-plan-b 100 0) "invalid runtime")
-(check-error (savings-plan-b 100 4) "invalid runtime")
+(check-error (savings-plan-b 100 0) "savings-plan: invalid runtime")
+(check-error (savings-plan-b 100 4) "savings-plan: invalid runtime")
 (check-expect (savings-plan-b 100 1) 100.5)
 (check-expect (savings-plan-b 100 1.5) 100.5)
 ;; Includes the bonus

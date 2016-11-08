@@ -98,3 +98,35 @@
 ;              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105)
 ;                    (make-stop 'SE001 'CStadt 117) (make-stop 'IC002 'AStadt 200)
 ;                    (make-stop 'IC002 'CStadt 208.5)))
+
+;; station-schedule: (listof stop) station -> (listof stop)
+;;
+;; Given a list schedule list of all trains and all stations
+;; this procedure will output a schedule
+;; only valid for the specific station.
+;;
+;; Example:
+;; (station-schedule (all-stops test-network test-trains) 'AStadt)
+;; = (list
+;;       (make-stop 'SE001 'AStadt 100)
+;;       (make-stop 'IC002 'AStadt 200))
+(define (station-schedule lst-stop station)
+  (cond
+    [(empty? lst-stop) empty]
+    [(eq? station (stop-station-name (first lst-stop)))
+     (cons (first lst-stop)
+           (station-schedule (rest lst-stop) station))]
+    [else (station-schedule (rest lst-stop) station)]))
+
+;; Tests
+;(check-expect (station-schedule (all-stops test-network test-trains) 'AStadt)
+;              (list
+;               (make-stop 'SE001 'AStadt 100)
+;               (make-stop 'IC002 'AStadt 200)))
+;
+;(check-expect (station-schedule empty 'AStadt) empty)
+;(check-expect (station-schedule (all-stops test-network test-trains) 'unknown) empty)
+;
+;(check-expect (station-schedule (all-stops test-network test-trains) 'BDorf)
+;              (list
+;               (make-stop 'SE001 'BDorf 105)))

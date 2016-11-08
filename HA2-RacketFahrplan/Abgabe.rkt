@@ -61,3 +61,40 @@
 
 ;; ========== Problems ==========
 
+;; 5.4
+;; all-stops: (listof station) (listof train) -> (listof stop)
+;; Gets a list of stops that all trains at all stations in the network perform
+;; Example: (all-stops test-network (list SE001)) returns
+;; (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105) (make-stop 'SE001 'CStadt 117))
+(define (all-stops network trains)
+  (cond
+    ;; no more trains - exit
+    [(empty? trains) empty]
+    [else
+     ;; create schedule for first train in list...
+     (append
+      (train-schedule
+       (find-stops
+        (distance-table
+         network
+         (service-from (train-service (first trains))))
+        (service-kind
+         (train-service
+          (first trains))))
+       (first trains))
+      ;; ... and append it to schedule of remaining trains
+      (all-stops network (rest trains)))]))
+
+;; Tests (no additional tests required for this procedure!)
+(check-expect (all-stops empty empty) empty)
+(check-expect (all-stops test-network empty) empty)
+(check-expect (all-stops empty (list SE001 IC002)) empty)
+(check-expect (all-stops test-network (list SE001))
+              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105)
+                    (make-stop 'SE001 'CStadt 117)))
+(check-expect (all-stops test-network (list IC002))
+              (list (make-stop 'IC002 'AStadt 200) (make-stop 'IC002 'CStadt 208.5)))
+(check-expect (all-stops test-network (list SE001 IC002))
+              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105)
+                    (make-stop 'SE001 'CStadt 117) (make-stop 'IC002 'AStadt 200)
+                    (make-stop 'IC002 'CStadt 208.5)))

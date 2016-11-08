@@ -14,4 +14,12 @@
 
 
 
-;; !!! YOUR CODE !!!
+(define (find-stops stations train_kind)
+	(cons
+		(if (member? train_kind (station-train-kinds (first stations)))
+			(first stations)
+			(empty)
+		)
+		(find-stops (rest stations) train_kind)
+	)
+)

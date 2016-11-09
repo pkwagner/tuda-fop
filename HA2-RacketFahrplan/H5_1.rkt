@@ -14,12 +14,27 @@
 
 
 
+;; 5.1
+;; find-stops : (listof station) symbol -> (listof station)
+;;
+;; Returns only the stations supporting a special train kind (train_kind)
+;; out of a given station list
+;;
+;; Example: (find-stops (list (make-station 'Hanau '(RE SE VIAS IC) 13) (make-station 'Offenbach '(RE SE VIAS) 5.5) (make-station 'Frankfurt '(RE SE VIAS IC) 0)) 'IC)
+;;          = (list (make-station 'Hanau '(RE SE VIAS IC) 13) (make-station 'Frankfurt '(RE SE VIAS IC) 0))
 (define (find-stops stations train_kind)
-	(cons
-		(if (member? train_kind (station-train-kinds (first stations)))
-			(first stations)
-			(empty)
-		)
-		(find-stops (rest stations) train_kind)
+	(cond
+		[(empty? stations) empty]
+
+		[
+			(member? train_kind (station-train-kinds (first stations)))
+			(cons
+				(first stations)
+				(find-stops (rest stations) train_kind)
+			)
+		]
+
+		[else (find-stops (rest stations) train_kind)]
 	)
 )
+;; [TODO] Checks; Replace example by given list (both only possible in the final version)

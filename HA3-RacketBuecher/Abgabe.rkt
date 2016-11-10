@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname multi-constraint-knapsack-template) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -47,7 +47,62 @@
 
 ;; ====== Problem 5.1 ======
 
-;; TODO implement 5.1
+
+;(define (x-set-member? set x pred)
+;  (local [(define (f x) (+ x 5))
+;          (define (t x) (- x 5))]
+;    (f 1)
+;    ))
+
+;; x-set-member?: x-set X (X X -> boolean) -> boolean
+;;
+;; Checks if a element of type X is in the struct x-set
+;; using the given predicate
+;;
+;; Ex: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) -> true
+(define (x-set-member? set x pred)
+  (local [(define items (x-set-items set))
+          ; Use a function instead of a variable in order to check empty? first
+          (define (rest-set set) (make-x-set (- 1 (x-set-size set)) (rest items)))
+          ]
+    (cond
+      [(empty? items) false]
+      [(pred x (first items)) true]
+      [else (x-set-member? (rest-set set) x pred)])))
+
+
+;; Tests
+(check-expect (x-set-member? (make-x-set 0 empty) 0 =) false)
+(check-expect (x-set-member? (make-x-set 2 (list 1 2)) 2 =) true)
+(check-expect (x-set-member? (make-x-set 2 (list 1 2)) 3 =) false)
+
+
+
+;; x-set-insert: x-set X (X X -> boolean) -> x-set
+;;
+;; Inserts x into the set if the predicate evaluates false
+;; and so the element isn't in the set yet.
+;;
+;; The set containing the new element at the beginning will be returned.
+;;
+;; Ex: (x-set-insert (make-x-set 2 (list 1 2)) 3 =) -> (make-x-set 3 (list 1 2 3)
+(define (x-set-insert set x pred)
+  (local [(define (insert x)
+            (make-x-set (+ 1 (x-set-size set)) (cons x (x-set-items set))))
+          ]
+    (cond
+      [(x-set-member? set x pred) set]
+      [else (insert x)])))
+
+
+;; Tests
+(check-expect (x-set-insert (make-x-set 0 empty) 1 =) (make-x-set 1 (list 1)))
+; No change
+(check-expect (x-set-insert (make-x-set 1 (list 1)) 1 =) (make-x-set 1 (list 1)))
+; New element added to a non-empty list
+(check-expect (x-set-insert (make-x-set 1 (list 'B)) 'A symbol=?) (make-x-set 2 (list 'A 'B)))
+
+
 
 ;; ====== Problem 5.2 ======
 

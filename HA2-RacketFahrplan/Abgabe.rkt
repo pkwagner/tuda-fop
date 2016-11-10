@@ -1,157 +1,1377 @@
-;; The first three lines of this file were inserted by DrRacket. They record metadata
-;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib"read.ss""wxme")WXME0108 ## 
+#|
+   This file uses the GRacket editor format.
+   Open this file in DrRacket version 6.6 or later to read it.
 
-;; Authors:
-;; Alexander Siegler
-;; Paul Konstantin Wagner
-;; Yoshua Hitzel
-;; Marcel Lackovic
+   Most likely, it was created by saving a program in DrRacket,
+   and it probably contains a program with non-text elements
+   (such as images or comment boxes).
 
-;; ====== Structures ======
-
-;; station is a structure representing a train station
-;; name: symbol - the unique name of the station
-;; train-kinds: (listof symbol) - all kinds of trains serving that station
-;;    (e.g. 'SE, 'IC, 'VIAS)
-;; distance-to-next: number - distance to next station in direction of 'Frankfurt/'CStadt
-(define-struct station (name train-kinds distance-to-next))
-
-;; service is a structure representing a train service/line ("Kursbuchlinie")
-;; kind: symbol - kind of train (e.g. 'SE, 'IC, 'VIAS)
-;; from: symbol - the station of initial departure in direction of 'Frankfurt/'CStadt
-;; avg-velocity: number - the average velocity on the tracks, taking into account stops and waits
-(define-struct service (kind from avg-velocity))
-
-;; train is a structure representing a specific train service at a specific time
-;; identifier: symbol - unique train identifier 
-;; start-time: number - time of initial departure in minutes after midnight
-(define-struct train (identifier service start-time))
-
-;; stop is a structure representing an entry in a schedule
-;;    (a train stopping at a specific station at a given time)
-;; train-identifier: symbol - the stopping train's unique identifier
-;; station-name: symbol - the station's name as a symbol
-;; stop-time: number - the time of day for the stop in minutes after midnight
-(define-struct stop (train-identifier station-name stop-time))
-
-;; ====== Smaller dataset =======
-
-;; Network AStadt -> BDorf -> CStadt
-(define a-stadt (make-station 'AStadt '(IC SE) 2.5))
-(define b-dorf  (make-station 'BDorf '(SE) 6))
-(define c-stadt (make-station 'CStadt '(IC SE) 0))
-
-;; An example train network as a (listof station)
-(define test-network (list a-stadt b-dorf c-stadt))
-
-;; Two example services: a SE & an IC from A->C
-(define SE-A-C (make-service 'SE 'AStadt 0.5))
-(define IC-A-C (make-service 'IC 'AStadt 1))
-
-;; An example (listof service)
-(define test-services (list SE-A-C IC-A-C))
-
-;; Two example trains (one of each type)
-(define SE001 (make-train 'SE001 SE-A-C 100))
-(define IC002 (make-train 'IC002 IC-A-C 200))
-
-;; An example (listof train)
-(define test-trains (list SE001 IC002))
-
-;; ========== Problems ==========
-
-;; 5.1
-;; find-stops : (listof station) symbol -> (listof station)
-;;
-;; Returns only the stations supporting a special train kind (train_kind)
-;; out of a given station list (stations)
-;;
-;; Example: (find-stops (list (make-station 'Hanau '(RE SE VIAS IC) 13) (make-station 'Offenbach '(RE SE VIAS) 5.5) (make-station 'Frankfurt '(RE SE VIAS IC) 0)) 'IC)
-;;          = (list (make-station 'Hanau '(RE SE VIAS IC) 13) (make-station 'Frankfurt '(RE SE VIAS IC) 0))
-(define (find-stops stations train_kind)
-	(cond
-		[(empty? stations) empty]
-
-		[
-			(member? train_kind (station-train-kinds (first stations)))
-			(cons
-				(first stations)
-				(find-stops (rest stations) train_kind)
-			)
-		]
-
-		[else (find-stops (rest stations) train_kind)]
-	)
-)
-;; [TODO] Checks; Replace example by given list (both only possible in the final version)
-
-;; 5.4
-;; all-stops: (listof station) (listof train) -> (listof stop)
-;; Gets a list of stops that all trains at all stations in the network perform
-;; Example: (all-stops test-network (list SE001)) returns
-;; (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105) (make-stop 'SE001 'CStadt 117))
-;(define (all-stops network trains)
-;  (cond
-;    ;; no more trains - exit
-;    [(empty? trains) empty]
-;    [else
-;     ;; create schedule for first train in list...
-;     (append
-;      (train-schedule
-;       (find-stops
-;        (distance-table
-;         network
-;         (service-from (train-service (first trains))))
-;        (service-kind
-;         (train-service
-;          (first trains))))
-;       (first trains))
-;      ;; ... and append it to schedule of remaining trains
-;      (all-stops network (rest trains)))]))
-
-;; Tests (no additional tests required for this procedure!)
-;(check-expect (all-stops empty empty) empty)
-;(check-expect (all-stops test-network empty) empty)
-;(check-expect (all-stops empty (list SE001 IC002)) empty)
-;(check-expect (all-stops test-network (list SE001))
-;              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105)
-;                    (make-stop 'SE001 'CStadt 117)))
-;(check-expect (all-stops test-network (list IC002))
-;              (list (make-stop 'IC002 'AStadt 200) (make-stop 'IC002 'CStadt 208.5)))
-;(check-expect (all-stops test-network (list SE001 IC002))
-;              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105)
-;                    (make-stop 'SE001 'CStadt 117) (make-stop 'IC002 'AStadt 200)
-;                    (make-stop 'IC002 'CStadt 208.5)))
-
-;; station-schedule: (listof stop) station -> (listof stop)
-;;
-;; Given a list schedule list of all trains and all stations
-;; this procedure will output a schedule
-;; only valid for the specific station.
-;;
-;; Example:
-;; (station-schedule (all-stops test-network test-trains) 'AStadt)
-;; = (list
-;;       (make-stop 'SE001 'AStadt 100)
-;;       (make-stop 'IC002 'AStadt 200))
-;(define (station-schedule lst-stop station)
-;  (cond
-;    [(empty? lst-stop) empty]
-;    [(eq? station (stop-station-name (first lst-stop)))
-;     (cons (first lst-stop)
-;           (station-schedule (rest lst-stop) station))]
-;    [else (station-schedule (rest lst-stop) station)]))
-
-;; Tests
-;(check-expect (station-schedule (all-stops test-network test-trains) 'AStadt)
-;              (list
-;               (make-stop 'SE001 'AStadt 100)
-;               (make-stop 'IC002 'AStadt 200)))
-;
-;(check-expect (station-schedule empty 'AStadt) empty)
-;(check-expect (station-schedule (all-stops test-network test-trains) 'unknown) empty)
-;
-;(check-expect (station-schedule (all-stops test-network test-trains) 'BDorf)
-;              (list
-;               (make-stop 'SE001 'BDorf 105)))
+            http://racket-lang.org/
+|#
+ 32 7 #"wxtext\0"
+3 1 6 #"wxtab\0"
+1 1 8 #"wximage\0"
+2 0 8 #"wxmedia\0"
+4 1 34 #"(lib \"syntax-browser.ss\" \"mrlib\")\0"
+1 0 36 #"(lib \"cache-image-snip.ss\" \"mrlib\")\0"
+1 0 68
+(
+ #"((lib \"image-core.ss\" \"mrlib\") (lib \"image-core-wxme.rkt\" \"mr"
+ #"lib\"))\0"
+) 1 0 16 #"drscheme:number\0"
+3 0 44 #"(lib \"number-snip.ss\" \"drscheme\" \"private\")\0"
+1 0 36 #"(lib \"comment-snip.ss\" \"framework\")\0"
+1 0 93
+(
+ #"((lib \"collapsed-snipclass.ss\" \"framework\") (lib \"collapsed-sni"
+ #"pclass-wxme.ss\" \"framework\"))\0"
+) 0 0 43 #"(lib \"collapsed-snipclass.ss\" \"framework\")\0"
+0 0 19 #"drscheme:sexp-snip\0"
+0 0 29 #"drscheme:bindings-snipclass%\0"
+1 0 101
+(
+ #"((lib \"ellipsis-snip.rkt\" \"drracket\" \"private\") (lib \"ellipsi"
+ #"s-snip-wxme.rkt\" \"drracket\" \"private\"))\0"
+) 2 0 88
+(
+ #"((lib \"pict-snip.rkt\" \"drracket\" \"private\") (lib \"pict-snip.r"
+ #"kt\" \"drracket\" \"private\"))\0"
+) 0 0 34 #"(lib \"bullet-snip.rkt\" \"browser\")\0"
+0 0 25 #"(lib \"matrix.ss\" \"htdp\")\0"
+1 0 22 #"drscheme:lambda-snip%\0"
+1 0 29 #"drclickable-string-snipclass\0"
+0 0 26 #"drracket:spacer-snipclass\0"
+0 0 57
+#"(lib \"hrule-snip.rkt\" \"macro-debugger\" \"syntax-browser\")\0"
+1 0 26 #"drscheme:pict-value-snip%\0"
+0 0 45 #"(lib \"image-snipr.ss\" \"slideshow\" \"private\")\0"
+1 0 38 #"(lib \"pict-snipclass.ss\" \"slideshow\")\0"
+2 0 55 #"(lib \"vertical-separator-snip.ss\" \"stepper\" \"private\")\0"
+1 0 18 #"drscheme:xml-snip\0"
+1 0 31 #"(lib \"xml-snipclass.ss\" \"xml\")\0"
+1 0 21 #"drscheme:scheme-snip\0"
+2 0 34 #"(lib \"scheme-snipclass.ss\" \"xml\")\0"
+1 0 10 #"text-box%\0"
+1 0 32 #"(lib \"text-snipclass.ss\" \"xml\")\0"
+1 0 1 6 #"wxloc\0"
+          0 0 80 0 1 #"\0"
+0 75 1 #"\0"
+0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 0 9
+#"Standard\0"
+0 75 10 #"Monospace\0"
+0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 0 255 255 255 1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 -1 -1 2 24
+#"framework:default-color\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 1 0 0 0 0 0 0 255 255 255 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 150 0 150 0 0 0 -1 -1 2 15
+#"text:ports out\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 192 46 214 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 93 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 255 0 0 0 0 0 -1
+-1 2 15 #"text:ports err\0"
+0 -1 1 #"\0"
+1 0 -1 -1 93 -1 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 0 0 175 0 0 0 -1 -1 2 17
+#"text:ports value\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 57 89 216 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
+-1 2 27 #"Matching Parenthesis Style\0"
+0 -1 1 #"\0"
+1.0 0 92 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 34 139 34 0 0 0 -1
+-1 2 1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 102 102 255 0 0 0 -1 -1 2
+37 #"framework:syntax-color:scheme:symbol\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 102 102 255 0 0 0 -1 -1 2
+38 #"framework:syntax-color:scheme:keyword\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 102 102 255 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 249 148 40 0 0 0 -1 -1 2
+38 #"framework:syntax-color:scheme:comment\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 249 148 40 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 51 174 51 0 0 0 -1 -1 2 37
+#"framework:syntax-color:scheme:string\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 51 174 51 0 0 0 -1 -1 2 35
+#"framework:syntax-color:scheme:text\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 51 174 51 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 60 194 57 0 0 0 -1 -1 2 39
+#"framework:syntax-color:scheme:constant\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 60 194 57 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 151 69 43 0 0 0 -1 -1 2 49
+#"framework:syntax-color:scheme:hash-colon-keyword\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 151 69 43 0 0 0 -1 -1 2 42
+#"framework:syntax-color:scheme:parenthesis\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 151 69 43 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 36
+#"framework:syntax-color:scheme:error\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 0 0 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
+36 #"framework:syntax-color:scheme:other\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
+16 #"Misspelled Text\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 50 163 255 0 0 0 -1 -1 2
+38 #"drracket:check-syntax:lexically-bound\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 50 163 255 0 0 0 -1 -1 2 1
+#"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
+28 #"drracket:check-syntax:set!d\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
+37 #"drracket:check-syntax:unused-require\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
+36 #"drracket:check-syntax:free-variable\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 166 0 255 0 0 0 -1 -1 2 31
+#"drracket:check-syntax:imported\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 166 0 255 0 0 0 -1 -1 2 47
+#"drracket:check-syntax:my-obligation-style-pref\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 192 203 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 50 205 50 0 0 0 -1 -1 2 50
+#"drracket:check-syntax:their-obligation-style-pref\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 50 205 50 0 0 0 -1 -1 2 48
+#"drracket:check-syntax:unk-obligation-style-pref\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 240 230 140 0 0 0 -1 -1 2
+49 #"drracket:check-syntax:both-obligation-style-pref\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 240 230 140 0 0 0 -1 -1 2
+26 #"plt:htdp:test-coverage-on\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
+1 #"\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 205 92 92 0 0 0 -1 -1 2 27
+#"plt:htdp:test-coverage-off\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 205 92 92 0 0 0 -1 -1 4 1
+#"\0"
+0 70 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
+-1 -1 4 4 #"XML\0"
+0 70 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
+-1 -1 2 37 #"plt:module-language:test-coverage-on\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0 0 0 1 1 1 255 255 255 0 0 0 -1 -1 2
+38 #"plt:module-language:test-coverage-off\0"
+0 -1 1 #"\0"
+1 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0 0 0 0 0 0 205 92 92 0 0 0 -1 -1 4 1
+#"\0"
+0 71 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 1.0 1.0 1.0 1.0 1.0 1.0 0 0 0 0 0 0
+-1 -1 4 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
+-1 4 1 #"\0"
+0 71 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 1 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 0 255 0 0 0 -1
+-1 4 1 #"\0"
+0 71 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0 0 0 1.0 1.0 1.0 0 100 0 0 0 0 -1
+-1 0 1 #"\0"
+0 75 10 #"Monospace\0"
+0.0 12 90 -1 90 -1 3 -1 0 1 0 1 0 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 1 0.0 0.0 0.0 0.0 0.0 0.0 255 255 255
+0 0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 192 46 214 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 93 -1 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 255 0 0 0 0
+0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 57 89 216 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 38 38 128 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 194 116 31 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 41 128 38 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 132 60 36 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 0 0 0 0 0
+-1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 255 255 255
+0 0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 81 112 203 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 178 34 34 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 68 0 203 0 0
+0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 0 116 0 0 0
+0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 0 0.0 0.0 0.0 1.0 1.0 1.0 139 142 28 0
+0 0 -1 -1 2 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 93 -1 -1 0 1 0 0 0 1 0.0 0.0 0.0 0.0 0.0 0.0 255 165 0 0
+0 0 -1 -1 4 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1 25 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1 17 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1 45 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1 15 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1 19 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1 47 1 #"\0"
+0 -1 1 #"\0"
+1.0 0 -1 -1 -1 -1 -1 -1 0 0 0 0 1 0 0.0 0.0 0.0 0.0 0.0 0.0 0 0 0 255
+255 255 -1 -1           0 968 0 4 3 85
+(
+ #";; The first three lines of this file were inserted by DrRacket. The"
+ #"y record metadata"
+) 0 0 4 29 1 #"\n"
+0 0 4 3 85
+(
+ #";; about the language level of this file in a form that our tools ca"
+ #"n easily process."
+) 0 0 4 29 1 #"\n"
+0 0 4 3 181
+(
+ #"#reader(lib \"htdp-beginner-abbr-reader.ss\" \"lang\")((modname Abga"
+ #"be) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t con"
+ #"structor repeating-decimal #f #t none #f () #f)))"
+) 0 0 4 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 11 #";; Authors:"
+0 0 25 29 1 #"\n"
+0 0 17 3 20 #";; Alexander Siegler"
+0 0 25 29 1 #"\n"
+0 0 17 3 25 #";; Paul Konstantin Wagner"
+0 0 25 29 1 #"\n"
+0 0 17 3 16 #";; Yoshua Hitzel"
+0 0 25 29 1 #"\n"
+0 0 17 3 18 #";; Marcel Lackovic"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 27 #";; ====== Structures ======"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 54 #";; station is a structure representing a train station"
+0 0 25 29 1 #"\n"
+0 0 17 3 48 #";; name: symbol - the unique name of the station"
+0 0 25 29 1 #"\n"
+0 0 17 3 74
+(
+ #";; train-kinds: (listof symbol) - all kinds of trains serving that s"
+ #"tation"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 28 #";;    (e.g. 'SE, 'IC, 'VIAS)"
+0 0 25 29 1 #"\n"
+0 0 17 3 89
+(
+ #";; distance-to-next: number - distance to next station in direction "
+ #"of 'Frankfurt/'CStadt"
+) 0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 13 #"define-struct"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"station"
+0 0 25 3 2 #" ("
+0 0 32 3 4 #"name"
+0 0 25 3 1 #" "
+0 0 32 3 11 #"train-kinds"
+0 0 25 3 1 #" "
+0 0 32 3 16 #"distance-to-next"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 77
+(
+ #";; service is a structure representing a train service/line (\"Kursb"
+ #"uchlinie\")"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 54 #";; kind: symbol - kind of train (e.g. 'SE, 'IC, 'VIAS)"
+0 0 25 29 1 #"\n"
+0 0 17 3 85
+(
+ #";; from: symbol - the station of initial departure in direction of '"
+ #"Frankfurt/'CStadt"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 97
+(
+ #";; avg-velocity: number - the average velocity on the tracks, taking"
+ #" into account stops and waits"
+) 0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 13 #"define-struct"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"service"
+0 0 25 3 2 #" ("
+0 0 32 3 4 #"kind"
+0 0 25 3 1 #" "
+0 0 32 3 4 #"from"
+0 0 25 3 1 #" "
+0 0 32 3 12 #"avg-velocity"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 80
+(
+ #";; train is a structure representing a specific train service at a s"
+ #"pecific time"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 48 #";; identifier: symbol - unique train identifier "
+0 0 25 29 1 #"\n"
+0 0 17 3 75
+(
+ #";; start-time: number - time of initial departure in minutes after m"
+ #"idnight"
+) 0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 13 #"define-struct"
+0 0 25 3 1 #" "
+0 0 32 3 5 #"train"
+0 0 25 3 2 #" ("
+0 0 32 3 10 #"identifier"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"service"
+0 0 25 3 1 #" "
+0 0 32 3 10 #"start-time"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 58
+#";; stop is a structure representing an entry in a schedule"
+0 0 25 29 1 #"\n"
+0 0 17 3 62
+#";;    (a train stopping at a specific station at a given time)"
+0 0 25 29 1 #"\n"
+0 0 17 3 68
+#";; train-identifier: symbol - the stopping train's unique identifier"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";; station-name: symbol - the station's name as a symbol"
+0 0 25 29 1 #"\n"
+0 0 17 3 77
+(
+ #";; stop-time: number - the time of day for the stop in minutes after"
+ #" midnight"
+) 0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 13 #"define-struct"
+0 0 25 3 1 #" "
+0 0 32 3 4 #"stop"
+0 0 25 3 2 #" ("
+0 0 32 3 16 #"train-identifier"
+0 0 25 3 1 #" "
+0 0 32 3 12 #"station-name"
+0 0 25 3 1 #" "
+0 0 32 3 9 #"stop-time"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 33 #";; ====== Smaller dataset ======="
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 36 #";; Network AStadt -> BDorf -> CStadt"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"a-stadt"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 6 #"AStadt"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"IC"
+0 0 25 3 1 #" "
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 3 #"2.5"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"b-dorf"
+0 0 25 3 3 #"  ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"BDorf"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 1 #"6"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"c-stadt"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 6 #"CStadt"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"IC"
+0 0 25 3 1 #" "
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 1 #"0"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 49 #";; An example train network as a (listof station)"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 12 #"test-network"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"a-stadt"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"b-dorf"
+0 0 25 3 1 #" "
+0 0 32 3 7 #"c-stadt"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 47 #";; Two example services: a SE & an IC from A->C"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"SE-A-C"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-service"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"SE"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 6 #"AStadt"
+0 0 25 3 1 #" "
+0 0 22 3 3 #"0.5"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"IC-A-C"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-service"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"IC"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 6 #"AStadt"
+0 0 25 3 1 #" "
+0 0 22 3 1 #"1"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 30 #";; An example (listof service)"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 13 #"test-services"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"SE-A-C"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"IC-A-C"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 40 #";; Two example trains (one of each type)"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 5 #"SE001"
+0 0 25 3 2 #" ("
+0 0 32 3 10 #"make-train"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"SE001"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"SE-A-C"
+0 0 25 3 1 #" "
+0 0 22 3 3 #"100"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 5 #"IC002"
+0 0 25 3 2 #" ("
+0 0 32 3 10 #"make-train"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"IC002"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"IC-A-C"
+0 0 25 3 1 #" "
+0 0 22 3 3 #"200"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 28 #";; An example (listof train)"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 1 #" "
+0 0 32 3 11 #"test-trains"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 32 3 5 #"SE001"
+0 0 25 3 1 #" "
+0 0 32 3 5 #"IC002"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 33 #";; ========== Problems =========="
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 6 #";; 5.1"
+0 0 25 29 1 #"\n"
+0 0 17 3 59
+#";; find-stops : (listof station) symbol -> (listof station)"
+0 0 25 29 1 #"\n"
+0 0 17 3 2 #";;"
+0 0 25 29 1 #"\n"
+0 0 17 3 73
+(
+ #";; Returns only the stations supporting a special train kind (train_"
+ #"kind)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 41 #";; out of a given station list (stations)"
+0 0 25 29 1 #"\n"
+0 0 17 3 2 #";;"
+0 0 25 29 1 #"\n"
+0 0 17 3 166
+(
+ #";; Example: (find-stops (list (make-station 'Hanau '(RE SE VIAS IC) "
+ #"13) (make-station 'Offenbach '(RE SE VIAS) 5.5) (make-station 'Frank"
+ #"furt '(RE SE VIAS IC) 0)) 'IC)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 107
+(
+ #";;          = (list (make-station 'Hanau '(RE SE VIAS IC) 13) (make-"
+ #"station 'Frankfurt '(RE SE VIAS IC) 0))"
+) 0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 2 #" ("
+0 0 32 3 10 #"find-stops"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 1 #" "
+0 0 32 3 10 #"train_kind"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"("
+0 0 38 3 4 #"cond"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 2 #"[("
+0 0 38 3 6 #"empty?"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 38 3 5 #"empty"
+0 0 25 3 1 #"]"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"["
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"("
+0 0 38 3 7 #"member?"
+0 0 25 3 1 #" "
+0 0 32 3 10 #"train_kind"
+0 0 25 3 2 #" ("
+0 0 32 3 19 #"station-train-kinds"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 3 #")))"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"("
+0 0 38 3 4 #"cons"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"("
+0 0 32 3 10 #"find-stops"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"rest"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 32 3 10 #"train_kind"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"]"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #"["
+0 0 14 3 4 #"else"
+0 0 25 3 2 #" ("
+0 0 32 3 10 #"find-stops"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"rest"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 32 3 10 #"train_kind"
+0 0 25 3 2 #")]"
+0 0 25 29 1 #"\n"
+0 1 25 65 1 #"\t"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 17 3 89
+(
+ #";; [TODO] Checks; Replace example by given list (both only possible "
+ #"in the final version)"
+) 0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 6 #";; 5.2"
+0 0 25 29 1 #"\n"
+0 0 17 3 71
+(
+ #";; distance-table-offset: (listof stations) number -> (listof statio"
+ #"ns)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 72
+(
+ #";; Adds the distances of every further stations to the following sta"
+ #"tion"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 33 #";; Example: (distance-table (list"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";;            (make-station 'Waechtersbach '(RE SE) 4.5)"
+0 0 25 29 1 #"\n"
+0 0 17 3 46 #";;            (make-station 'Wirtheim '(SE) 3)"
+0 0 25 29 1 #"\n"
+0 0 17 3 50 #";;            (make-station 'HaitzHoechst '(SE) 3)"
+0 0 25 29 1 #"\n"
+0 0 17 3 28 #";;          ) 'Waechtersbach"
+0 0 25 29 1 #"\n"
+0 0 17 3 12 #";;        = "
+0 0 17 3 50 #"(list (make-station 'Waechtersbach (list 'RE 'SE) "
+0 8          10 17 4 #"9/2\0"
+1 #"\0"
+8 #"decimal\0"
+2 #"1\0"
+0 0 17 3 37 #") (make-station 'Wirtheim (list 'SE) "
+0 8          10 17 5 #"15/2\0"
+1 #"\0"
+8 #"decimal\0"
+2 #"1\0"
+0 0 17 3 41 #") (make-station 'HaitzHoechst (list 'SE) "
+0 8          10 17 5 #"21/2\0"
+1 #"\0"
+8 #"decimal\0"
+2 #"1\0"
+0 0 17 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 2 #" ("
+0 0 32 3 21 #"distance-table-offset"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"offset"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 3 #"  ("
+0 0 38 3 4 #"cond"
+0 0 25 29 1 #"\n"
+0 0 25 3 6 #"    [("
+0 0 38 3 6 #"empty?"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 38 3 5 #"empty"
+0 0 25 3 1 #"]"
+0 0 25 29 1 #"\n"
+0 0 25 3 6 #"    [("
+0 0 38 3 6 #"empty?"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"rest"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 4 #")) ("
+0 0 38 3 4 #"list"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"station-name"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 4 #")) ("
+0 0 32 3 19 #"station-train-kinds"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 4 #")) ("
+0 0 38 3 1 #"+"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"offset"
+0 0 25 3 2 #" ("
+0 0 32 3 24 #"station-distance-to-next"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 6 #")))))]"
+0 0 25 29 1 #"\n"
+0 0 25 3 5 #"    ["
+0 0 14 3 4 #"else"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"cons"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"station-name"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 4 #")) ("
+0 0 32 3 19 #"station-train-kinds"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 4 #")) ("
+0 0 38 3 1 #"+"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"offset"
+0 0 25 3 2 #" ("
+0 0 32 3 24 #"station-distance-to-next"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 7 #"))))  ("
+0 0 32 3 21 #"distance-table-offset"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"rest"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 3 #") ("
+0 0 38 3 1 #"+"
+0 0 25 3 1 #" "
+0 0 32 3 6 #"offset"
+0 0 25 3 2 #" ("
+0 0 32 3 24 #"station-distance-to-next"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 7 #")))) )]"
+0 0 25 29 1 #"\n"
+0 0 25 3 3 #"  )"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 8 #";; Tests"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 12 #"check-expect"
+0 0 25 3 2 #" ("
+0 0 32 3 14 #"distance-table"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 29 1 #"\n"
+0 0 25 3 34 #"                                 ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 13 #"Waechtersbach"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"RE"
+0 0 25 3 1 #" "
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 3 #"4.5"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 34 #"                                 ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 8 #"Wirtheim"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 1 #"3"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 33 #"                               ) "
+0 0 38 3 1 #"'"
+0 0 14 3 13 #"Waechtersbach"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"              ("
+0 0 38 3 4 #"list"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 8 #"Wirtheim"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 1 #"3"
+0 0 25 3 2 #"))"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 12 #"check-expect"
+0 0 25 3 2 #" ("
+0 0 32 3 14 #"distance-table"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 29 1 #"\n"
+0 0 25 3 34 #"                                 ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 13 #"Waechtersbach"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"RE"
+0 0 25 3 1 #" "
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 3 #"4.5"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 33 #"                               ) "
+0 0 38 3 1 #"'"
+0 0 14 3 13 #"Waechtersbach"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 14 #"              "
+0 0 38 3 5 #"empty"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 64
+#";; distance-table: (listof stations) symbol -> (listof stations)"
+0 0 25 29 1 #"\n"
+0 0 17 3 75
+(
+ #";; Calculates the distance from the start station to all following s"
+ #"tations"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 33 #";; Example: (distance-table (list"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";;            (make-station 'Waechtersbach '(RE SE) 4.5)"
+0 0 25 29 1 #"\n"
+0 0 17 3 46 #";;            (make-station 'Wirtheim '(SE) 3)"
+0 0 25 29 1 #"\n"
+0 0 17 3 50 #";;            (make-station 'HaitzHoechst '(SE) 3)"
+0 0 25 29 1 #"\n"
+0 0 17 3 29 #";;          ) 'Waechtersbach "
+0 0 25 29 1 #"\n"
+0 0 17 3 98
+(
+ #";;       =  (list (make-station 'Wirtheim (list 'SE) 3) (make-statio"
+ #"n 'HaitzHoechst (list 'SE) 6))"
+) 0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 6 #"define"
+0 0 25 3 2 #" ("
+0 0 32 3 14 #"distance-table"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 1 #" "
+0 0 32 3 12 #"from-station"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 3 #"  ("
+0 0 38 3 4 #"cond"
+0 0 25 29 1 #"\n"
+0 0 25 3 6 #"    [("
+0 0 38 3 6 #"empty?"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 38 3 5 #"empty"
+0 0 25 3 1 #"]"
+0 0 25 29 1 #"\n"
+0 0 25 3 6 #"    [("
+0 0 38 3 3 #"eq?"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"station-name"
+0 0 25 3 2 #" ("
+0 0 38 3 5 #"first"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 3 #")) "
+0 0 32 3 12 #"from-station"
+0 0 25 3 3 #") ("
+0 0 32 3 21 #"distance-table-offset"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"rest"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 22 3 1 #"0"
+0 0 25 3 2 #")]"
+0 0 25 29 1 #"\n"
+0 0 25 3 5 #"    ["
+0 0 14 3 4 #"else"
+0 0 25 3 2 #" ("
+0 0 32 3 14 #"distance-table"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"rest"
+0 0 25 3 1 #" "
+0 0 32 3 8 #"stations"
+0 0 25 3 2 #") "
+0 0 32 3 12 #"from-station"
+0 0 25 3 2 #")]"
+0 0 25 29 1 #"\n"
+0 0 25 3 3 #"  )"
+0 0 25 29 1 #"\n"
+0 0 25 3 2 #"  "
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 7 #";; Test"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 12 #"check-expect"
+0 0 25 3 2 #" ("
+0 0 32 3 21 #"distance-table-offset"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"BDorf"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 3 #"2.5"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 44 #"                                           ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 6 #"CStadt"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"IC"
+0 0 25 3 1 #" "
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 3 #"8.5"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 3 38 #"                                     )"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"               "
+0 0 22 3 1 #"0"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"              )"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"              ("
+0 0 38 3 4 #"list"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"BDorf"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 8          10 4 4 #"5/2\0"
+1 #"\0"
+8 #"decimal\0"
+2 #"1\0"
+0 0 25 3 3 #") ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 6 #"CStadt"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"IC"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 2 #"11"
+0 0 25 3 3 #")) "
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #"("
+0 0 38 3 12 #"check-expect"
+0 0 25 3 2 #" ("
+0 0 32 3 21 #"distance-table-offset"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"BDorf"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 25 3 1 #"("
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 0 22 3 3 #"2.5"
+0 0 25 3 3 #") )"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"               "
+0 0 22 3 1 #"0"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"              )"
+0 0 25 29 1 #"\n"
+0 0 25 3 15 #"              ("
+0 0 38 3 4 #"list"
+0 0 25 3 2 #" ("
+0 0 32 3 12 #"make-station"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 5 #"BDorf"
+0 0 25 3 2 #" ("
+0 0 38 3 4 #"list"
+0 0 25 3 1 #" "
+0 0 38 3 1 #"'"
+0 0 14 3 2 #"SE"
+0 0 25 3 2 #") "
+0 8          10 4 4 #"5/2\0"
+1 #"\0"
+8 #"decimal\0"
+2 #"1\0"
+0 0 25 3 4 #") ) "
+0 0 25 29 1 #"\n"
+0 0 25 3 1 #")"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 6 #";; 5.4"
+0 0 25 29 1 #"\n"
+0 0 17 3 62
+#";; all-stops: (listof station) (listof train) -> (listof stop)"
+0 0 25 29 1 #"\n"
+0 0 17 3 78
+(
+ #";; Gets a list of stops that all trains at all stations in the netwo"
+ #"rk perform"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 57 #";; Example: (all-stops test-network (list SE001)) returns"
+0 0 25 29 1 #"\n"
+0 0 17 3 101
+(
+ #";; (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105"
+ #") (make-stop 'SE001 'CStadt 117))"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 35 #";(define (all-stops network trains)"
+0 0 25 29 1 #"\n"
+0 0 17 3 8 #";  (cond"
+0 0 25 29 1 #"\n"
+0 0 17 3 29 #";    ;; no more trains - exit"
+0 0 25 29 1 #"\n"
+0 0 17 3 28 #";    [(empty? trains) empty]"
+0 0 25 29 1 #"\n"
+0 0 17 3 10 #";    [else"
+0 0 25 29 1 #"\n"
+0 0 17 3 51 #";     ;; create schedule for first train in list..."
+0 0 25 29 1 #"\n"
+0 0 17 3 13 #";     (append"
+0 0 25 29 1 #"\n"
+0 0 17 3 22 #";      (train-schedule"
+0 0 25 29 1 #"\n"
+0 0 17 3 19 #";       (find-stops"
+0 0 25 29 1 #"\n"
+0 0 17 3 24 #";        (distance-table"
+0 0 25 29 1 #"\n"
+0 0 17 3 17 #";         network"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";         (service-from (train-service (first trains))))"
+0 0 25 29 1 #"\n"
+0 0 17 3 22 #";        (service-kind"
+0 0 25 29 1 #"\n"
+0 0 17 3 24 #";         (train-service"
+0 0 25 29 1 #"\n"
+0 0 17 3 28 #";          (first trains))))"
+0 0 25 29 1 #"\n"
+0 0 17 3 23 #";       (first trains))"
+0 0 25 29 1 #"\n"
+0 0 17 3 59
+#";      ;; ... and append it to schedule of remaining trains"
+0 0 25 29 1 #"\n"
+0 0 17 3 44 #";      (all-stops network (rest trains)))]))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 59
+#";; Tests (no additional tests required for this procedure!)"
+0 0 25 29 1 #"\n"
+0 0 17 3 45 #";(check-expect (all-stops empty empty) empty)"
+0 0 25 29 1 #"\n"
+0 0 17 3 52 #";(check-expect (all-stops test-network empty) empty)"
+0 0 25 29 1 #"\n"
+0 0 17 3 58
+#";(check-expect (all-stops empty (list SE001 IC002)) empty)"
+0 0 25 29 1 #"\n"
+0 0 17 3 52 #";(check-expect (all-stops test-network (list SE001))"
+0 0 25 29 1 #"\n"
+0 0 17 3 81
+(
+ #";              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE00"
+ #"1 'BDorf 105)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 53 #";                    (make-stop 'SE001 'CStadt 117)))"
+0 0 25 29 1 #"\n"
+0 0 17 3 52 #";(check-expect (all-stops test-network (list IC002))"
+0 0 25 29 1 #"\n"
+0 0 17 3 86
+(
+ #";              (list (make-stop 'IC002 'AStadt 200) (make-stop 'IC00"
+ #"2 'CStadt 208.5)))"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 58
+#";(check-expect (all-stops test-network (list SE001 IC002))"
+0 0 25 29 1 #"\n"
+0 0 17 3 81
+(
+ #";              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE00"
+ #"1 'BDorf 105)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 82
+(
+ #";                    (make-stop 'SE001 'CStadt 117) (make-stop 'IC00"
+ #"2 'AStadt 200)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 55 #";                    (make-stop 'IC002 'CStadt 208.5)))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 59
+#";; station-schedule: (listof stop) station -> (listof stop)"
+0 0 25 29 1 #"\n"
+0 0 17 3 2 #";;"
+0 0 25 29 1 #"\n"
+0 0 17 3 60
+#";; Given a list schedule list of all trains and all stations"
+0 0 25 29 1 #"\n"
+0 0 17 3 40 #";; this procedure will output a schedule"
+0 0 25 29 1 #"\n"
+0 0 17 3 39 #";; only valid for the specific station."
+0 0 25 29 1 #"\n"
+0 0 17 3 2 #";;"
+0 0 25 29 1 #"\n"
+0 0 17 3 11 #";; Example:"
+0 0 25 29 1 #"\n"
+0 0 17 3 66
+#";; (station-schedule (all-stops test-network test-trains) 'AStadt)"
+0 0 25 29 1 #"\n"
+0 0 17 3 10 #";; = (list"
+0 0 25 29 1 #"\n"
+0 0 17 3 39 #";;       (make-stop 'SE001 'AStadt 100)"
+0 0 25 29 1 #"\n"
+0 0 17 3 40 #";;       (make-stop 'IC002 'AStadt 200))"
+0 0 25 29 1 #"\n"
+0 0 17 3 44 #";(define (station-schedule lst-stop station)"
+0 0 25 29 1 #"\n"
+0 0 17 3 8 #";  (cond"
+0 0 25 29 1 #"\n"
+0 0 17 3 30 #";    [(empty? lst-stop) empty]"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";    [(eq? station (stop-station-name (first lst-stop)))"
+0 0 25 29 1 #"\n"
+0 0 17 3 28 #";     (cons (first lst-stop)"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";           (station-schedule (rest lst-stop) station))]"
+0 0 25 29 1 #"\n"
+0 0 17 3 56 #";    [else (station-schedule (rest lst-stop) station)]))"
+0 0 25 29 1 #"\n"
+0 0 25 29 1 #"\n"
+0 0 17 3 8 #";; Tests"
+0 0 25 29 1 #"\n"
+0 0 17 3 78
+(
+ #";(check-expect (station-schedule (all-stops test-network test-trains"
+ #") 'AStadt)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 20 #";              (list"
+0 0 25 29 1 #"\n"
+0 0 17 3 46 #";               (make-stop 'SE001 'AStadt 100)"
+0 0 25 29 1 #"\n"
+0 0 17 3 48 #";               (make-stop 'IC002 'AStadt 200)))"
+0 0 25 29 1 #"\n"
+0 0 17 3 1 #";"
+0 0 25 29 1 #"\n"
+0 0 17 3 54 #";(check-expect (station-schedule empty 'AStadt) empty)"
+0 0 25 29 1 #"\n"
+0 0 17 3 86
+(
+ #";(check-expect (station-schedule (all-stops test-network test-trains"
+ #") 'unknown) empty)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 1 #";"
+0 0 25 29 1 #"\n"
+0 0 17 3 77
+(
+ #";(check-expect (station-schedule (all-stops test-network test-trains"
+ #") 'BDorf)"
+) 0 0 25 29 1 #"\n"
+0 0 17 3 20 #";              (list"
+0 0 25 29 1 #"\n"
+0 0 17 3 47 #";               (make-stop 'SE001 'BDorf 105)))"
+0           0

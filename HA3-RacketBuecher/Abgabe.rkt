@@ -47,13 +47,6 @@
 
 ;; ====== Problem 5.1 ======
 
-
-;(define (x-set-member? set x pred)
-;  (local [(define (f x) (+ x 5))
-;          (define (t x) (- x 5))]
-;    (f 1)
-;    ))
-
 ;; x-set-member?: x-set X (X X -> boolean) -> boolean
 ;;
 ;; Checks if a element of type X is in the struct x-set
@@ -101,6 +94,23 @@
 (check-expect (x-set-insert (make-x-set 1 (list 1)) 1 =) (make-x-set 1 (list 1)))
 ; New element added to a non-empty list
 (check-expect (x-set-insert (make-x-set 1 (list 'B)) 'A symbol=?) (make-x-set 2 (list 'A 'B)))
+
+;; symbol-set-insert: x-set symbol -> x-set
+;;
+;; Inserts a symbol into the set if the element isn't in the set yet
+;;
+;; The set containing the new element at the beginning will be returned.
+;;
+;; Ex: (symbol-set-insert (make-x-set 1 (list 'B)) 'A) -> (make-x-set 2 (list 'A 'B)
+(define (symbol-set-insert set symbol)
+  (x-set-insert set symbol symbol=?))
+
+;; Tests
+(check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))
+; No change
+(check-expect (symbol-set-insert (make-x-set 1 (list 'A)) 'A) (make-x-set 1 (list 'A)))
+; New element added to a non-empty list
+(check-expect (symbol-set-insert (make-x-set 1 (list 'B)) 'A) (make-x-set 2 (list 'A 'B)))
 
 
 

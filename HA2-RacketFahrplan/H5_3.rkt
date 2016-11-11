@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname H5_3_NEU) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname H5_3) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; Author:
 ;; Marcel Lakcovic
 
@@ -139,4 +139,4 @@
 (check-expect (train-schedule (find-stops (distance-table test-network 'AStadt) 'IC) IC002)
               (list (make-stop 'IC002 'AStadt 200) (make-stop 'IC002 'CStadt 208.5)))
 (check-expect (train-schedule (find-stops (distance-table test-network 'AStadt) 'SE) SE001)
-              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 112) (make-stop 'SE001 'CStadt 117)))
+              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105) (make-stop 'SE001 'CStadt 117)))

@@ -141,7 +141,6 @@
               )
              )
 
-
 ;; distance-table: (listof stations) symbol -> (listof stations)
 ;; Calculates the distance from the start station to all following stations
 ;; Example: (distance-table (list
@@ -172,6 +171,31 @@
 
 
 
+;; 5.3
+;;
+;; train-schedule: (listof station) train -> (listof stop)
+;; Calculates the train-schedule for a specific train, based on the train stops.
+;; Example: (train-schedule (find-stops (distance-table test-network 'AStadt) 'IC) IC002)
+;;          = (list (make-stop 'IC002 'AStadt 200) (make-stop 'IC002 'CStadt 208.5))
+(define (train-schedule stations train)
+  (cond
+    [(empty? stations) empty]
+    [(empty? (rest stations)) (list (make-stop (train-identifier train) (station-name (first stations)) (+ (/ (station-distance-to-next (first stations)) (service-avg-velocity (train-service train))) (train-start-time train))))]
+    [else (cons (make-stop (train-identifier train) (station-name (first stations)) (+ (/ (station-distance-to-next (first stations)) (service-avg-velocity (train-service train))) (train-start-time train))) (train-schedule (rest stations) train))]
+  )
+ )
+
+;; Tests
+(check-expect (train-schedule (find-stops (distance-table empty 'AStadt) 'IC) IC002)
+              empty)
+(check-expect (train-schedule (find-stops (distance-table test-network empty) 'IC) IC002)
+              empty)
+(check-expect (train-schedule (find-stops (distance-table test-network 'AStadt) empty) IC002)
+              empty)
+(check-expect (train-schedule (find-stops (distance-table test-network 'AStadt) 'IC) IC002)
+              (list (make-stop 'IC002 'AStadt 200) (make-stop 'IC002 'CStadt 208.5)))
+(check-expect (train-schedule (find-stops (distance-table test-network 'AStadt) 'SE) SE001)
+              (list (make-stop 'SE001 'AStadt 100) (make-stop 'SE001 'BDorf 105) (make-stop 'SE001 'CStadt 117)))
 
 
 

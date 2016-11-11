@@ -1,3 +1,6 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname H5_2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; Yoshua Hitzel
 
 ;; 5.2
@@ -85,6 +88,9 @@
 
 ;; Tests
 (check-expect (distance-table test-network 'BDorf)
-              (list (make-station 'CStadt (list 'IC 'SE) 0)) )
+              (list
+               (make-station 'BDorf (list 'SE) 0)
+               (make-station 'CStadt (list 'IC 'SE) 0)
+              ) )
 (check-expect (distance-table test-network 'ADorf)
               empty )

@@ -164,7 +164,10 @@
 
 ;; Tests
 (check-expect (distance-table test-network 'BDorf)
-              (list (make-station 'CStadt (list 'IC 'SE) 0)) )
+              (list
+               (make-station 'BDorf (list 'SE) 0)
+               (make-station 'CStadt (list 'IC 'SE) 0)
+              ) )
 (check-expect (distance-table test-network 'ADorf)
               empty )
 

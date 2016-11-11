@@ -1,6 +1,6 @@
-#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
-
-;; Author:
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname H5_2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; Yoshua Hitzel
 
 ;; 5.2
@@ -8,9 +8,17 @@
 ;; Dummy
 (define-struct station (name train-kinds distance-to-next))
 
+;; Network AStadt -> BDorf -> CStadt
+(define a-stadt (make-station 'AStadt '(IC SE) 2.5))
+(define b-dorf  (make-station 'BDorf '(SE) 6))
+(define c-stadt (make-station 'CStadt '(IC SE) 0))
+
+;; An example train network as a (listof station)
+(define test-network (list a-stadt b-dorf c-stadt))
+
 ;; distance-table-offset: (listof stations) number -> (listof stations)
 ;; Calculates the distance from the start station to every further station by adding the particular
-;; distance from previous stations
+;; distance from the particular previous station
 ;; Example: (distance-table (list
 ;;            (make-station 'Waechtersbach '(RE SE) 4.5)
 ;;            (make-station 'Wirtheim '(SE) 3)
@@ -41,16 +49,23 @@
   )
 )
 
-;; Tests
-(check-expect (distance-table (list
-                                 (make-station 'Waechtersbach '(RE SE) 4.5)
-                                 (make-station 'Wirtheim '(SE) 3)
-                               ) 'Waechtersbach)
-              (list (make-station 'Wirtheim (list 'SE) 3)) )
-(check-expect (distance-table (list
-                                 (make-station 'Waechtersbach '(RE SE) 4.5)
-                               ) 'Waechtersbach)
-              empty )
+
+;; Test
+(check-expect (distance-table-offset test-network 0 )
+              (list
+               (make-station 'AStadt (list 'IC 'SE) 2.5)
+               (make-station 'BDorf (list 'SE) 8.5)
+               (make-station 'CStadt (list 'IC 'SE) 8.5)
+              )
+             )
+(check-expect (distance-table-offset test-network 2 )
+              (list
+               (make-station 'AStadt (list 'IC 'SE) 4.5)
+               (make-station 'BDorf (list 'SE) 10.5)
+               (make-station 'CStadt (list 'IC 'SE) 10.5)
+              )
+             )
+
 
 
 ;; distance-table: (listof stations) symbol -> (listof stations)
@@ -73,11 +88,7 @@
 )
 
 ;; Tests
-(check-expect (distance-table-offset (list (make-station 'BDorf '(SE) 2.5)
-                                           (make-station 'CStadt '(IC SE) 8.5)
-                                     ) 0 )
-              (list (make-station 'BDorf (list 'SE) 2.5) (make-station 'CStadt (list 'IC 'SE) 11))  )
-(check-expect (distance-table-offset (list (make-station 'BDorf '(SE) 2.5)
-                                     ) 0 )
-              (list (make-station 'BDorf (list 'SE) 2.5) )  )
-
+(check-expect (distance-table test-network 'BDorf)
+              (list (make-station 'CStadt (list 'IC 'SE) 0)) )
+(check-expect (distance-table test-network 'ADorf)
+              empty )

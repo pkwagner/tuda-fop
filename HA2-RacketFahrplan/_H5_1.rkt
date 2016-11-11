@@ -37,4 +37,22 @@
 		[else (find-stops (rest stations) train_kind)]
 	)
 )
-;; [TODO] Checks; Replace example by given list (both only possible in the final version)
+
+;; Tests
+(check-expect (find-stops empty 'IC)
+              empty)
+(check-expect (find-stops test-network empty)
+              empty)
+(check-expect (find-stops test-network 'IC)
+              (list
+               (make-station 'AStadt (list 'IC 'SE) 2.5)
+               (make-station 'CStadt (list 'IC 'SE)  0)
+              )
+             )
+(check-expect (find-stops test-network 'SE)
+              (list
+               (make-station 'AStadt (list 'IC 'SE) 2.5)
+               (make-station 'BDorf (list 'SE) 6)
+               (make-station 'CStadt (list 'IC 'SE) 0)
+              )
+             )

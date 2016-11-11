@@ -26,7 +26,7 @@
 ;;          ) 0 )
 ;;        = (list (make-station 'Waechtersbach (list 'RE 'SE) 0)
 ;;                (make-station 'Wirtheim (list 'SE) 4.5)
-;;                (make-station 'HaitzHoechst (list 'SE) 10.5)
+;;                (make-station 'HaitzHoechst (list 'SE) 7.5)
 ;;          )
 (define (distance-table-offset stations offset)
   (cond

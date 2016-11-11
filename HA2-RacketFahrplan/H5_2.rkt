@@ -1,6 +1,3 @@
-;; The first three lines of this file were inserted by DrRacket. They record metadata
-;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-abbr-reader.ss" "lang")((modname H5_2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 ;; Yoshua Hitzel
 
 ;; 5.2
@@ -23,7 +20,7 @@
 ;;            (make-station 'Waechtersbach '(RE SE) 4.5)
 ;;            (make-station 'Wirtheim '(SE) 3)
 ;;            (make-station 'HaitzHoechst '(SE) 3)
-;;          ) 'Waechtersbach )
+;;          ) 0 )
 ;;        = (list (make-station 'Waechtersbach (list 'RE 'SE) 4.5)
 ;;                (make-station 'Wirtheim (list 'SE) 7.5)
 ;;                (make-station 'HaitzHoechst (list 'SE) 10.5)
@@ -81,10 +78,9 @@
 (define (distance-table stations from-station)
   (cond
     [(empty? stations) empty]
-    [(eq? (station-name (first stations)) from-station) (distance-table-offset (rest stations) 0)]
+    [(eq? (station-name (first stations)) from-station) (distance-table-offset stations (* -1 (station-distance-to-next (first stations))))]
     [else (distance-table (rest stations) from-station)]
   )
-  
 )
 
 ;; Tests

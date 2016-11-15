@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -56,7 +56,7 @@
 (define (x-set-member? set x pred)
   (local [(define items (x-set-items set))
           ; Use a function instead of a variable in order to check empty? first
-          (define (rest-set set) (make-x-set (- 1 (x-set-size set)) (rest items)))
+          (define (rest-set set) (make-x-set (- (x-set-size set) 1) (rest items)))
           ]
     (cond
       [(empty? items) false]

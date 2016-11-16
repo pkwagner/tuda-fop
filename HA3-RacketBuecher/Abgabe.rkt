@@ -62,7 +62,7 @@
 (check-expect (x-set-member? (make-x-set 0 empty) 0 =) false)
 (check-expect (x-set-member? (make-x-set 2 (list 1 2)) 2 =) true)
 (check-expect (x-set-member? (make-x-set 2 (list 1 2)) 3 =) false)
-
+(check-expect (x-set-member? (make-x-set 3 (list 1 2 2)) 2 =) true)
 
 
 ;; x-set-insert: x-set X (X X -> boolean) -> x-set

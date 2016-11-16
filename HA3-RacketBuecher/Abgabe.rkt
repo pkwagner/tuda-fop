@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -52,16 +52,10 @@
 ;; Checks if a element of type X is in the struct x-set
 ;; using the given predicate
 ;;
-;; Ex: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) -> true
+;; Example: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) -> true
 (define (x-set-member? set x pred)
-  (local [(define items (x-set-items set))
-          ; Use a function instead of a variable in order to check empty? first
-          (define (rest-set set) (make-x-set (- (x-set-size set) 1) (rest items)))
-          ]
-    (cond
-      [(empty? items) false]
-      [(pred x (first items)) true]
-      [else (x-set-member? (rest-set set) x pred)])))
+  (local [(define (exists? other) (pred x other))]
+    (ormap exists? (x-set-items set))))
 
 
 ;; Tests
@@ -78,14 +72,13 @@
 ;;
 ;; The set containing the new element at the beginning will be returned.
 ;;
-;; Ex: (x-set-insert (make-x-set 2 (list 1 2)) 3 =) -> (make-x-set 3 (list 1 2 3)
+;; Example: (x-set-insert (make-x-set 2 (list 1 2)) 3 =) -> (make-x-set 3 (list 1 2 3)
 (define (x-set-insert set x pred)
-  (local [(define (insert x)
-            (make-x-set (+ 1 (x-set-size set)) (cons x (x-set-items set))))
-          ]
+  (local [(define (insert-start x)
+            (make-x-set (+ (x-set-size set) 1) (cons x (x-set-items set))))]
     (cond
       [(x-set-member? set x pred) set]
-      [else (insert x)])))
+      [else (insert-start x)])))
 
 
 ;; Tests
@@ -101,16 +94,16 @@
 ;;
 ;; The set containing the new element at the beginning will be returned.
 ;;
-;; Ex: (symbol-set-insert (make-x-set 1 (list 'B)) 'A) -> (make-x-set 2 (list 'A 'B)
+;; Example: (symbol-set-insert (make-x-set 1 (list 'B)) 'A) -> (make-x-set 2 (list 'A 'B)
 (define (symbol-set-insert set symbol)
   (x-set-insert set symbol symbol=?))
 
 ;; Tests
-(check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))
-; No change
-(check-expect (symbol-set-insert (make-x-set 1 (list 'A)) 'A) (make-x-set 1 (list 'A)))
-; New element added to a non-empty list
-(check-expect (symbol-set-insert (make-x-set 1 (list 'B)) 'A) (make-x-set 2 (list 'A 'B)))
+;(check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))
+;; No change
+;(check-expect (symbol-set-insert (make-x-set 1 (list 'A)) 'A) (make-x-set 1 (list 'A)))
+;; New element added to a non-empty list
+;(check-expect (symbol-set-insert (make-x-set 1 (list 'B)) 'A) (make-x-set 2 (list 'A 'B)))
 
 
 
@@ -124,11 +117,42 @@
 ;;  - right: decision-tree-node - root of the right subtree, adopting the textbook ("1")
 (define-struct decision-tree-node (book left right))
 
-;; TODO implement 5.2
+;; build-decision-tree: (listof textbook) -> decision-tree-node
+;;
+;; Builds a decision tree based on the given list of textbooks.
+;;
+;; Example: (build-decision-tree small-textbooks) ->
+;;   Following-Tree:
+;;        faust
+;;       /     \
+;; geometrie  geometrie
+(define (build-decision-tree textbooks)
+  (cond
+    [(empty? textbooks) empty]
+    [else (local
+            [(define child (build-decision-tree (rest textbooks)))]
+            (make-decision-tree-node (first textbooks) child child))]))
+
+;; Tests
+(check-expect (build-decision-tree empty) empty)
+(check-expect (build-decision-tree single-textbook)
+              (make-decision-tree-node faust empty empty))
+(check-expect (build-decision-tree (list faust geometrie htdp))
+              (make-decision-tree-node faust
+                                       (make-decision-tree-node geometrie
+                                                                (make-decision-tree-node htdp empty empty)
+                                                                (make-decision-tree-node htdp empty empty))
+                                       (make-decision-tree-node geometrie
+                                                                (make-decision-tree-node htdp empty empty)
+                                                                (make-decision-tree-node htdp empty empty))))
+
+
 
 ;; ====== Problem 5.3 ======
 
-;; TODO implement 5.3
+
+;; ToDo 5.3
+
 
 ;; ====== Problem 5.4 ======
 
@@ -156,5 +180,3 @@
 (check-expect (sum-up-utility small-textbooks (list false false)) 0)
 (check-expect (sum-up-utility small-textbooks (list true false)) 50)
 (check-expect (sum-up-utility small-textbooks (list false true)) 80)
-
-;; TODO implement 5.4

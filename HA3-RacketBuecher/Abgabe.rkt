@@ -151,7 +151,46 @@
 ;; ====== Problem 5.3 ======
 
 
-;; ToDo 5.3
+;; satisfies-constraints?: (listof textbook) (listof boolean) number number -> boolean
+;;
+;; Checks if the given list of text books with their chose candidates are
+;; * related to to a specified number of subjects or are higher
+;; * The total price is lower or equal to the budget
+;;
+;; Example: (satisfies-constraints? avail-textbooks (list true) 1 1000) -> true
+(define (satisfies-constraints? all-textbooks solution-candidate num-subjects budget)
+  (local
+    [(define (filter-books books candidates)
+       (cond
+         [(or (empty? books) (empty? candidates)) empty]
+         ; First book is selected - add it to the list of selected books
+         [(first candidates) (cons (first books)
+                                   (filter-books (rest books) (rest candidates)))]
+         ; Remove the first book, because it's not selected
+         [else (filter-books (rest books) (rest candidates))]))
+     (define (count-price books) (foldl + 0 (map textbook-price books)))
+     (define (symbol-set-insert-2 x set) (symbol-set-insert set x))
+     (define (subject-set books) (foldl symbol-set-insert-2
+                                        (make-x-set 0 empty)
+                                        (foldl cons empty
+                                               (map textbook-subject books))))
+     (define filtered-books (filter-books all-textbooks solution-candidate))]
+    (cond
+      [(empty? filtered-books) false]
+      [else (and
+             (>= budget (count-price filtered-books))
+             (<= num-subjects (x-set-size (subject-set filtered-books))))])))
+
+;; Tests
+; No book selected
+(check-expect (satisfies-constraints? avail-textbooks empty 10 10) false)
+; No budget
+(check-expect (satisfies-constraints? avail-textbooks (list true false) 1 0) false)
+; Not enough subjects
+(check-expect (satisfies-constraints? avail-textbooks (list true) 2 1000) false)
+; Should have enough
+(check-expect (satisfies-constraints? avail-textbooks (list true false true) 1 1000) true)
+
 
 
 ;; ====== Problem 5.4 ======

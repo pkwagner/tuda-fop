@@ -12,7 +12,7 @@ env:
     # with Travis CI's newer container infrastructure.
     - RACKET_DIR=~/racket
     # Test against the newest Racket release version
-    - RACKET_VERSION=RELEASE
+    - RACKET_VERSION=6.7
 
 # Download and install racket
 install:

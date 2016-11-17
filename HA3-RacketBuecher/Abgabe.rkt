@@ -54,7 +54,15 @@
 ;;
 ;; Example: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) -> true
 (define (x-set-member? set x pred)
-  (local [(define (exists? other) (pred x other))]
+  (local
+    ;; exists?: Y -> boolean
+    ;;
+    ;; Checks if the given other element and the searching element x
+    ;; returns true by using the given predicate from x-set-member?
+    ;;
+    ;; Example: (exists? 5) -> evaluates true if you search for x=5 and your
+    ;;   predicate is the '='
+    [(define (exists? other) (pred x other))]
     (ormap exists? (x-set-items set))))
 
 
@@ -62,6 +70,7 @@
 (check-expect (x-set-member? (make-x-set 0 empty) 0 =) false)
 (check-expect (x-set-member? (make-x-set 2 (list 1 2)) 2 =) true)
 (check-expect (x-set-member? (make-x-set 2 (list 1 2)) 3 =) false)
+; Should return true even if there are duplicate entries
 (check-expect (x-set-member? (make-x-set 3 (list 1 2 2)) 2 =) true)
 
 
@@ -74,8 +83,15 @@
 ;;
 ;; Example: (x-set-insert (make-x-set 2 (list 1 2)) 3 =) -> (make-x-set 3 (list 1 2 3)
 (define (x-set-insert set x pred)
-  (local [(define (insert-start x)
-            (make-x-set (+ (x-set-size set) 1) (cons x (x-set-items set))))]
+  (local
+    ;; insert-start:: x -> x-set
+    ;;
+    ;; Inserts the element x at the beginning of the set and therefore increases the size
+    ;;
+    ;; Example: (insert-start 5) -> (make-x-set 3 (list 5 0 1)) 
+    ;;   for set = (2 (list 0 1)) from x-set-insert
+    [(define (insert-start x)
+       (make-x-set (+ (x-set-size set) 1) (cons x (x-set-items set))))]
     (cond
       [(x-set-member? set x pred) set]
       [else (insert-start x)])))
@@ -99,11 +115,11 @@
   (x-set-insert set symbol symbol=?))
 
 ;; Tests
-;(check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))
-;; No change
-;(check-expect (symbol-set-insert (make-x-set 1 (list 'A)) 'A) (make-x-set 1 (list 'A)))
-;; New element added to a non-empty list
-;(check-expect (symbol-set-insert (make-x-set 1 (list 'B)) 'A) (make-x-set 2 (list 'A 'B)))
+(check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))
+; No change
+(check-expect (symbol-set-insert (make-x-set 1 (list 'A)) 'A) (make-x-set 1 (list 'A)))
+; New element added to a non-empty list
+(check-expect (symbol-set-insert (make-x-set 1 (list 'B)) 'A) (make-x-set 2 (list 'A 'B)))
 
 
 
@@ -130,6 +146,7 @@
   (cond
     [(empty? textbooks) empty]
     [else (local
+            ; Builds a child node without the parent
             [(define child (build-decision-tree (rest textbooks)))]
             (make-decision-tree-node (first textbooks) child child))]))
 
@@ -160,6 +177,14 @@
 ;; Example: (satisfies-constraints? avail-textbooks (list true) 1 1000) -> true
 (define (satisfies-constraints? all-textbooks solution-candidate num-subjects budget)
   (local
+    ;; filter-books:: (listof textbooks) (listof boolean) -> (listof textbooks)
+    ;;
+    ;; Checks if a textbook is a solution candidate by checking the boolean list if
+    ;; there is a true at the same position
+    ;;
+    ;; If boolean list is shorter, it will assume the remaining are no solution candidates
+    ;;
+    ;; Example: (filter-books (list htdp ddca) (list false true)) -> (list ddca)
     [(define (filter-books books candidates)
        (cond
          [(or (empty? books) (empty? candidates)) empty]
@@ -168,8 +193,25 @@
                                    (filter-books (rest books) (rest candidates)))]
          ; Remove the first book, because it's not selected
          [else (filter-books (rest books) (rest candidates))]))
+     ;; count-price:: (listof books) -> number
+     ;;
+     ;; Grabs the price of all books and sums it up
+     ;;
+     ;; Example: (count-price (list htdp ddca)) -> 85
      (define (count-price books) (foldl + 0 (map textbook-price books)))
+     ;; symbol-set-insert-2:: symbol (listof symbol)
+     ;;
+     ;; Creates an alias for invoking the symbol-set-insert procedure with
+     ;; a different parameter order in order to make usable by fold*
+     ;;
+     ;; Example: (symbol-set-insert2 'A (make-x-set 1 (list 'B))) -> (make-x-set 2 (list 'A 'B))
      (define (symbol-set-insert-2 x set) (symbol-set-insert set x))
+     ;; subject-set:: (listof books) -> x-set
+     ;;
+     ;; Maps a list of books to a x-set which contain a unique list of subjects
+     ;; as symbols. 
+     ;;
+     ;; Example: (subject-set (list htdp)) -> (make-x-set 1 (list 'FOP))
      (define (subject-set books) (foldl symbol-set-insert-2
                                         (make-x-set 0 empty)
                                         (foldl cons empty
@@ -178,7 +220,9 @@
     (cond
       [(empty? filtered-books) false]
       [else (and
+             ; the books costs lower or are equal to our budget
              (>= budget (count-price filtered-books))
+             ; the subject number of books are greater or equal to our requirement
              (<= num-subjects (x-set-size (subject-set filtered-books))))])))
 
 ;; Tests

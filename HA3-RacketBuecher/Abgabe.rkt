@@ -232,9 +232,10 @@
 (check-expect (satisfies-constraints? avail-textbooks (list true false) 1 0) false)
 ; Not enough subjects
 (check-expect (satisfies-constraints? avail-textbooks (list true) 2 1000) false)
-; Should have enough
+; Should return true (min one subject and enough budget)
 (check-expect (satisfies-constraints? avail-textbooks (list true false true) 1 1000) true)
-
+; Equal to the required subjects
+(check-expect (satisfies-constraints? avail-textbooks (list true false true) 2 1000) true)
 
 
 ;; ====== Problem 5.4 ======

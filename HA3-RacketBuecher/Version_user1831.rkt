@@ -1,6 +1,6 @@
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
-
-
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Version_user1831) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 (define-struct textbook (title utility price subject))
 (define htdp       (make-textbook 'HowToDesignPrograms 90 45 'FOP))
@@ -144,7 +144,7 @@ ddca microarch theo-inf tur-compl))
 (check-expect (satisfies-constraints? avail-textbooks (list true) 2 1000) false)
 
 (check-expect (satisfies-constraints? avail-textbooks (list true false true) 1 1000) true)
-
+(check-expect (satisfies-constraints? avail-textbooks (list true false true) 2 1000) true)
 
 
 

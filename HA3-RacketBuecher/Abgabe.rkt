@@ -92,6 +92,7 @@
     ;;   for set = (2 (list 0 1)) from x-set-insert
     [(define (insert-start x)
        (make-x-set (+ (x-set-size set) 1) (cons x (x-set-items set))))]
+    
     (cond
       [(x-set-member? set x pred) set]
       [else (insert-start x)])))
@@ -192,13 +193,17 @@
          [(first candidates) (cons (first books)
                                    (filter-books (rest books) (rest candidates)))]
          ; Remove the first book, because it's not selected
-         [else (filter-books (rest books) (rest candidates))]))
+         [else (filter-books (rest books) (rest candidates))]
+       )
+     )
+     
      ;; count-price:: (listof books) -> number
      ;;
      ;; Grabs the price of all books and sums it up
      ;;
      ;; Example: (count-price (list htdp ddca)) -> 85
      (define (count-price books) (foldl + 0 (map textbook-price books)))
+     
      ;; symbol-set-insert-2:: symbol (listof symbol)
      ;;
      ;; Creates an alias for invoking the symbol-set-insert procedure with
@@ -206,6 +211,7 @@
      ;;
      ;; Example: (symbol-set-insert2 'A (make-x-set 1 (list 'B))) -> (make-x-set 2 (list 'A 'B))
      (define (symbol-set-insert-2 x set) (symbol-set-insert set x))
+     
      ;; subject-set:: (listof books) -> x-set
      ;;
      ;; Maps a list of books to a x-set which contain a unique list of subjects
@@ -216,11 +222,14 @@
                                         (make-x-set 0 empty)
                                         (foldl cons empty
                                                (map textbook-subject books))))
+
+     ;; Define selected books as filtered-books
      (define filtered-books (filter-books all-textbooks solution-candidate))]
+    
     (cond
       [(empty? filtered-books) false]
       [else (and
-             ; the books costs lower or are equal to our budget
+             ; the books cost less or equal than our budget
              (>= budget (count-price filtered-books))
              ; the subject number of books are greater or equal to our requirement
              (<= num-subjects (x-set-size (subject-set filtered-books))))])))

@@ -47,7 +47,7 @@
 
 ;; ====== Problem 5.1 ======
 
-;; x-set-member?: x-set X (X X -> boolean) -> boolean
+;; x-set-member?: x-set X (X Y -> boolean) -> boolean
 ;;
 ;; Checks if a element of type X is in the struct x-set
 ;; using the given predicate
@@ -65,7 +65,7 @@
 (check-expect (x-set-member? (make-x-set 3 (list 1 2 2)) 2 =) true)
 
 
-;; x-set-insert: x-set X (X X -> boolean) -> x-set
+;; x-set-insert: x-set X (X Y -> boolean) -> x-set
 ;;
 ;; Inserts x into the set if the predicate evaluates false
 ;; and so the element isn't in the set yet.

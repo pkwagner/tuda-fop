@@ -268,6 +268,39 @@
      ;; but do not forget to recurse over the rest of the books and solution!
      (sum-up-utility (rest textbooks) (rest solution))]))
 
+
+(define (optimize-selection textbooks solution-subtree num-subjects budget)
+  ;(local
+  ;  [(define (get-valid-solutions textbooks solution-subtree num-subjects budget)
+  ;     (cond
+  ;       [(< (length solution-subtree) (length textbooks))
+  ;           (cons
+  ;            (get-valid-solutions textbooks (cons false solution-subtree) num-subjects budget)
+  ;            (get-valid-solutions textbooks (cons true solution-subtree) num-subjects budget)
+  ;           )]
+  ;       [(satisfies-constraints? textbooks solution-subtree num-subjects budget) solution-subtree]
+  ;       [else empty]
+  ;     )
+  ;   )]
+  ;)
+  (local
+    [(define (get-all-subtrees textbooks subtree)
+       (if (< (length subtree) (length textbooks))
+           (append (get-all-subtrees textbooks (cons false subtree)) (get-all-subtrees textbooks (cons true subtree)))
+           (cons (reverse subtree) empty))
+     )
+
+     (define (satisfies-constraints-filter solution-subtree) (satisfies-constraints? textbooks solution-subtree num-subjects budget))
+    ]
+    
+    (filter satisfies-constraints-filter (get-all-subtrees textbooks solution-subtree))
+    ;; Should rank it...
+  )
+)
+
+; Simple test.......
+(optimize-selection avail-textbooks (reverse (list true false)) 2 1000)
+
 ;; Tests (you do NOT have to write your own tests for this!)
 (check-expect (sum-up-utility empty empty) 0)
 (check-expect (sum-up-utility small-textbooks (list false false)) 0)

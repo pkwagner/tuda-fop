@@ -324,7 +324,14 @@
           (define (satisfies-constraints-filter solution)
                   (satisfies-constraints? textbooks solution num-subjects budget)
           )
-     
+
+          ;; highest-utility-tree : (listof boolean) (listof boolean) -> (listof boolean)
+          ;;
+          ;; Compares utility of two given binary solutions and returns the better one
+          ;;    Designed to use with fold* which compares a whole list
+          ;; The var textbook is set by the parent function optimize-selection
+          ;;
+          ;; (highest-utility-tree (list true false) (list false false)) = (list true false) (if the parent function set textbooks as small-textbooks)
           (define (highest-utility-tree solution best-solution)
             (if (> (sum-up-utility textbooks solution) (sum-up-utility textbooks best-solution))
                 solution
@@ -332,16 +339,19 @@
                 )
             )
           ]
-    
+
+    ; 1) Builds all binary solution possibilities out of a given decision-tree (-> get-all-solutions)
+    ; 2) Filters solutions so that only those solutions remain that match satisfies-constraints? (-> filter)
+    ; 3) Compares the utility of all remaining solutions step by step and returns the best one (-> foldl)
     (foldl
-     highest-utility-tree
-     empty
-     (filter satisfies-constraints-filter
-             (get-all-solutions textbooks decision-tree)
-             )
-     )
+       highest-utility-tree
+       empty
+       (filter satisfies-constraints-filter
+               (get-all-solutions textbooks decision-tree)
+       )
     )
   )
+)
 
 ;; Tests
 ; Too many subjects

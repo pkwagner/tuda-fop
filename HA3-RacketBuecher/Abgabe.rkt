@@ -155,7 +155,7 @@
   (cond
     [(empty? textbooks) empty]
     [else (local
-            ; Builds a node tree with all (check-expect (build-decision-tree small-textbooks)
+            ; Builds a node tree with all (check-expect (build-decision-tree small-textbooks))
             [(define child (build-decision-tree (rest textbooks)))]
             (make-decision-tree-node (first textbooks) child child))]))
 
@@ -296,6 +296,12 @@
      ;; Example: (get-all-solutions small-textbooks (build-decision-tree small-textbooks)) -> (list (list true false) (list true true))
      (define (get-all-solutions textbooks decision-tree)
        (local
+         ;; make-solution : decision-tree-node (listof boolean) -> (listof (listof boolean))
+         ;;
+         ;; Generates all possible binary solutions based on a given decision-tree-node
+         ;; If solution is not empty make-solution continues building from the given point
+         ;;
+         ;; Example: (get-all-solutions (build-decision-tree small-textbooks) empty) -> (list (list true false) (list true true))
          [(define (make-solution decision-tree solution)
                   (if (empty? decision-tree)
                       (cons (reverse solution) empty)
@@ -307,12 +313,14 @@
        )
      )
 
-     ;; satisfies-constraints-filter : decision-tree-node -> boolean
+     ;; satisfies-constraints-filter : (listof boolean) -> boolean
      ;;
-     ;; Wrapper for satisfies-constraints? that needs only a decision-tree-node and can be set into a filter
-     ;; ...
+     ;; Wrapper for satisfies-constraints? that needs only a binary solution and can be set into a filter
+     ;; The vars textbooks, num-subjects, budget are set by the parent function optimize-selection
      ;;
-     ;; Example: ...
+     ;; Example: (satisfies-constraints-filter (list true false)) = true (if the parent function set * textbooks as small-textbooks
+     ;;                                                                                              * num-subjects as 1
+     ;;                                                                                              * budget as 12)
      (define (satisfies-constraints-filter solution)
              (satisfies-constraints? textbooks solution num-subjects budget)
      )

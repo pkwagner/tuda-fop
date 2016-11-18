@@ -288,19 +288,25 @@
 ;; Builds all possible tree-nodes matching satisfies-constraints? and returns the best possibility
 ;;
 ;; Example: (optimize-selection small-textbooks '() 1 12) = (list true false)
-(define (optimize-selection textbooks solution-tree num-subjects budget)
+(define (optimize-selection textbooks decision-tree num-subjects budget)
   (local [
-     (define solution-tree-reversed (reverse solution-tree))
      ;; get-all-solutions : (listof textbook) decision-tree-node -> (listof (listof boolean))
      ;;
-     ;; Returns all tree-nodes based on decision-tree-node (doesn't check if they satisfy constraints)
+     ;; Returns all buildable solutions based on decision-tree-node (doesn't check if they satisfy constraints)
      ;;
-     ;; Example: (get-all-solutions small-textbooks (list true)) -> (list (list true false) (list true true))
-     (define (get-all-solutions textbooks solution-tree)
-       (if (< (length solution-tree) (length textbooks))
-           (append (get-all-solutions textbooks (cons false solution-tree)) (get-all-solutions textbooks (cons true solution-tree)))
-           (cons (reverse solution-tree) empty))
+     ;; Example: (get-all-solutions small-textbooks (build-decision-tree small-textbooks)) -> (list (list true false) (list true true))
+     (define (get-all-solutions textbooks decision-tree)
+       (local
+         [(define (make-solution decision-tree solution)
+                  (if (empty? decision-tree)
+                      (cons (reverse solution) empty)
+                      (append (make-solution (decision-tree-node-left decision-tree) (cons false solution)) (make-solution (decision-tree-node-right decision-tree) (cons true solution)))
+                  )
+         )]
+
+         (make-solution decision-tree empty)
        )
+     )
 
      ;; satisfies-constraints-filter : decision-tree-node -> boolean
      ;;
@@ -324,18 +330,16 @@
       highest-utility-tree
       empty
       (filter satisfies-constraints-filter
-              (get-all-solutions textbooks solution-tree-reversed)
+              (get-all-solutions textbooks decision-tree)
       )
     )
   )
 )
 ;; Tests
 ; Tests from exercise
-(check-expect (optimize-selection small-textbooks empty 2 10) empty)
-(check-expect (optimize-selection small-textbooks empty 1 12) (list true false))
-(check-expect (optimize-selection small-textbooks empty 2 40) (list true true))
-
-
+;(check-expect (optimize-selection small-textbooks empty 2 10) empty)
+;(check-expect (optimize-selection small-textbooks empty 1 12) (list true false))
+;(check-expect (optimize-selection small-textbooks empty 2 40) (list true true))
 
 ;; Below are given tests from the template
 (check-expect (build-decision-tree small-textbooks)

@@ -1,6 +1,3 @@
-;; The first three lines of this file were inserted by DrRacket. They record metadata
-;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Version_user1831) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 (define-struct textbook (title utility price subject))
 (define htdp       (make-textbook 'HowToDesignPrograms 90 45 'FOP))
@@ -126,11 +123,10 @@ ddca microarch theo-inf tur-compl))
         (define result (and (boolean=? (first bools) true) (>= budget (textbook-price tb))))
        ]
        (cond
-         [(empty? restB) (and result (= min 0))]
+         [(and (empty? restB) (or (= min 0) (and (= min 1) result))) true]
+         [(and (empty? restB) (> min 0)) false]
          [(and (not (empty? restB)) result) (satisfies-constraints? restT restB (- min 1) (- budget (textbook-price tb)))]
-         [else
-          (satisfies-constraints? restT restB min budget)
-         ]
+         [else (satisfies-constraints? restT restB min budget) ]
        )
      )
     ]
@@ -171,3 +167,4 @@ ddca microarch theo-inf tur-compl))
 
 
 ;; TODO 5.4 is missing!!!
+

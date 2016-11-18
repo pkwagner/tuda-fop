@@ -343,7 +343,7 @@
                avail-textbooks (list true false true) 3 90) false)
 (check-expect (satisfies-constraints?
                avail-textbooks (list true false true false true false false true)
-               4 190) true
+               4 190) true)
 
 (check-expect (optimize-selection small-textbooks
                                   (build-decision-tree small-textbooks) 1 12)

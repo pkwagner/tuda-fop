@@ -346,8 +346,8 @@
 (check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 1 45)
               (list false false true false false false false false))
 
-(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 3 150)
-              (list true false true false true))
+(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 2 70)
+              (list false false false true true false false false))
 
 
 ;; Below are given tests from the template

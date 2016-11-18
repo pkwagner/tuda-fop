@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -270,19 +270,6 @@
 
 
 (define (optimize-selection textbooks solution-subtree num-subjects budget)
-  ;(local
-  ;  [(define (get-valid-solutions textbooks solution-subtree num-subjects budget)
-  ;     (cond
-  ;       [(< (length solution-subtree) (length textbooks))
-  ;           (cons
-  ;            (get-valid-solutions textbooks (cons false solution-subtree) num-subjects budget)
-  ;            (get-valid-solutions textbooks (cons true solution-subtree) num-subjects budget)
-  ;           )]
-  ;       [(satisfies-constraints? textbooks solution-subtree num-subjects budget) solution-subtree]
-  ;       [else empty]
-  ;     )
-  ;   )]
-  ;)
   (local
     [(define (get-all-subtrees textbooks subtree)
        (if (< (length subtree) (length textbooks))
@@ -291,10 +278,27 @@
      )
 
      (define (satisfies-constraints-filter solution-subtree) (satisfies-constraints? textbooks solution-subtree num-subjects budget))
+     
+     (define (is-book-selected? textbook is-selected selected-books) (if is-selected (cons textbook selected-books) selected-books))
+     (define (get-selected-books textbooks solution)
+             (foldl is-book-selected? empty textbooks solution)
+     )
+     
+     (define (rank-tree-utility textbooks solution highestSolution)
+             (if (> (sum-up-utility textbooks solution) highestSolution)
+                 (sum-up-utility textbooks solution)
+                 highestSolution
+             )
+     )
     ]
     
-    (filter satisfies-constraints-filter (get-all-subtrees textbooks solution-subtree))
-    ;; Should rank it...
+    (foldl
+      rank-tree-utility
+      0
+      (get-selected-books textbooks (filter satisfies-constraints-filter
+              (get-all-subtrees textbooks solution-subtree)
+      ))
+    )
   )
 )
 

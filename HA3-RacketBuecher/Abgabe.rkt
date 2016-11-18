@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -268,45 +268,62 @@
      ;; but do not forget to recurse over the rest of the books and solution!
      (sum-up-utility (rest textbooks) (rest solution))]))
 
-
-(define (optimize-selection textbooks solution-subtree num-subjects budget)
-  (local
-    [(define (get-all-subtrees textbooks subtree)
-       (if (< (length subtree) (length textbooks))
-           (append (get-all-subtrees textbooks (cons false subtree)) (get-all-subtrees textbooks (cons true subtree)))
-           (cons (reverse subtree) empty))
-     )
-
-     (define (satisfies-constraints-filter solution-subtree) (satisfies-constraints? textbooks solution-subtree num-subjects budget))
-     
-     (define (is-book-selected? textbook is-selected selected-books) (if is-selected (cons textbook selected-books) selected-books))
-     (define (get-selected-books textbooks solution)
-             (foldl is-book-selected? empty textbooks solution)
-     )
-     
-     (define (rank-tree-utility textbooks solution highestSolution)
-             (if (> (sum-up-utility textbooks solution) highestSolution)
-                 (sum-up-utility textbooks solution)
-                 highestSolution
-             )
-     )
-    ]
-    
-    (foldl
-      rank-tree-utility
-      0
-      (get-selected-books textbooks (filter satisfies-constraints-filter
-              (get-all-subtrees textbooks solution-subtree)
-      ))
-    )
-  )
-)
-
-; Simple test.......
-(optimize-selection avail-textbooks (reverse (list true false)) 2 1000)
-
 ;; Tests (you do NOT have to write your own tests for this!)
 (check-expect (sum-up-utility empty empty) 0)
 (check-expect (sum-up-utility small-textbooks (list false false)) 0)
 (check-expect (sum-up-utility small-textbooks (list true false)) 50)
 (check-expect (sum-up-utility small-textbooks (list false true)) 80)
+
+
+;; optimize-selection : (listof textbook) decision-tree-node number number -> (listof boolean)
+;;
+;; Builds all possible tree-nodes matching satisfies-constraints? and returns the best possibility
+;;
+;; Example: (optimize-selection small-textbooks '() 1 12) = (list true false)
+(define (optimize-selection textbooks solution-tree num-subjects budget)
+  (local [
+     (define solution-tree-reversed (reverse solution-tree))
+     ;; get-all-solutions : (listof textbook) decision-tree-node -> (listof (listof boolean))
+     ;;
+     ;; Returns all tree-nodes based on decision-tree-node (doesn't check if they satisfy constraints)
+     ;;
+     ;; Example: (get-all-solutions small-textbooks (list true)) -> (list (list true false) (list true true))
+     (define (get-all-solutions textbooks solution-tree)
+       (if (< (length solution-tree) (length textbooks))
+           (append (get-all-solutions textbooks (cons false solution-tree)) (get-all-solutions textbooks (cons true solution-tree)))
+           (cons (reverse solution-tree) empty))
+     )
+
+     ;; satisfies-constraints-filter : decision-tree-node -> boolean
+     ;;
+     ;; Wrapper for satisfies-constraints? that needs only a decision-tree-node and can be set into a filter
+     ;; ...
+     ;;
+     ;; Example: ...
+     (define (satisfies-constraints-filter solution)
+             (satisfies-constraints? textbooks solution num-subjects budget)
+     )
+     
+     (define (highest-utility-tree solution best-solution)
+             (if (> (sum-up-utility textbooks solution) (sum-up-utility textbooks best-solution))
+                 solution
+                 best-solution
+             )
+     )
+    ]
+    
+    (foldl
+      highest-utility-tree
+      empty
+      (filter satisfies-constraints-filter
+              (get-all-solutions textbooks solution-tree-reversed)
+      )
+    )
+  )
+)
+
+;; Tests
+; Tests from exercise
+(check-expect (optimize-selection small-textbooks empty 2 10) empty)
+(check-expect (optimize-selection small-textbooks empty 1 12) (list true false))
+(check-expect (optimize-selection small-textbooks empty 2 40) (list true true))

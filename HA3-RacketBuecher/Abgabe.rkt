@@ -45,8 +45,6 @@
 ;; items: (listof X) - a list of unique items of type X
 (define-struct x-set (size items))
 
-
-
 ;; ====== Problem 5.1 ======
 
 ;; x-set-member? : x-set X (X Y -> boolean) -> boolean
@@ -55,7 +53,7 @@
 ;; using the given predicate
 ;;
 ;; Example: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) = true
-(define (x-set-member? set x pred)
+(define (x-set-member? set x predicate)
   (local
     ;; exists? : Y -> boolean
     ;;
@@ -64,12 +62,12 @@
     ;;
     ;; Example: (exists? 5) = true (if you search for x=5 and your
     ;;                        predicate is the '=')
-    [(define (exists? other) (pred x other))]
+    [(define (member? other) (predicate x other))]
     ; ormap returns false if *every* item returns false -> if one item is found
     ; that returns true the procedure breaks and returns with true
-    (ormap exists? (x-set-items set))
+    (ormap member? (x-set-items set))
+    )
   )
-)
 
 
 ;; Tests
@@ -103,7 +101,6 @@
       [(x-set-member? set x pred) set]
       [else (insert-start x)])))
 
-
 ;; Tests
 (check-expect (x-set-insert (make-x-set 0 empty) 1 =) (make-x-set 1 (list 1)))
 ; No change
@@ -112,14 +109,16 @@
 (check-expect (x-set-insert (make-x-set 1 (list 'B)) 'A symbol=?) (make-x-set 2 (list 'A 'B)))
 
 
+
 ;; symbol-set-insert : x-set symbol -> x-set
 ;;
 ;; Inserts a symbol into the set if the element isn't in the set yet
+;;
 ;; The set containing the new element at the beginning will be returned.
 ;;
 ;; Example: (symbol-set-insert (make-x-set 1 (list 'B)) 'A) = (make-x-set 2 (list 'A 'B)
 (define (symbol-set-insert set symbol)
-        (x-set-insert set symbol symbol=?))
+  (x-set-insert set symbol symbol=?))
 
 ;; Tests
 (check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))
@@ -144,7 +143,10 @@
 ;;
 ;; Builds a decision tree based on the given list of textbooks.
 ;;
-;; Example: (build-decision-tree small-textbooks) ->
+;; Example: (build-decision-tree small-textbooks) =
+;;  (make-decision-tree-node faust
+;;                           (make-decision-tree-node geometrie empty empty)
+;;                           (make-decision-tree-node geometrie empty empty))
 ;;   Following-Tree:
 ;;        faust
 ;;       /     \
@@ -153,11 +155,9 @@
   (cond
     [(empty? textbooks) empty]
     [else (local
-            ; Builds a child node without the parent
+            ; Builds a node tree with all (check-expect (build-decision-tree small-textbooks)
             [(define child (build-decision-tree (rest textbooks)))]
-            (make-decision-tree-node (first textbooks) child child))]
-  )
-)
+            (make-decision-tree-node (first textbooks) child child))]))
 
 ;; Tests
 (check-expect (build-decision-tree empty) empty)
@@ -176,7 +176,8 @@
 
 ;; ====== Problem 5.3 ======
 
-;; satisfies-constraints? : (listof textbook) (listof boolean) number number -> boolean
+
+;; satisfies-constraints?: (listof textbook) (listof boolean) number number -> boolean
 ;;
 ;; Checks if the given list of text books with their chose candidates are
 ;; * related to to a specified number of subjects or are higher
@@ -202,7 +203,7 @@
          ; Remove the first book, because it's not selected
          [else (filter-books (rest books) (rest candidates))]
          )
-     )
+       )
      
      ;; count-price : (listof books) -> number
      ;;
@@ -232,7 +233,7 @@
 
      ;; Define selected books as filtered-books
      (define filtered-books (filter-books all-textbooks solution-candidate))]
-     (cond
+    (cond
       [(empty? filtered-books) false]
       [else (and
              ; the books cost less or equal than our budget
@@ -256,9 +257,7 @@
 ;; ====== Problem 5.4 ======
 
 ;; sum-up-utility : (listof textbook) (listof boolean) -> number
-;;
 ;; Sums up the utility of all textbooks included in the solution
-;;
 ;; Example: (check-expect (add-up-utility small-textbooks (list false false)) 0)
 (define (sum-up-utility textbooks solution)
   (cond
@@ -290,58 +289,62 @@
 ;; Example: (optimize-selection small-textbooks '() 1 12) = (list true false)
 (define (optimize-selection textbooks solution-tree num-subjects budget)
   (local [
-     (define solution-tree-reversed (reverse solution-tree))
-     ;; get-all-solutions : (listof textbook) decision-tree-node -> (listof (listof boolean))
-     ;;
-     ;; Returns all tree-nodes based on decision-tree-node (doesn't check if they satisfy constraints)
-     ;;
-     ;; Example: (get-all-solutions small-textbooks (list true)) -> (list (list true false) (list true true))
-     (define (get-all-solutions textbooks solution-tree)
-       (if (< (length solution-tree) (length textbooks))
-           (append (get-all-solutions textbooks (cons false solution-tree)) (get-all-solutions textbooks (cons true solution-tree)))
-           (cons (reverse solution-tree) empty))
-       )
+          (define solution-tree-reversed (reverse solution-tree))
+          ;; get-all-solutions : (listof textbook) decision-tree-node -> (listof (listof boolean))
+          ;;
+          ;; Returns all tree-nodes based on decision-tree-node (doesn't check if they satisfy constraints)
+          ;;
+          ;; Example: (get-all-solutions small-textbooks (list true)) -> (list (list true false) (list true true))
+          (define (get-all-solutions textbooks solution-tree)
+            (if (< (length solution-tree) (length textbooks))
+                (append (get-all-solutions textbooks (cons false solution-tree))
+                        (get-all-solutions textbooks (cons true solution-tree)))
+                (cons (reverse solution-tree) empty))
+            )
 
-     ;; satisfies-constraints-filter : decision-tree-node -> boolean
-     ;;
-     ;; Wrapper for satisfies-constraints? that needs only a decision-tree-node and can be set into a filter
-     ;; ...
-     ;;
-     ;; Example: ...
-     (define (satisfies-constraints-filter solution)
-             (satisfies-constraints? textbooks solution num-subjects budget)
-     )
+          ;; satisfies-constraints-filter : decision-tree-node -> boolean
+          ;;
+          ;; Wrapper for satisfies-constraints? that needs only a decision-tree-node and can be set into a filter
+          ;; ...
+          ;;
+          ;; Example: ...
+          (define (satisfies-constraints-filter solution)
+            (satisfies-constraints? textbooks solution num-subjects budget)
+            )
      
-     (define (highest-utility-tree solution best-solution)
-             (if (> (sum-up-utility textbooks solution) (sum-up-utility textbooks best-solution))
-                 solution
-                 best-solution
-             )
-     )
-    ]
+          (define (highest-utility-tree solution best-solution)
+            (if (> (sum-up-utility textbooks solution) (sum-up-utility textbooks best-solution))
+                solution
+                best-solution
+                )
+            )
+          ]
     
     (foldl
-      highest-utility-tree
-      empty
-      (filter satisfies-constraints-filter
-              (get-all-solutions textbooks solution-tree-reversed)
-      )
+     highest-utility-tree
+     empty
+     (filter satisfies-constraints-filter
+             (get-all-solutions textbooks solution-tree-reversed)
+             )
+     )
     )
   )
-)
+
 ;; Tests
-; Tests from exercise
-(check-expect (optimize-selection small-textbooks empty 2 10) empty)
-(check-expect (optimize-selection small-textbooks empty 1 12) (list true false))
-(check-expect (optimize-selection small-textbooks empty 2 40) (list true true))
+; Too many subjects
+(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 8 10000) empty)
+; Not enough budget
+(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 2 20) empty)
+(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 3 150)
+              (list true false true false true))
 
 
 
 ;; Below are given tests from the template
 (check-expect (build-decision-tree small-textbooks)
               (make-decision-tree-node faust
-               (make-decision-tree-node geometrie empty empty)
-               (make-decision-tree-node geometrie empty empty)))
+                                       (make-decision-tree-node geometrie empty empty)
+                                       (make-decision-tree-node geometrie empty empty)))
 
 (check-expect (satisfies-constraints?
                avail-textbooks (list true false true) 2 90) true)

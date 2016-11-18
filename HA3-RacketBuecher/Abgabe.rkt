@@ -294,7 +294,7 @@
            (append (get-all-solutions textbooks (cons false solution-tree)) (get-all-solutions textbooks (cons true solution-tree)))
            (cons (reverse solution-tree) empty))
        )
-     (define (satisfies-constraints-filter solution-subtree)
+
      ;; satisfies-constraints-filter : decision-tree-node -> boolean
      ;;
      ;; Wrapper for satisfies-constraints? that needs only a decision-tree-node and can be set into a filter
@@ -329,12 +329,12 @@
 (check-expect (optimize-selection small-textbooks empty 2 40) (list true true))
 
 
+
 ;; Below are given tests from the template
 (check-expect (build-decision-tree small-textbooks)
               (make-decision-tree-node faust
                (make-decision-tree-node geometrie empty empty)
                (make-decision-tree-node geometrie empty empty)))
-
 
 (check-expect (satisfies-constraints?
                avail-textbooks (list true false true) 2 90) true)

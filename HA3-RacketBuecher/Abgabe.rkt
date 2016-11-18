@@ -47,23 +47,25 @@
 
 ;; ====== Problem 5.1 ======
 
-;; x-set-member?: x-set X (X Y -> boolean) -> boolean
+;; x-set-member? : x-set X (X Y -> boolean) -> boolean
 ;;
 ;; Checks if a element of type X is in the struct x-set
 ;; using the given predicate
 ;;
-;; Example: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) -> true
+;; Example: (x-set-member? (make-x-set 2 (list 1 2)) 2 =) = true
 (define (x-set-member? set x pred)
   (local
-    ;; exists?: Y -> boolean
+    ;; exists? : Y -> boolean
     ;;
     ;; Checks if the given other element and the searching element x
     ;; returns true by using the given predicate from x-set-member?
     ;;
-    ;; Example: (exists? 5) -> evaluates true if you search for x=5 and your
-    ;;   predicate is the '='
+    ;; Example: (exists? 5) = true (if you search for x=5 and your
+    ;;                        predicate is the '=')
     [(define (exists? other) (pred x other))]
-    (ormap exists? (x-set-items set))))
+    (ormap exists? (x-set-items set))
+  )
+)
 
 
 ;; Tests
@@ -74,22 +76,22 @@
 (check-expect (x-set-member? (make-x-set 3 (list 1 2 2)) 2 =) true)
 
 
-;; x-set-insert: x-set X (X Y -> boolean) -> x-set
+;; x-set-insert : x-set X (X Y -> boolean) -> x-set
 ;;
 ;; Inserts x into the set if the predicate evaluates false
 ;; and so the element isn't in the set yet.
 ;;
 ;; The set containing the new element at the beginning will be returned.
 ;;
-;; Example: (x-set-insert (make-x-set 2 (list 1 2)) 3 =) -> (make-x-set 3 (list 1 2 3)
+;; Example: (x-set-insert (make-x-set 2 (list 1 2)) 3 =) = (make-x-set 3 (list 1 2 3))
 (define (x-set-insert set x pred)
   (local
-    ;; insert-start:: x -> x-set
+    ;; insert-start : x -> x-set
     ;;
     ;; Inserts the element x at the beginning of the set and therefore increases the size
     ;;
-    ;; Example: (insert-start 5) -> (make-x-set 3 (list 5 0 1)) 
-    ;;   for set = (2 (list 0 1)) from x-set-insert
+    ;; Example: (insert-start 5) = (make-x-set 3 (list 5 0 1)) 
+    ;;                             for set = (2 (list 0 1)) from x-set-insert
     [(define (insert-start x)
        (make-x-set (+ (x-set-size set) 1) (cons x (x-set-items set))))]
     
@@ -105,15 +107,15 @@
 ; New element added to a non-empty list
 (check-expect (x-set-insert (make-x-set 1 (list 'B)) 'A symbol=?) (make-x-set 2 (list 'A 'B)))
 
-;; symbol-set-insert: x-set symbol -> x-set
+
+;; symbol-set-insert : x-set symbol -> x-set
 ;;
 ;; Inserts a symbol into the set if the element isn't in the set yet
-;;
 ;; The set containing the new element at the beginning will be returned.
 ;;
-;; Example: (symbol-set-insert (make-x-set 1 (list 'B)) 'A) -> (make-x-set 2 (list 'A 'B)
+;; Example: (symbol-set-insert (make-x-set 1 (list 'B)) 'A) = (make-x-set 2 (list 'A 'B)
 (define (symbol-set-insert set symbol)
-  (x-set-insert set symbol symbol=?))
+        (x-set-insert set symbol symbol=?))
 
 ;; Tests
 (check-expect (symbol-set-insert (make-x-set 0 empty) 'A) (make-x-set 1 (list 'A)))

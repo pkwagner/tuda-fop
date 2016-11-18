@@ -327,3 +327,30 @@
 (check-expect (optimize-selection small-textbooks empty 2 10) empty)
 (check-expect (optimize-selection small-textbooks empty 1 12) (list true false))
 (check-expect (optimize-selection small-textbooks empty 2 40) (list true true))
+
+
+;; Below are given tests from the template
+(check-expect (build-decision-tree small-textbooks)
+              (make-decision-tree-node faust
+               (make-decision-tree-node geometrie empty empty)
+               (make-decision-tree-node geometrie empty empty)))
+
+
+(check-expect (satisfies-constraints?
+               avail-textbooks (list true false true) 2 90) true)
+;; check if categories are counted correctly
+(check-expect (satisfies-constraints?
+               avail-textbooks (list true false true) 3 90) false)
+(check-expect (satisfies-constraints?
+               avail-textbooks (list true false true false true false false true)
+               4 190) true
+
+(check-expect (optimize-selection small-textbooks
+                                  (build-decision-tree small-textbooks) 1 12)
+              (list true false))
+(check-expect (optimize-selection small-textbooks
+                                  (build-decision-tree small-textbooks) 1 25)
+              (list false true))
+(check-expect (optimize-selection small-textbooks
+                                  (build-decision-tree small-textbooks) 1 40)
+              (list true true))

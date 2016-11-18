@@ -65,6 +65,7 @@
     ;; Example: (exists? 5) = true (if you search for x=5 and your
     ;;                        predicate is the '=')
     [(define (member? other) (predicate x other))]
+    ; According to the documentation: https://docs.racket-lang.org/reference/pairs.html
     ; ormap returns false if *every* item returns false -> if one item is found
     ; that returns true the procedure breaks and returns with true
     (ormap member? (x-set-items set))
@@ -99,7 +100,8 @@
 ;; x-set-insert : x-set X (X Y -> boolean) -> x-set
 ;;
 ;; Inserts x into the set if the predicate evaluates false
-;; and so the element isn't in the set yet.
+;; and so the element isn't in the set yet. Otherwise the value is already in the set and the unmodifed set will be
+;; returned.
 ;;
 ;; The set containing the new element at the beginning will be returned.
 ;;
@@ -213,17 +215,9 @@
     ;;
     ;; If boolean list is shorter, it will assume the remaining are no solution candidates
     ;;
-    ;; Example: (filter-books (list htdp ddca) (list false true)) -> (list ddca)
-    [(define (filter-books books candidates)
-       (cond
-         [(or (empty? books) (empty? candidates)) empty]
-         ; First book is selected - add it to the list of selected books
-         [(first candidates) (cons (first books)
-                                   (filter-books (rest books) (rest candidates)))]
-         ; Remove the first book, because it's not selected
-         [else (filter-books (rest books) (rest candidates))]
-         )
-       )
+    ;; Example: (filter-books (list htdp ddca) (list true)) = (list htdp)
+    [(define (filter-books book-pair)
+       (if (second book-pair) true false))
      
      ;; count-price : (listof books) -> number
      ;;
@@ -251,8 +245,26 @@
                                         (foldl cons empty
                                                (map textbook-subject books))))
 
+     ;; pair : (listof books) (listof boolean) -> (listof (books boolean))
+     ;;
+     ;; Pairs each component from the lists together, so that each book gets the relevant solution candidate value
+     ;; If the candidate list is shorter than the list of books it will fill that list with false.
+     ;;
+     ;; Example: (pair (list htdp ddca) (list true)) = (list (htdp true) (ddca false))
+     (define (pair books candidates) (local [
+                                             (define len-books (length books))
+                                             (define len-cand (length candidates))
+                                             ]
+                                       (cond
+                                         [(= len-books len-cand) (map list books candidates)]
+                                         [(> len-books len-cand) (pair books (append candidates (list false)))]
+                                         [else (error "statisfies-constraints?: books list is shorter than the candidate list")]
+                                         )))
+
      ;; Define selected books as filtered-books
-     (define filtered-books (filter-books all-textbooks solution-candidate))]
+     (define filtered-books (map first
+                                 (filter filter-books
+                                         (pair all-textbooks solution-candidate))))]
     (cond
       [(empty? filtered-books) false]
       [else (and
@@ -272,6 +284,8 @@
 (check-expect (satisfies-constraints? avail-textbooks (list true false true) 1 1000) true)
 ; Equal to the required subjects
 (check-expect (satisfies-constraints? avail-textbooks (list true false true) 2 1000) true)
+(check-error (satisfies-constraints? empty (list true) 0 1000)
+             "statisfies-constraints?: books list is shorter than the candidate list")
 
 
 
@@ -324,15 +338,16 @@
               ;;
               ;; Example: (get-all-solutions (build-decision-tree small-textbooks) empty) -> (list (list true false) (list true true))
               [(define (make-solution decision-tree solution)
-                       (if (empty? decision-tree)
-                           (cons (reverse solution) empty)
-                           (append (make-solution (decision-tree-node-left decision-tree) (cons false solution)) (make-solution (decision-tree-node-right decision-tree) (cons true solution)))
-                       )
-              )]
+                 (if (empty? decision-tree)
+                     (cons (reverse solution) empty)
+                     (append (make-solution (decision-tree-node-left decision-tree) (cons false solution))
+                             (make-solution (decision-tree-node-right decision-tree) (cons true solution)))
+                     )
+                 )]
 
               (make-solution decision-tree empty)
+              )
             )
-          )
 
           ;; satisfies-constraints-filter : (listof boolean) -> boolean
           ;;
@@ -343,8 +358,8 @@
           ;;                                                                                              * num-subjects as 1
           ;;                                                                                              * budget as 12)
           (define (satisfies-constraints-filter solution)
-                  (satisfies-constraints? textbooks solution num-subjects budget)
-          )
+            (satisfies-constraints? textbooks solution num-subjects budget)
+            )
 
           ;; highest-utility-tree : (listof boolean) (listof boolean) -> (listof boolean)
           ;;

@@ -289,65 +289,71 @@
 ;; Example: (optimize-selection small-textbooks '() 1 12) = (list true false)
 (define (optimize-selection textbooks decision-tree num-subjects budget)
   (local [
-     ;; get-all-solutions : (listof textbook) decision-tree-node -> (listof (listof boolean))
-     ;;
-     ;; Returns all buildable solutions based on decision-tree-node (doesn't check if they satisfy constraints)
-     ;;
-     ;; Example: (get-all-solutions small-textbooks (build-decision-tree small-textbooks)) -> (list (list true false) (list true true))
-     (define (get-all-solutions textbooks decision-tree)
-       (local
-         ;; make-solution : decision-tree-node (listof boolean) -> (listof (listof boolean))
-         ;;
-         ;; Generates all possible binary solutions based on a given decision-tree-node
-         ;; If solution is not empty make-solution continues building from the given point
-         ;;
-         ;; Example: (get-all-solutions (build-decision-tree small-textbooks) empty) -> (list (list true false) (list true true))
-         [(define (make-solution decision-tree solution)
-                  (if (empty? decision-tree)
-                      (cons (reverse solution) empty)
-                      (append (make-solution (decision-tree-node-left decision-tree) (cons false solution)) (make-solution (decision-tree-node-right decision-tree) (cons true solution)))
-                  )
-         )]
+          ;; get-all-solutions : (listof textbook) decision-tree-node -> (listof (listof boolean))
+          ;;
+          ;; Returns all buildable solutions based on decision-tree-node (doesn't check if they satisfy constraints)
+          ;;
+          ;; Example: (get-all-solutions small-textbooks (build-decision-tree small-textbooks)) -> (list (list true false) (list true true))
+          (define (get-all-solutions textbooks decision-tree)
+            (local
+              ;; make-solution : decision-tree-node (listof boolean) -> (listof (listof boolean))
+              ;;
+              ;; Generates all possible binary solutions based on a given decision-tree-node
+              ;; If solution is not empty make-solution continues building from the given point
+              ;;
+              ;; Example: (get-all-solutions (build-decision-tree small-textbooks) empty) -> (list (list true false) (list true true))
+              [(define (make-solution decision-tree solution)
+                       (if (empty? decision-tree)
+                           (cons (reverse solution) empty)
+                           (append (make-solution (decision-tree-node-left decision-tree) (cons false solution)) (make-solution (decision-tree-node-right decision-tree) (cons true solution)))
+                       )
+              )]
 
-         (make-solution decision-tree empty)
-       )
-     )
+              (make-solution decision-tree empty)
+            )
+          )
 
-     ;; satisfies-constraints-filter : (listof boolean) -> boolean
-     ;;
-     ;; Wrapper for satisfies-constraints? that needs only a binary solution and can be set into a filter
-     ;; The vars textbooks, num-subjects, budget are set by the parent function optimize-selection
-     ;;
-     ;; Example: (satisfies-constraints-filter (list true false)) = true (if the parent function set * textbooks as small-textbooks
-     ;;                                                                                              * num-subjects as 1
-     ;;                                                                                              * budget as 12)
-     (define (satisfies-constraints-filter solution)
-             (satisfies-constraints? textbooks solution num-subjects budget)
-     )
+          ;; satisfies-constraints-filter : (listof boolean) -> boolean
+          ;;
+          ;; Wrapper for satisfies-constraints? that needs only a binary solution and can be set into a filter
+          ;; The vars textbooks, num-subjects, budget are set by the parent function optimize-selection
+          ;;
+          ;; Example: (satisfies-constraints-filter (list true false)) = true (if the parent function set * textbooks as small-textbooks
+          ;;                                                                                              * num-subjects as 1
+          ;;                                                                                              * budget as 12)
+          (define (satisfies-constraints-filter solution)
+                  (satisfies-constraints? textbooks solution num-subjects budget)
+          )
      
-     (define (highest-utility-tree solution best-solution)
+          (define (highest-utility-tree solution best-solution)
             (if (> (sum-up-utility textbooks solution) (sum-up-utility textbooks best-solution))
                 solution
                 best-solution
                 )
             )
-     ]
+          ]
     
     (foldl
-      highest-utility-tree
-      empty
-      (filter satisfies-constraints-filter
-              (get-all-solutions textbooks decision-tree)
-      )
+     highest-utility-tree
+     empty
+     (filter satisfies-constraints-filter
+             (get-all-solutions textbooks decision-tree)
+             )
+     )
     )
   )
-)
 
 ;; Tests
 ; Too many subjects
 (check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 8 10000) empty)
 ; Not enough budget
 (check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 2 20) empty)
+
+(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 1 45)
+              (list false false true false false false false false))
+
+(check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 2 70)
+              (list false false false true true false false false))
 
 
 ;; Below are given tests from the template

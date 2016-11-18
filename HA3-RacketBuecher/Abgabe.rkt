@@ -63,6 +63,8 @@
     ;; Example: (exists? 5) -> evaluates true if you search for x=5 and your
     ;;   predicate is the '='
     [(define (exists? other) (pred x other))]
+    ; ormap returns false if *every* item returns false -> if one item is found
+    ; that returns true the procedure breaks and returns with true
     (ormap exists? (x-set-items set))))
 
 
@@ -194,8 +196,8 @@
                                    (filter-books (rest books) (rest candidates)))]
          ; Remove the first book, because it's not selected
          [else (filter-books (rest books) (rest candidates))]
+         )
        )
-     )
      
      ;; count-price:: (listof books) -> number
      ;;
@@ -225,7 +227,6 @@
 
      ;; Define selected books as filtered-books
      (define filtered-books (filter-books all-textbooks solution-candidate))]
-    
     (cond
       [(empty? filtered-books) false]
       [else (and
@@ -292,8 +293,8 @@
        (if (< (length solution-tree) (length textbooks))
            (append (get-all-solutions textbooks (cons false solution-tree)) (get-all-solutions textbooks (cons true solution-tree)))
            (cons (reverse solution-tree) empty))
-     )
-
+       )
+     (define (satisfies-constraints-filter solution-subtree)
      ;; satisfies-constraints-filter : decision-tree-node -> boolean
      ;;
      ;; Wrapper for satisfies-constraints? that needs only a decision-tree-node and can be set into a filter
@@ -321,7 +322,6 @@
     )
   )
 )
-
 ;; Tests
 ; Tests from exercise
 (check-expect (optimize-selection small-textbooks empty 2 10) empty)

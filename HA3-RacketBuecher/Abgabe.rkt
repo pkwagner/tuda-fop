@@ -45,6 +45,8 @@
 ;; items: (listof X) - a list of unique items of type X
 (define-struct x-set (size items))
 
+
+
 ;; ====== Problem 5.1 ======
 
 ;; x-set-member? : x-set X (X Y -> boolean) -> boolean
@@ -66,9 +68,8 @@
     ; ormap returns false if *every* item returns false -> if one item is found
     ; that returns true the procedure breaks and returns with true
     (ormap member? (x-set-items set))
-    )
   )
-
+)
 
 ;; Tests
 (check-expect (x-set-member? (make-x-set 0 empty) 0 =) false)
@@ -99,7 +100,9 @@
     
     (cond
       [(x-set-member? set x pred) set]
-      [else (insert-start x)])))
+      [else (insert-start x)])
+  )
+)
 
 ;; Tests
 (check-expect (x-set-insert (make-x-set 0 empty) 1 =) (make-x-set 1 (list 1)))
@@ -107,7 +110,6 @@
 (check-expect (x-set-insert (make-x-set 1 (list 1)) 1 =) (make-x-set 1 (list 1)))
 ; New element added to a non-empty list
 (check-expect (x-set-insert (make-x-set 1 (list 'B)) 'A symbol=?) (make-x-set 2 (list 'A 'B)))
-
 
 
 ;; symbol-set-insert : x-set symbol -> x-set
@@ -157,7 +159,9 @@
     [else (local
             ; Builds a node tree with all (check-expect (build-decision-tree small-textbooks))
             [(define child (build-decision-tree (rest textbooks)))]
-            (make-decision-tree-node (first textbooks) child child))]))
+            (make-decision-tree-node (first textbooks) child child))]
+  )
+)
 
 ;; Tests
 (check-expect (build-decision-tree empty) empty)
@@ -175,7 +179,6 @@
 
 
 ;; ====== Problem 5.3 ======
-
 
 ;; satisfies-constraints?: (listof textbook) (listof boolean) number number -> boolean
 ;;
@@ -252,6 +255,7 @@
 (check-expect (satisfies-constraints? avail-textbooks (list true false true) 1 1000) true)
 ; Equal to the required subjects
 (check-expect (satisfies-constraints? avail-textbooks (list true false true) 2 1000) true)
+
 
 
 ;; ====== Problem 5.4 ======
@@ -364,6 +368,7 @@
 
 (check-expect (optimize-selection avail-textbooks (build-decision-tree avail-textbooks) 2 70)
               (list false false false true true false false false))
+
 
 
 ;; Below are given tests from the template

@@ -45,6 +45,8 @@
 ;; items: (listof X) - a list of unique items of type X
 (define-struct x-set (size items))
 
+
+
 ;; ====== Problem 5.1 ======
 
 ;; x-set-member? : x-set X (X Y -> boolean) -> boolean
@@ -65,7 +67,9 @@
     [(define (exists? other) (pred x other))]
     ; ormap returns false if *every* item returns false -> if one item is found
     ; that returns true the procedure breaks and returns with true
-    (ormap exists? (x-set-items set))))
+    (ormap exists? (x-set-items set))
+  )
+)
 
 
 ;; Tests
@@ -151,7 +155,9 @@
     [else (local
             ; Builds a child node without the parent
             [(define child (build-decision-tree (rest textbooks)))]
-            (make-decision-tree-node (first textbooks) child child))]))
+            (make-decision-tree-node (first textbooks) child child))]
+  )
+)
 
 ;; Tests
 (check-expect (build-decision-tree empty) empty)
@@ -170,14 +176,13 @@
 
 ;; ====== Problem 5.3 ======
 
-
-;; satisfies-constraints?: (listof textbook) (listof boolean) number number -> boolean
+;; satisfies-constraints? : (listof textbook) (listof boolean) number number -> boolean
 ;;
 ;; Checks if the given list of text books with their chose candidates are
 ;; * related to to a specified number of subjects or are higher
 ;; * The total price is lower or equal to the budget
 ;;
-;; Example: (satisfies-constraints? avail-textbooks (list true) 1 1000) -> true
+;; Example: (satisfies-constraints? avail-textbooks (list true) 1 1000) = true
 (define (satisfies-constraints? all-textbooks solution-candidate num-subjects budget)
   (local
     ;; filter-books:: (listof textbooks) (listof boolean) -> (listof textbooks)
@@ -197,29 +202,29 @@
          ; Remove the first book, because it's not selected
          [else (filter-books (rest books) (rest candidates))]
          )
-       )
+     )
      
-     ;; count-price:: (listof books) -> number
+     ;; count-price : (listof books) -> number
      ;;
      ;; Grabs the price of all books and sums it up
      ;;
-     ;; Example: (count-price (list htdp ddca)) -> 85
+     ;; Example: (count-price (list htdp ddca)) = 85
      (define (count-price books) (foldl + 0 (map textbook-price books)))
      
-     ;; symbol-set-insert-2:: symbol (listof symbol)
+     ;; symbol-set-insert-2 : symbol (listof symbol)
      ;;
      ;; Creates an alias for invoking the symbol-set-insert procedure with
      ;; a different parameter order in order to make usable by fold*
      ;;
-     ;; Example: (symbol-set-insert2 'A (make-x-set 1 (list 'B))) -> (make-x-set 2 (list 'A 'B))
+     ;; Example: (symbol-set-insert2 'A (make-x-set 1 (list 'B))) = (make-x-set 2 (list 'A 'B))
      (define (symbol-set-insert-2 x set) (symbol-set-insert set x))
      
-     ;; subject-set:: (listof books) -> x-set
+     ;; subject-set : (listof books) -> x-set
      ;;
      ;; Maps a list of books to a x-set which contain a unique list of subjects
      ;; as symbols. 
      ;;
-     ;; Example: (subject-set (list htdp)) -> (make-x-set 1 (list 'FOP))
+     ;; Example: (subject-set (list htdp)) = (make-x-set 1 (list 'FOP))
      (define (subject-set books) (foldl symbol-set-insert-2
                                         (make-x-set 0 empty)
                                         (foldl cons empty
@@ -227,7 +232,7 @@
 
      ;; Define selected books as filtered-books
      (define filtered-books (filter-books all-textbooks solution-candidate))]
-    (cond
+     (cond
       [(empty? filtered-books) false]
       [else (and
              ; the books cost less or equal than our budget
@@ -250,8 +255,10 @@
 
 ;; ====== Problem 5.4 ======
 
-;; sum-up-utility: (listof textbook) (listof boolean) -> number
+;; sum-up-utility : (listof textbook) (listof boolean) -> number
+;;
 ;; Sums up the utility of all textbooks included in the solution
+;;
 ;; Example: (check-expect (add-up-utility small-textbooks (list false false)) 0)
 (define (sum-up-utility textbooks solution)
   (cond

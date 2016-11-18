@@ -71,6 +71,23 @@
   )
 )
 
+; Alternative without ormap
+;(define (x-set-member? set xitem op)
+;  (local
+;    [(define items (x-set-items set))]
+;    (cond
+;      [(empty? items) false]
+;      [else
+;       (local
+;         [(define sub-set (make-x-set (- (x-set-size set) 1) (rest items)))]
+;         (cond
+;           [(op (first items) xitem) true]
+;           [else (x-set-member? sub-set xitem op)]
+;           )
+;         )]
+;      )
+;    ))
+
 ;; Tests
 (check-expect (x-set-member? (make-x-set 0 empty) 0 =) false)
 (check-expect (x-set-member? (make-x-set 2 (list 1 2)) 2 =) true)

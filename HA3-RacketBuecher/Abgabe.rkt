@@ -63,9 +63,9 @@
     ;; Example: (exists? 5) = true (if you search for x=5 and your
     ;;                        predicate is the '=')
     [(define (exists? other) (pred x other))]
-    (ormap exists? (x-set-items set))
-  )
-)
+    ; ormap returns false if *every* item returns false -> if one item is found
+    ; that returns true the procedure breaks and returns with true
+    (ormap exists? (x-set-items set))))
 
 
 ;; Tests
@@ -196,8 +196,8 @@
                                    (filter-books (rest books) (rest candidates)))]
          ; Remove the first book, because it's not selected
          [else (filter-books (rest books) (rest candidates))]
+         )
        )
-     )
      
      ;; count-price:: (listof books) -> number
      ;;
@@ -227,7 +227,6 @@
 
      ;; Define selected books as filtered-books
      (define filtered-books (filter-books all-textbooks solution-candidate))]
-    
     (cond
       [(empty? filtered-books) false]
       [else (and
@@ -294,7 +293,7 @@
        (if (< (length solution-tree) (length textbooks))
            (append (get-all-solutions textbooks (cons false solution-tree)) (get-all-solutions textbooks (cons true solution-tree)))
            (cons (reverse solution-tree) empty))
-     )
+       )
 
      ;; satisfies-constraints-filter : decision-tree-node -> boolean
      ;;
@@ -323,9 +322,35 @@
     )
   )
 )
-
 ;; Tests
 ; Tests from exercise
 (check-expect (optimize-selection small-textbooks empty 2 10) empty)
 (check-expect (optimize-selection small-textbooks empty 1 12) (list true false))
 (check-expect (optimize-selection small-textbooks empty 2 40) (list true true))
+
+
+
+;; Below are given tests from the template
+(check-expect (build-decision-tree small-textbooks)
+              (make-decision-tree-node faust
+               (make-decision-tree-node geometrie empty empty)
+               (make-decision-tree-node geometrie empty empty)))
+
+(check-expect (satisfies-constraints?
+               avail-textbooks (list true false true) 2 90) true)
+;; check if categories are counted correctly
+(check-expect (satisfies-constraints?
+               avail-textbooks (list true false true) 3 90) false)
+(check-expect (satisfies-constraints?
+               avail-textbooks (list true false true false true false false true)
+               4 190) true
+
+(check-expect (optimize-selection small-textbooks
+                                  (build-decision-tree small-textbooks) 1 12)
+              (list true false))
+(check-expect (optimize-selection small-textbooks
+                                  (build-decision-tree small-textbooks) 1 25)
+              (list false true))
+(check-expect (optimize-selection small-textbooks
+                                  (build-decision-tree small-textbooks) 1 40)
+              (list true true))

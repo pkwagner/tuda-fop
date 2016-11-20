@@ -208,17 +208,7 @@
 ;; Example: (satisfies-constraints? avail-textbooks (list true) 1 1000) = true
 (define (satisfies-constraints? all-textbooks solution-candidate num-subjects budget)
   (local
-    ;; filter-books:: (listof textbooks) (listof boolean) -> (listof textbooks)
-    ;;
-    ;; Checks if a textbook is a solution candidate by checking the boolean list if
-    ;; there is a true at the same position
-    ;;
-    ;; If boolean list is shorter, it will assume the remaining are no solution candidates
-    ;;
-    ;; Example: (filter-books (list htdp ddca) (list true)) = (list htdp)
-    [(define (filter-books book-pair)
-       (if (second book-pair) true false))
-     
+    [
      ;; count-price : (listof books) -> number
      ;;
      ;; Grabs the price of all books and sums it up
@@ -263,7 +253,8 @@
 
      ;; Define selected books as filtered-books
      (define filtered-books (map first
-                                 (filter filter-books
+                                 ; Second means the solution candidate for the selected book
+                                 (filter second
                                          (pair all-textbooks solution-candidate))))]
     (cond
       [(empty? filtered-books) false]

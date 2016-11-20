@@ -1,0 +1,4 @@
+gcc_logo.png - www.gcc.tu-darmstadt.de
+big_boss.jpg - https://cutommadedigitalart.wordpress.com/metal-gear-solid-art/imgmetal-gear-solid-peace-walker2/
+solid_snake.jpg - http://comicvine.gamespot.com/images/1300-5006562
+square.ttf - typetype.ru, converted to ttf, see square-licence.pdf

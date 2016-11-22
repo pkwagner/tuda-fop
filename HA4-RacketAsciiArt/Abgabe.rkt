@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "image.rkt" "teachpack" "2htdp") (lib "batch-io.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "image.rkt" "teachpack" "2htdp") (lib "batch-io.rkt" "teachpack" "2htdp")) #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")))))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -199,45 +199,27 @@
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
 ;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
-  (local
-    [
-     (define default 0)
-     ;; blur: number number number -> integer
-     ;;
-     ;; Calculates the formula for bluring a triple of pixels and rounds the result
-     ;; in order to output a valid color attribute between 0 and 255.
-     ;;
-     ;; Example: (blur 1 1 1) = 2
-     (define (blur prev cur nex) (round-half-up (/ (+ prev (* 2 cur) nex) 4)))
+        (local [
+                (define (downsample input output last-value)
+                        (if (empty? input)
+                            empty
+                            (downsample (rest input)
+                                        (cons (/ (+ last-value (* (first input) 2) (if (empty? (rest input))
+                                                                                               0
+                                                                                               (second input)
+                                                                                   )) 4) output
+                                        )
+                                        (first input)
+                            )
+                        )
+                )
+               ]
+        
+               (downsample (list 1  5  7  3  12  13  11  4  16  20  17  1  14  22  13  5) empty 0)
+        )
+)
 
-     ;; average-rest: number number number (listof number) -> (listof number)
-     ;;
-     ;; Blurs each pixel and remember the previous, current and next element as performance optimization.
-     ;;
-     ;; Example: (average-rest 0 1 0) = (list 1) 
-     (define (average-rest prev cur nex rest-lst) (if (empty? rest-lst)
-                                                      ; We reached the end. So after moving it again our cur(ent) is the
-                                                      ; last pixel
-                                                      (list (blur prev cur nex) (blur cur nex default))
-                                                      (cons (blur prev cur nex)
-                                                            (average-rest cur nex (first rest-lst) (rest rest-lst)))))
-
-     ;; average: (listof number) -> (listof number)
-     ;;
-     ;; Blurs all pixels in this list. The previous of the first pixel and the next element of the last pixel defaults
-     ;; to 0.
-     ;;
-     ;; Example: (average (list 1)) = (list 1)
-     (define (average lst) (if (empty? lst)
-                               empty
-                               ; Move everything from right to left to remember the next, prev and current one
-                               ; This starts with the (n - 1) and therefore have to remove the first element
-                               (rest (average-rest default default (first lst) (rest lst)))))
-     ]
-    (map make-color
-         (average (map color-red image))
-         (average (map color-green image))
-         (average (map color-blue image)))))
+(average3 empty)
 
 ;; No tests necessary here (but it makes sense to use it)
 (check-expect (average3 empty) empty)

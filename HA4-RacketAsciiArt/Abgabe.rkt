@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")))))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")) #f)))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -200,14 +200,17 @@
 ;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
         (local [
-                (define (downsample input output last-value)
+                (define (downsample-raw input output last-value)
                         (if (empty? input)
-                            empty
-                            (downsample (rest input)
+                            (reverse output)
+                            (downsample-raw (rest input)
                                         (cons (/ (+ last-value (* (first input) 2) (if (empty? (rest input))
                                                                                                0
                                                                                                (second input)
-                                                                                   )) 4) output
+                                                                                   )
+                                                 )
+                                              4)
+                                              output
                                         )
                                         (first input)
                             )
@@ -215,7 +218,7 @@
                 )
                ]
         
-               (downsample (list 1  5  7  3  12  13  11  4  16  20  17  1  14  22  13  5) empty 0)
+               (downsample-raw (list 1  5  7  3  12  13  11  4  16  20  17  1  14  22  13  5) empty 0)
         )
 )
 

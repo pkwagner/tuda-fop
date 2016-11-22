@@ -192,33 +192,30 @@
 
 ;; ====== Problem 6.3 ======
 
-;; average3: (listof color) -> (listof (triple of number))
+;; average3 : (listof color) -> (listof color)
 ;;  
 ;; Blurs the image
 ;;
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
 ;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
-        (local [
-                (define (downsample-raw input output last-value)
-                        (if (empty? input)
-                            (reverse output)
-                            (downsample-raw (rest input)
-                                        (cons (/ (+ last-value (* (first input) 2) (if (empty? (rest input))
-                                                                                               0
-                                                                                               (second input)
-                                                                                   )
-                                                 )
-                                              4)
-                                              output
-                                        )
-                                        (first input)
+        (local [(define (downsample-raw-cycle input last-value)
+                        (if (empty? input) empty 
+                            (cons (/ (+ last-value
+                                        (* (first input) 2)
+                                        (if (empty? (rest input)) 0 (second input))
+                                     )
+                                   4)
+
+                                  (downsample-raw-cycle (rest input) (first input))
                             )
                         )
                 )
+                
+                (define (downsample-raw input) (downsample-raw-cycle input 0))
                ]
         
-               (downsample-raw (list 1  5  7  3  12  13  11  4  16  20  17  1  14  22  13  5) empty 0)
+               (downsample-raw (list 1  5  7  3  12  13  11  4  16  20  17  1  14  22  13  5))
         )
 )
 

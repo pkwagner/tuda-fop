@@ -192,6 +192,8 @@
 
 ;; ====== Problem 6.3 ======
 
+(define-struct downsampling-ratio (previous current next sum))
+
 ;; average3 : (listof color) -> (listof color)
 ;;  
 ;; Blurs the image
@@ -199,27 +201,33 @@
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
 ;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
-        (local [(define (downsample-raw-cycle input last-value)
+        (local [(define (downsample-color input last-value ratio)
                         (if (empty? input) empty 
-                            (cons (/ (+ last-value
-                                        (* (first input) 2)
-                                        (if (empty? (rest input)) 0 (second input))
-                                     )
-                                   4)
-
-                                  (downsample-raw-cycle (rest input) (first input))
+                            (cons (round (/ (+ (* last-value (downsampling-ratio-previous ratio))
+                                               (* (first input) (downsampling-ratio-current ratio))
+                                               (if (empty? (rest input))
+                                                   0
+                                                   (* (second input) (downsampling-ratio-next ratio)))
+                                            )
+                                            (downsampling-ratio-sum ratio)
+                                          )
+                                  )
+                                  (downsample-color (rest input) (first input) ratio)
                             )
                         )
                 )
-                
-                (define (downsample-raw input) (downsample-raw-cycle input 0))
+                (define (default-downsample-color input) (downsample-color input 0 (make-downsampling-ratio 1 2 1 4)))
                ]
         
-               (downsample-raw (list 1  5  7  3  12  13  11  4  16  20  17  1  14  22  13  5))
+               (foldr (lambda (r g b previous) (cons (make-color r g b) previous)) empty
+                      (default-downsample-color (map color-red image))
+                      (default-downsample-color (map color-green image))
+                      (default-downsample-color (map color-blue image))
+               )
         )
 )
 
-(average3 empty)
+(average3 (list (make-color 4 7 12) (make-color 255 180 82) (make-color 234 192 8) (make-color 3 3 3) (make-color 4 4 4) (make-color 5 5 5) (make-color 6 6 6) (make-color 7 7 7)))
 
 ;; No tests necessary here (but it makes sense to use it)
 (check-expect (average3 empty) empty)

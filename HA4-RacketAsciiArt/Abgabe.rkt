@@ -254,7 +254,7 @@
            ; Element at specific position
            (define-struct element (pos val))
            ]
-          (map to-el image))
+          (map to-el image)))
 
 ;; No tests necessary here
 

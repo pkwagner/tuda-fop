@@ -107,6 +107,21 @@
 
 ;; ====== Problem 6.2 ======
 
+;; round-half-up: number -> integer
+;;
+;; Rounds the number to the nearest neighbor
+;;
+;; Example: (round-half-up 2.5) = 3
+(define (round-half-up number) (floor (+ number .5)))
+
+;; Tests
+(check-expect (round-half-up 2.5) 3)
+(check-expect (round-half-up 2.45) 2)
+(check-expect (round-half-up 2.6) 3)
+(check-expect (round-half-up 3) 3)
+
+
+
 ;; hsl-to-ascii: hsl -> integer
 ;;
 ;; Converts a hsl struct to number in the ascii table. This character will look-like
@@ -129,13 +144,6 @@
      (define alph-Z 90)
      (define alph-a 97)
      (define alph-z 122)
-
-     ;; round-half-up: number -> integer
-     ;;
-     ;; Rounds the number to the nearest neighbor
-     ;;
-     ;; Example: (round-half-up 2.5) = 3
-     (define (round-half-up number) (floor (+ number .5)))
       
      ;; range: number number number -> number
      ;;
@@ -189,17 +197,18 @@
 ;; Blurs the image
 ;;
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
-;; = (list '(3.25 3.25 3.25) '(6.5 6.5 6.5) '(7.25 7.25 7.25))
+;; = (list '(3 3 3) '(7 7 7) '(7 7 7))
 (define (average3 image)
   (local
     [
      (define default 0)
-     ;; blur: number number number -> number
+     ;; blur: number number number -> integer
      ;;
-     ;; Calculates the formula for bluring a triple of pixels
+     ;; Calculates the formula for bluring a triple of pixels and rounds the result
+     ;; in order to output a valid color attribute between 0 and 255.
      ;;
      ;; Example: (blur 1 1 1) = 2
-     (define (blur prev cur nex) (/ (+ prev (* 2 cur) nex) 4))
+     (define (blur prev cur nex) (round-half-up (/ (+ prev (* 2 cur) nex) 4)))
 
      ;; average-rest: number number number (listof number) -> (listof number)
      ;;
@@ -207,11 +216,11 @@
      ;;
      ;; Example: (average-rest 0 1 0) = (list 1) 
      (define (average-rest prev cur nex rest-lst) (if (empty? rest-lst)
-                                                  ; We reached the end. So after moving it again our cur(ent) is the
-                                                  ; last pixel
-                                                  (list (blur prev cur nex) (blur cur nex default))
-                                                  (cons (blur prev cur nex)
-                                                        (average-rest cur nex (first rest-lst) (rest rest-lst)))))
+                                                      ; We reached the end. So after moving it again our cur(ent) is the
+                                                      ; last pixel
+                                                      (list (blur prev cur nex) (blur cur nex default))
+                                                      (cons (blur prev cur nex)
+                                                            (average-rest cur nex (first rest-lst) (rest rest-lst)))))
 
      ;; average: (listof number) -> (listof number)
      ;;
@@ -234,7 +243,7 @@
 (check-expect (average3 empty) empty)
 (check-expect (average3 (list (make-color 2 2 2))) (list '(1 1 1)))
 (check-expect (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
-              (list '(3.25 3.25 3.25) '(6.5 6.5 6.5) '(7.25 7.25 7.25)))
+              (list '(3 3 3) '(7 7 7) '(7 7 7)))
 
 
 
@@ -259,28 +268,28 @@
 ;; ====== Provided code ======
 
 ; Commented out because they depend on unimplemented procedures from above.
-;; downsample: (listof color) integer -> (listof color)
-;; Downsamples an image by a factor of 2, i.e. first blurs the image with horizontal kernel
-;; 0.25 * [1 2 1], then removes every second pixel horizontally and every second row, pads with (0, 0, 0);
-;; Example: (downsample (list (make-color 0 0 0) (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) 
-;;                            (make-color 4 5 5) (make-color 5 5 5) (make-color 6 6 6) (make-color 7 7 7)) 4) returns
-;;          (list (make-color 0 0 0) (make-color 2 2 2)) with width of 2
-(define (downsample rgb-list width)
-  (if
-   (empty? rgb-list)
-   empty
-   (downscale (average3 rgb-list) width)))
-
-;; Test
-;; error here -> student did forget to check for an empty list
-(check-expect (downsample empty 0) empty)
-;; error here -> student assumes that list-length is greater than 1 or pads wrong
-(check-expect (downsample (list (make-color 128 128 128)) 1) (list (make-color 64 64 64 255)))
-;; error here -> student probably does not take the imge's width correctly into account
-(check-expect (downsample (list
-                           (make-color 0 0 0) (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3)
-                           (make-color 4 4 4) (make-color 5 5 5) (make-color 6 6 6) (make-color 7 7 7)) 4)
-              (list (make-color 0 0 0) (make-color 2 2 2)))
+;;; downsample: (listof color) integer -> (listof color)
+;;; Downsamples an image by a factor of 2, i.e. first blurs the image with horizontal kernel
+;;; 0.25 * [1 2 1], then removes every second pixel horizontally and every second row, pads with (0, 0, 0);
+;;; Example: (downsample (list (make-color 0 0 0) (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) 
+;;;                            (make-color 4 5 5) (make-color 5 5 5) (make-color 6 6 6) (make-color 7 7 7)) 4) returns
+;;;          (list (make-color 0 0 0) (make-color 2 2 2)) with width of 2
+;(define (downsample rgb-list width)
+;  (if
+;   (empty? rgb-list)
+;   empty
+;   (downscale (average3 rgb-list) width)))
+;
+;;; Test
+;;; error here -> student did forget to check for an empty list
+;(check-expect (downsample empty 0) empty)
+;;; error here -> student assumes that list-length is greater than 1 or pads wrong
+;(check-expect (downsample (list (make-color 128 128 128)) 1) (list (make-color 64 64 64 255)))
+;;; error here -> student probably does not take the imge's width correctly into account
+;(check-expect (downsample (list
+;                           (make-color 0 0 0) (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3)
+;                           (make-color 4 4 4) (make-color 5 5 5) (make-color 6 6 6) (make-color 7 7 7)) 4)
+;              (list (make-color 0 0 0) (make-color 2 2 2)))
               
 
 ;;; downsample-pyramid: (listof color) integer integer -> (listof color)

@@ -250,11 +250,7 @@
   ; 1. Count all elements and pair them with the value
   ; 2. Remove all odd rows
   ; 3. Remove all odd elements in a row
-  (locale [
-           ; Element at specific position
-           (define-struct element (pos val))
-           ]
-          (map to-el image)))
+  ...)
 
 ;; No tests necessary here
 

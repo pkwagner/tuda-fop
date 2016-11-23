@@ -197,7 +197,7 @@
 ;; Blurs the image
 ;;
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
-;; = (list '(3 3 3) '(7 7 7) '(7 7 7))
+;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
   (local
     [
@@ -234,16 +234,17 @@
                                ; This starts with the (n - 1) and therefore have to remove the first element
                                (rest (average-rest default default (first lst) (rest lst)))))
      ]
-    (map list
+    (map make-color
          (average (map color-red image))
          (average (map color-green image))
          (average (map color-blue image)))))
 
 ;; No tests necessary here (but it makes sense to use it)
 (check-expect (average3 empty) empty)
-(check-expect (average3 (list (make-color 2 2 2))) (list '(1 1 1)))
+(check-expect (average3 (list (make-color 2 2 2))) (list (make-color 1 1 1)))
+(check-expect (average3 (list (make-color 4 2 8))) (list (make-color 2 1 4)))
 (check-expect (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
-              (list '(3 3 3) '(7 7 7) '(7 7 7)))
+              (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7)))
 
 
 

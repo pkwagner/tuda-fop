@@ -192,8 +192,6 @@
 
 ;; ====== Problem 6.3 ======
 
-(define-struct downsampling-ratio (previous current next sum))
-
 ;; average3 : (listof color) -> (listof color)
 ;;  
 ;; Blurs the image
@@ -201,22 +199,22 @@
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
 ;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
-        (local [(define (downsample-color input last-value ratio)
+        (local [(define (downsample-color input last-value)
                         (if (empty? input) empty 
-                            (cons (round (/ (+ (* last-value (downsampling-ratio-previous ratio))
-                                               (* (first input) (downsampling-ratio-current ratio))
-                                               (if (empty? (rest input))
-                                                   0
-                                                   (* (second input) (downsampling-ratio-next ratio)))
-                                            )
-                                            (downsampling-ratio-sum ratio)
-                                          )
+                            (cons (round-half-up (/ (+ last-value
+                                                       (* (first input) 2)
+                                                       (if (empty? (rest input))
+                                                           0
+                                                           (second input))
+                                                    )
+                                                    4
+                                                 )
                                   )
-                                  (downsample-color (rest input) (first input) ratio)
+                                  (downsample-color (rest input) (first input))
                             )
                         )
                 )
-                (define (default-downsample-color input) (downsample-color input 0 (make-downsampling-ratio 1 2 1 4)))
+                (define (default-downsample-color input) (downsample-color input 0))
                ]
         
                (foldr (lambda (r g b previous) (cons (make-color r g b) previous)) empty

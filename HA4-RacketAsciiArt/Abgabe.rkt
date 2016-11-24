@@ -240,27 +240,37 @@
 
 ;; downscale: (listof color) integer -> (listof color)
 ;;
-;; Downscale an image represented as a list of colors to certain target width
+;; Downscales an image represented as a list of colors to certain target width
 ;;
-;; Example: (downscale (average3 (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4) 1)))
-;; = (list (make-color 1 1 1))
+;; Example: (downscale (average3 (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4))) 2)
+;;          = (list (make-color 1 1 1))
 (define (downscale image image-width)
-        (local [(define (cut image image-width current-column crop-column crop-row)
+        (local [;; cut: (listof color) integer integer boolean boolean -> (listof color)
+                ;;
+                ;; Loop function for downscaling a given image
+                ;; - current-column should equal image width
+                ;; - cut-column, cut-row depend whether even or odd column/row numbers should been deleted (true -> even; false -> odd)
+                ;;
+                ;; Example: (cut (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4)) 2 2 false false)
+                ;;          = (make-color 1 1 1)
+                (define (cut image image-width current-column cut-column cut-row)
                         (cond [(empty? image) empty]
-                              [(= current-column 0) (cut image image-width image-width false (not crop-row))]
-                              [crop-row (cut (rest image) image-width (- current-column 1) crop-column crop-row)]
-                              [else (if crop-column
-                                        (cut (rest image)
-                                             image-width
-                                             (- current-column 1)
-                                             (not crop-column)
-                                             crop-row)
-                                        (cons (first image)
-                                              (cut (rest image)
-                                                   image-width
-                                                   (- current-column 1)
-                                                   (not crop-column)
-                                                   crop-row))
+                              ; If the end of the current line is reached, reset the column counter (current-column=image-width) and invert row cutting (cut-row=(not cut-row))
+                              [(= current-column 0) (cut image image-width image-width false (not cut-row))]
+                              ; If the current line should be deleted (cut-row=true), just ignore this pixel and pass to the next one
+                              [cut-row (cut (rest image) image-width (- current-column 1) cut-column cut-row)]
+                              ; -> The current row obviously shouldn't been deleted
+                              [else (local [; Define a var containing a recursive call of this function itself
+                                            (define next-pixels
+                                                    (cut (rest image)
+                                                    image-width
+                                                    (- current-column 1)
+                                                    (not cut-column)
+                                                    cut-row))
+                                           ]
+
+                                           ; Check if the current column should be deleted (cut-column=true), then just return next pixels, otherwise add current pixel to list
+                                           (if cut-column next-pixels (cons (first image) next-pixels))
                                     )
                               ]
                         )

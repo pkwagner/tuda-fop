@@ -150,7 +150,7 @@
      ;; Selects a number from a certain range where perc is the percent value
      ;; between 0 and 1. 0 stands for start and 1 stands for end.
      ;;
-     ;; Example: (range 50 70 5) = 55
+     ;; Example: (range 50 70 .5) = 60
      (define (range start end perc) (+ start
                                        ; Round the value because there is no decimal number in the ascii table
                                        (round-half-up (* perc (- end start)))))]

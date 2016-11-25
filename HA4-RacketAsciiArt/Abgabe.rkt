@@ -21,60 +21,62 @@
 ;; L: number - lightness component (normalized to [0, 1])
 (define-struct hsl (H S L))
 
+
 ;; rgb-to-hsl: color -> hsl
 ;;
 ;; Converts a color struct to the equivalent hsl struct
 ;;
 ;; Example: (rgb-to-hsl (make-color 85 85 85)) = (make-hsl 0 0 0.33)
-(define (rgb-to-hsl rgb-col)
-  (local [
-          (define max-color 255)
+(define (rgb-to-hsl rgb-color)
+  (local [(define max-color 255)
           ; Color attribute shortcuts
-          (define red (/ (color-red rgb-col) max-color))
-          (define green (/ (color-green rgb-col) max-color))
-          (define blue (/ (color-blue rgb-col) max-color))
+          (define red (/ (color-red rgb-color) max-color))
+          (define green (/ (color-green rgb-color) max-color))
+          (define blue (/ (color-blue rgb-color) max-color))
           
           (define maximum (max red green blue))
           (define minimum (min red green blue))
           (define difference (- maximum minimum))
           
-          (define hue (/ (local
-                           [
-                            ;; fmod: number number -> number
-                            ;;
-                            ;; Just like modulo, but you could also invoke this method with
-                            ;; floats/doubles and so it will return the rest of division as a float/double if 
-                            ;; 
-                            ;; Example: (fmod 11.5 3) = 2.5
-                            (define (fmod a b) (- a (* b (floor (/ a b)))))
+          (define hue (/ (local [;; fmod: number number -> number
+                                 ;;
+                                 ;; Just like modulo, but you could also invoke this method with
+                                 ;; floats/doubles and so it will return the rest of division as a float/double if 
+                                 ;; 
+                                 ;; Example: (fmod 11.5 3) = 2.5
+                                 (define (fmod a b) (- a (* b (floor (/ a b)))))
 
-                            ;; f: number number number -> number
-                            ;;
-                            ;; Calculates the hue formal:
-                            ;; (color-attr1 - color-attr2) / difference + X
-                            ;;
-                            ;; Where color-attr* is the color attribute of a color-struct. Either
-                            ;; red, green or blue and X is the summand like in case:
-                            ;; * Max = Rred -> X = 0
-                            ;; * Max = Green -> X = 2
-                            ;; * Max = Blue -> X = 4
-                            ;;
-                            ;; Example: (f 20 10 2) = 4 if difference = 5
-                            (define (f first second sum) (+ (/ (- first second) difference) sum))]
-                           (cond
-                             [(= difference 0) 0]
-                             [(= maximum red) (fmod (f green blue 0) 6)]
-                             [(= maximum green) (f blue red 2)]
-                             [(= maximum blue) (f red green 4)]))
-                         ; Instead of multiplikation it with 1/6, we could also just divide it by 6
-                         6))
+                                 ;; f: number number number -> number
+                                 ;;
+                                 ;; Calculates the hue formal:
+                                 ;; (color-attr1 - color-attr2) / difference + X
+                                 ;;
+                                 ;; Where color-attr* is the color attribute of a color-struct. Either
+                                 ;; red, green or blue and X is the summand like in case:
+                                 ;; * Max = Rred -> X = 0
+                                 ;; * Max = Green -> X = 2
+                                 ;; * Max = Blue -> X = 4
+                                 ;;
+                                 ;; Example: (f 20 10 2) = 4 if difference = 5
+                                 (define (f first second sum) (+ (/ (- first second) difference) sum))
+                                 ]
+                           
+                                 (cond [(= difference 0) 0]
+                                       [(= maximum red) (fmod (f green blue 0) 6)]
+                                       [(= maximum green) (f blue red 2)]
+                                       [(= maximum blue) (f red green 4)]))
+                                 ; Instead of multiplikation it with 1/6, we could also just divide it by 6
+                      6)
+          )
           (define lightness (/ (+ maximum minimum) 2))
-          (define saturation (if
-                              (or (= difference 0) (= lightness 1) (= lightness 0))
-                              0 (/ difference (- 1
-                                                 (abs (sub1 (* 2 lightness)))))))
-          ]
-    (make-hsl hue saturation lightness)))
+          (define saturation (if (or (= difference 0) (= lightness 1) (= lightness 0))
+                                 0
+                                 (/ difference (- 1 (abs (sub1 (* 2 lightness))))))
+          )]
+    
+          (make-hsl hue saturation lightness)
+    )
+)
 
 ;; Tests
 ; black
@@ -98,7 +100,7 @@
 ;;   (rgb-to-hsl-list (list (make-color 0 0 0) (make-color 255 255 255)))
 ;;   = (list (make-hsl 0 0 0) (make-hsl 0 0 1))
 (define (rgb-to-hsl-list rgb-list)
-  (map rgb-to-hsl rgb-list))
+        (map rgb-to-hsl rgb-list))
 
 ;; Tests
 (check-expect (rgb-to-hsl-list empty) empty)
@@ -131,36 +133,35 @@
 ;;
 ;; Example: (hsl-to-ascii (make-hsl 1 0 0.5)) = 90 where 90 in the ascii table stands for Z
 (define (hsl-to-ascii hsl)
-  (local
-    [
-     ; Shortcuts for hsl attributes
-     (define lightness (hsl-L hsl))
-     (define hue (hsl-H hsl))
-
-     ; Some magic numbers from the ascii table
-     (define space 35)
-     ; #
-     (define number-sign 32)
-     ; alphabet (A-Z and a-z)
-     (define alph-A 65)
-     (define alph-Z 90)
-     (define alph-a 97)
-     (define alph-z 122)
-      
-     ;; range: number number number -> number
-     ;;
-     ;; Selects a number from a certain range where perc is the percent value
-     ;; between 0 and 1. 0 stands for start and 1 stands for end.
-     ;;
-     ;; Example: (range 50 70 .5) = 60
-     (define (range start end perc) (+ start
-                                       ; Round the value because there is no decimal number in the ascii table
-                                       (round-half-up (* perc (- end start)))))]
-    (cond
-      [(<= lightness .05) space]
-      [(<= lightness .5) (range alph-A alph-Z hue)]
-      [(<= lightness .95) (range alph-a alph-z hue)]
-      [else number-sign])))
+  (local [; Shortcuts for hsl attributes
+          (define lightness (hsl-L hsl))
+          (define hue (hsl-H hsl))
+          
+          ; Some magic numbers from the ascii table
+          (define space 35)
+          ; #
+          (define number-sign 32)
+          ; alphabet (A-Z and a-z)
+          (define alph-A 65)
+          (define alph-Z 90)
+          (define alph-a 97)
+          (define alph-z 122)
+          
+          ;; range: number number number -> number
+          ;;
+          ;; Selects a number from a certain range where perc is the percent value
+          ;; between 0 and 1. 0 stands for start and 1 stands for end.
+          ;;
+          ;; Example: (range 50 70 .5) = 60
+          (define (range start end perc) (+ start
+                                            ; Rounds the value because there is no decimal number in ascii table
+                                            (round-half-up (* perc (- end start)))))
+         ]
+    
+         (cond [(<= lightness .05) space]
+               [(<= lightness .5) (range alph-A alph-Z hue)]
+               [(<= lightness .95) (range alph-a alph-z hue)]
+               [else number-sign])))
 
 ;; Tests
 ; black -> 35 = #

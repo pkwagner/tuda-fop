@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")) #f)))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")))))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -9,6 +9,8 @@
 ;; Marcel Lackovic
 
 (define ERROR .01)
+
+
 
 ;; ====== Problem 6.1 ======
 
@@ -192,31 +194,41 @@
 
 ;; ====== Problem 6.3 ======
 
-;; average3 : (listof color) -> (listof color)
+;; average3: (listof color) -> (listof color)
 ;;  
 ;; Blurs the image
 ;;
 ;; Example: (average3 (list (make-color 4 4 4) (make-color 5 5 5) (make-color 12 12 12)))
-;; = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
+;;          = (list (make-color 3 3 3) (make-color 7 7 7) (make-color 7 7 7))
 (define (average3 image)
-        (local [(define (downsample-color input last-value)
-                        (if (empty? input) empty 
-                            (cons (round-half-up (/ (+ last-value
-                                                       (* (first input) 2)
-                                                       (if (empty? (rest input))
-                                                           0
-                                                           (second input))
-                                                    )
-                                                    4
-                                                 )
+        (local [;; downsample-color: (listof number) number -> (listof number)
+                ;; 
+                ;; Takes a single-colored image as integer-list, the color at position -1
+                ;; (by default 0) and returns a monotone blurred color value list
+                ;;
+                ;; Example: (downsample-color (list 4 5 12) 0)
+                ;;          = (list 3 7 7)
+                (define (downsample-color image last-value)
+                        ;; Add recursion anchor
+                        (if (empty? image) empty 
+                            (cons ; Append bluring formula to last, current and next color value
+                                  ; Get last color by last-value, current by (first image) and next by (second image)
+                                  ; If there's not enough image for a second value assume 0
+                                  (round-half-up (/ (+ last-value
+                                                       (* (first image) 2)
+                                                       (if (empty? (rest image)) 0 (second image)))
+                                                 4)
                                   )
-                                  (downsample-color (rest input) (first input))
+                                  (downsample-color (rest image) (first image))
                             )
                         )
                 )
-                (define (default-downsample-color input) (downsample-color input 0))
+                ; Because last-value is predefined/static (0) it is useful to have a wrapper for it
+                (define (default-downsample-color image) (downsample-color image 0))
                ]
         
+               ;; : number number number (listof color) -> (listof color)
+               ;; Takes divided RGB values, combines them to a color and appends them to a list
                (foldr (lambda (r g b previous) (cons (make-color r g b) previous)) empty
                       (default-downsample-color (map color-red image))
                       (default-downsample-color (map color-green image))
@@ -224,8 +236,6 @@
                )
         )
 )
-
-(average3 (list (make-color 4 7 12) (make-color 255 180 82) (make-color 234 192 8) (make-color 3 3 3) (make-color 4 4 4) (make-color 5 5 5) (make-color 6 6 6) (make-color 7 7 7)))
 
 ;; No tests necessary here (but it makes sense to use it)
 (check-expect (average3 empty) empty)
@@ -251,22 +261,21 @@
                 ;; - current-column should equal image width
                 ;; - cut-column, cut-row depend whether even or odd column/row numbers should been deleted (true -> even; false -> odd)
                 ;;
-                ;; Example: (cut (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4)) 2 2 false false)
+                ;; Example: (cut (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4)) 2 false false)
                 ;;          = (make-color 1 1 1)
-                (define (cut image image-width current-column cut-column cut-row)
+                (define (cut image current-column cut-column cut-row)
                         (cond [(empty? image) empty]
                               ; If the end of the current line is reached, reset the column counter (current-column=image-width) and invert row cutting (cut-row=(not cut-row))
-                              [(= current-column 0) (cut image image-width image-width false (not cut-row))]
+                              [(= current-column 0) (cut image image-width false (not cut-row))]
                               ; If the current line should be deleted (cut-row=true), just ignore this pixel and pass to the next one
-                              [cut-row (cut (rest image) image-width (- current-column 1) cut-column cut-row)]
+                              [cut-row (cut (rest image) (- current-column 1) cut-column cut-row)]
                               ; -> The current row obviously shouldn't been deleted
                               [else (local [; Define a var containing a recursive call of this function itself
                                             (define next-pixels
                                                     (cut (rest image)
-                                                    image-width
-                                                    (- current-column 1)
-                                                    (not cut-column)
-                                                    cut-row))
+                                                         (- current-column 1)
+                                                         (not cut-column)
+                                                         cut-row))
                                            ]
 
                                            ; Check if the current column should be deleted (cut-column=true), then just return next pixels, otherwise add current pixel to list
@@ -276,7 +285,7 @@
                         )
                )]
           
-               (cut image image-width image-width false false)
+               (cut image image-width false false)
         )
 )
 
@@ -347,49 +356,49 @@
 
 
 ;;; Visual tests (Only check for successful save)
-;(check-expect (load-average3-save "fop-u04-material/gcc_logo.jpg" "fop-u04-material/gcc_logo_blurred.png") true)
-;(check-expect (load-average3-save "fop-u04-material/solid_snake.jpg" "fop-u04-material/solid_snake_blurred.png") true)
-;(check-expect (load-average3-save "fop-u04-material/big_boss.jpg" "fop-u04-material/big_boss_blurred.png") true)
-;
-;(check-expect (load-downscale-save "fop-u04-material/gcc_logo.jpg" "fop-u04-material/gcc_logo_scaled.png") true)
-;(check-expect (load-downscale-save "fop-u04-material/solid_snake.jpg" "fop-u04-material/solid_snake_scaled.png") true)
-;(check-expect (load-downscale-save "fop-u04-material/big_boss.jpg" "fop-u04-material/big_boss_scaled.png") true)
-;                
-;;; ascii-artify: string number -> string
-;;; Loads an image from the given path, downscales it n times by 2 and converts it to ascii art, the saves it as HTML-page in fop-04-material/ascii_art.html
-;(define (ascii-artify img-path n)
-;  (local
-;    ;; save-ascii-file: (listof integer) integer string -> filename (and ascii-image wrapped into HTML page on disk)
-;    ;; Saves a list of integers as ASCII image of a gven width in HTML page (zoomable)
-;    ((define (save-ascii-image ascii-list width filename)
-;       (local
-;         ;; converts integers in input ist to characters
-;         ((define char-list (map integer->char ascii-list))
-;          ;; add-newlines: (listof char) integer integer -> (listof char)
-;          ;; Adds a newline character (#\newline) every width characters
-;          (define (add-newlines lst i width)
-;            (cond
-;              [(empty? lst) lst]
-;              ;; passed width characters -> add <br /> and #\newline for HTML view
-;              [(and (= (modulo i width) 0) (> i 0)) (append (list #\< #\b #\r #\/ #\> (first lst)) (add-newlines (rest lst) (+ i 1) width))]
-;              ;; else just keep character
-;              [else (cons (first lst) (add-newlines (rest lst) (+ i 1) width))])))
-;         ;; write ASCII file as HTML page
-;         (write-file
-;          filename
-;          ;; add custom square font to HTML page and keep formatting of ASCII art
-;          (string-append
-;           "<html><head><title>FOP Ascii Art</title>"
-;           "<style type=\"text/css\">@font-face {font-family: Square; src: url(\"square.ttf\") format(\"truetype\")}</style>"
-;           "</head><body><pre style=\"font-family:Square, monospace;\">"
-;           (list->string (add-newlines char-list 0 width))
-;           "</pre></body></html>"))))
-;     (define img (bitmap/file img-path)))
-;    ;; save downscaled image
-;    (save-ascii-image
-;     (hsl-to-ascii-list (rgb-to-hsl-list (downsample-pyramid (image->color-list img) (image-width img) n)))
-;     (/ (image-width img) (expt 2 n))
-;     "fop-u04-material/ascii_art.html")))
-;
-;;; Execution - CALL HERE FOR ASCII ART GENERATION!
-;(ascii-artify "fop-u04-material/gcc_logo.jpg" 2)
+(check-expect (load-average3-save "fop-u04-material/gcc_logo.jpg" "fop-u04-material/gcc_logo_blurred.png") true)
+(check-expect (load-average3-save "fop-u04-material/solid_snake.jpg" "fop-u04-material/solid_snake_blurred.png") true)
+(check-expect (load-average3-save "fop-u04-material/big_boss.jpg" "fop-u04-material/big_boss_blurred.png") true)
+
+(check-expect (load-downscale-save "fop-u04-material/gcc_logo.jpg" "fop-u04-material/gcc_logo_scaled.png") true)
+(check-expect (load-downscale-save "fop-u04-material/solid_snake.jpg" "fop-u04-material/solid_snake_scaled.png") true)
+(check-expect (load-downscale-save "fop-u04-material/big_boss.jpg" "fop-u04-material/big_boss_scaled.png") true)
+                
+;; ascii-artify: string number -> string
+;; Loads an image from the given path, downscales it n times by 2 and converts it to ascii art, the saves it as HTML-page in fop-04-material/ascii_art.html
+(define (ascii-artify img-path n)
+  (local
+    ;; save-ascii-file: (listof integer) integer string -> filename (and ascii-image wrapped into HTML page on disk)
+    ;; Saves a list of integers as ASCII image of a gven width in HTML page (zoomable)
+    ((define (save-ascii-image ascii-list width filename)
+       (local
+         ;; converts integers in input ist to characters
+         ((define char-list (map integer->char ascii-list))
+          ;; add-newlines: (listof char) integer integer -> (listof char)
+          ;; Adds a newline character (#\newline) every width characters
+          (define (add-newlines lst i width)
+            (cond
+              [(empty? lst) lst]
+              ;; passed width characters -> add <br /> and #\newline for HTML view
+              [(and (= (modulo i width) 0) (> i 0)) (append (list #\< #\b #\r #\/ #\> (first lst)) (add-newlines (rest lst) (+ i 1) width))]
+              ;; else just keep character
+              [else (cons (first lst) (add-newlines (rest lst) (+ i 1) width))])))
+         ;; write ASCII file as HTML page
+         (write-file
+          filename
+          ;; add custom square font to HTML page and keep formatting of ASCII art
+          (string-append
+           "<html><head><title>FOP Ascii Art</title>"
+           "<style type=\"text/css\">@font-face {font-family: Square; src: url(\"square.ttf\") format(\"truetype\")}</style>"
+           "</head><body><pre style=\"font-family:Square, monospace;\">"
+           (list->string (add-newlines char-list 0 width))
+           "</pre></body></html>"))))
+     (define img (bitmap/file img-path)))
+    ;; save downscaled image
+    (save-ascii-image
+     (hsl-to-ascii-list (rgb-to-hsl-list (downsample-pyramid (image->color-list img) (image-width img) n)))
+     (/ (image-width img) (expt 2 n))
+     "fop-u04-material/ascii_art.html")))
+
+;; Execution - CALL HERE FOR ASCII ART GENERATION!
+(ascii-artify "fop-u04-material/gcc_logo.jpg" 2)

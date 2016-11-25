@@ -258,7 +258,7 @@
 ;; Example: (downscale (average3 (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4))) 2)
 ;;          = (list (make-color 1 1 1))
 (define (downscale image image-width)
-        (local [;; cut: (listof color) integer integer boolean boolean -> (listof color)
+        (local [;; cut: (listof color) integer boolean boolean -> (listof color)
                 ;;
                 ;; Loop function for downscaling a given image
                 ;; - current-column should equal image width

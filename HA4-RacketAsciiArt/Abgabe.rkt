@@ -183,7 +183,7 @@
 ;;   (hsl-to-ascii-list (list (make-hsl 0 0 0) (make-hsl 0 0 1)))
 ;;   = (list 35 32)
 (define (hsl-to-ascii-list hsl-list)
-  (map hsl-to-ascii hsl-list))
+        (map hsl-to-ascii hsl-list))
 
 ;; Tests
 (check-expect (hsl-to-ascii-list empty) empty)
@@ -227,6 +227,8 @@
                 (define (default-downsample-color image) (downsample-color image 0))
                ]
         
+               ; Seperates the image to three RGB color lists, blurs and recombines them pixel by pixel
+          
                ;; : number number number (listof color) -> (listof color)
                ;; Takes divided RGB values, combines them to a color and appends them to a list
                (foldr (lambda (r g b previous) (cons (make-color r g b) previous)) empty

@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")))))
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp"))) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ((lib "batch-io.rkt" "teachpack" "2htdp") (lib "image.rkt" "teachpack" "2htdp")) #f)))
 
 ;; Authors:
 ;; Alexander Siegler
@@ -266,6 +266,7 @@
                 ;;
                 ;; Example: (cut (list (make-color 1 1 1) (make-color 2 2 2) (make-color 3 3 3) (make-color 4 4 4)) 2 false false)
                 ;;          = (make-color 1 1 1)
+                ;;          if image-width is 2
                 (define (cut image current-column cut-column cut-row)
                         (cond [(empty? image) empty]
                               ; If the end of the current line is reached, reset the column counter (current-column=image-width) and invert row cutting (cut-row=(not cut-row))

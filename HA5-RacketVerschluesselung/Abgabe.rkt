@@ -141,31 +141,17 @@
 ;;
 ;; Example: (prime-sieve 11) = (list 1 2 3 5 7 11)
 (define (prime-sieve n)
-  ; Idea:
-  ; 1. Check the previous element with fold* - All previous elements are tested prime numbers
-  ; 2. Check the current element with the previous tested prime numbers using modulo (!= 0 -> prime)
   (local
-    [(define (prime? tested check)
-       (cond
-         [(empty? tested) true]
-         [(= (remainder check (first tested)) 0) false]
-         [else (prime? (rest tested) check)]))
-     (define (next-prime new old-lst)
-       (if (prime? old-lst new)
-           (cons new old-lst)
-           old-lst))]
-    (if (> n 0)
-        ; ToDo: filter is missing!!!!!!!
-        (cons 1 (reverse (foldl next-prime empty (generate-sequence 2 n))))
-        empty)))
-; Idea 2:
-; 1. Create a list of all numbers from 1 to n
-; 2.
-;  (local
-;   ((define (make-filter-lst x) (build-lst x (lambda (y) (* y x))))
-;    (define (prim? x) 
-;      (member? x (foldl cons empty (generate-sequence 2 (integer-sqrt x))))))
-;   (filter prim? (generate-sequence 1 n))))
+    [(define (prime? check)
+       ; Filter all non-prime numbers
+       (foldl
+        (lambda (against old) (if old
+                                  ; If one element can divide "check", it's not prime number
+                                  (not (= (remainder check against) 0))
+                                  ; Previously found one element that could divide "check""
+                                  false))
+        true (generate-sequence 2 (- check 1))))]
+    (filter prime? (generate-sequence 1 n))))
 
 ;; Tests
 (check-expect (prime-sieve 0) empty)

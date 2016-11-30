@@ -213,13 +213,30 @@
 
 ;; ====== Problem 3 ======
 
-;; find-second-key:
-;; 
-;; Example: 
-(define (find-second-key first-key p q)
-  ...)
+;; find-second-key: nat nat nat -> nat
+;;
+;; Finds a valid private key for a given public key and
+;; the prime numbers.
+;;
+;; Example: (find-second-key 11 7 3) = 11
+(define (find-second-key public-key p q)
+  (local
+    [(define phi (* (- p 1) (- q 1)))
+     ;; calc-private: nat -> nat
+     ;; Finds the first private key which is greater than the given number
+     ;; Example: (calc-private 1) = 3
+     ;; if public = 3, p = 3 and q = 5
+     (define (calc-private private)
+       (if (= (remainder (* private public-key) phi) 1)
+           private
+           (calc-private (add1 private))))]
+    (calc-private 1)))
 
 ;; Tests
+(check-expect (find-second-key 11 7 3) 11)
+(check-expect (find-second-key 3 3 5) 3)
+
+
 
 ;; ====== Problem 4 ======
 

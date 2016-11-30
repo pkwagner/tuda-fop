@@ -185,26 +185,28 @@
 ;; Example: (prime-factors 11) = (list 2 11) 
 (define (prime-factors n)
   (local
-    [(define primes (prime-sieve n))
-     (define bigger-divisor
-       ;; nat nat -> nat
-       ;; Checks if "against" can divide n. Otherwise it will return the given def value
-       (foldl (lambda (against def)
-                (if (= (remainder n against) 0)
-                    ; Found a higher value
-                    against
-                    ; Cannot divide n, so fallback to a previous calculated element
-                    def))
-              ; We only need to check with the prime numbers
-              0 (prime-sieve (- n 1))))]
-    (if (= bigger-divisor 1)
-        ; Found no other divisor except 1, so it's a prime number
-        (list n)
-        (list (/ n bigger-divisor) bigger-divisor))))
+    [(define primes (prime-sieve n))]
+    ;; prime (listof number) -> (listof number)
+    ;; Checks the the given prime number multiplicated another prime number
+    ;; could give the same value as n. It returns how n can be created or empty if not possible.
+    (foldl (lambda (prime1 def)
+             ;; prime (listof number) -> (listof number)
+             ;; Multiplicates the given prime number with the first prime number
+             ;; and returns how n can be created or empty if not possible.
+             (foldl (lambda (prime2 def) (cond
+                                           [(= (* prime1 prime2) n) (if (= prime2 1)
+                                                                        (list prime1)
+                                                                        (list prime2 prime1))]
+                                           [else def]))
+                    def primes))
+           empty primes)))
 
 ;; Tests
+; cannot be created only with two prime numbers
+(check-expect (prime-factors 12) empty)
 (check-expect (prime-factors 22) (list 2 11))
 (check-expect (prime-factors 9) (list 3 3))
+(check-expect (prime-factors 10) (list 2 5))
 ; prime-number
 (check-expect (prime-factors 7) (list 7))
 (check-expect (prime-factors 3) (list 3))

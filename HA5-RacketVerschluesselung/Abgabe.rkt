@@ -153,7 +153,7 @@
        (foldl
         ;; nat nat -> boolean
         ;;
-        ;; Checks if any element is 
+        ;; Checks if a element below check can divide
         (lambda (against old) (if old
                                   ; If one element can divide "check", it's not prime number
                                   (not (= (remainder check against) 0))
@@ -172,16 +172,45 @@
 
 
 
-;;; ====== Problem 2 ======
-;
-;;; prime-factors: 
-;;; 
-;;; Example: 
-;(define (prime-factors n)
-;  ...)
-;
-;;; Tests
-;    
+;; ====== Problem 2 ======
+
+;; prime-factors: nat -> (listof nat)
+;;
+;; Returns a list of prime numbers how the given number can be created with multiplication.
+;;
+;; If the given number is already a prime number, the returned list will only contain
+;; one element (the prime number itself). Otherwise the list contains two numbers with the higher one
+;; at the last position.
+;; 
+;; Example: (prime-factors 11) = (list 2 11) 
+(define (prime-factors n)
+  (local
+    [(define primes (prime-sieve n))
+     (define bigger-divisor
+       ;; nat nat -> nat
+       ;; Checks if "against" can divide n. Otherwise it will return the given def value
+       (foldl (lambda (against def)
+                (if (= (remainder n against) 0)
+                    ; Found a higher value
+                    against
+                    ; Cannot divide n, so fallback to a previous calculated element
+                    def))
+              ; We only need to check with the prime numbers
+              0 (prime-sieve (- n 1))))]
+    (if (= bigger-divisor 1)
+        ; Found no other divisor except 1, so it's a prime number
+        (list n)
+        (list (/ n bigger-divisor) bigger-divisor))))
+
+;; Tests
+(check-expect (prime-factors 22) (list 2 11))
+(check-expect (prime-factors 9) (list 3 3))
+; prime-number
+(check-expect (prime-factors 7) (list 7))
+(check-expect (prime-factors 3) (list 3))
+
+
+
 ;;; ====== Problem 3 ======
 ;
 ;;; find-second-key:

@@ -142,13 +142,22 @@
 ;; Example: (prime-sieve 11) = (list 1 2 3 5 7 11)
 (define (prime-sieve n)
   (local
+    ;; prime?: nat -> boolean
+    ;;
+    ;; Checks if a given number is a prime number by checking all previous numbers if they can divide
+    ;; the number.
+    ;;
+    ;; Example: (prime? 7) = true
     [(define (prime? check)
        ; Filter all non-prime numbers
        (foldl
+        ;; nat nat -> boolean
+        ;;
+        ;; Checks if any element is 
         (lambda (against old) (if old
                                   ; If one element can divide "check", it's not prime number
                                   (not (= (remainder check against) 0))
-                                  ; Previously found one element that could divide "check""
+                                  ; Previously found one element that could divide "check"
                                   false))
         true (generate-sequence 2 (- check 1))))]
     (filter prime? (generate-sequence 1 n))))

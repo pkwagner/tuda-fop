@@ -1,8 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
-(require graphics/turtles)
-
 ;; Authors:
 ;; Alexander Siegler
 ;; Paul Konstantin Wagner
@@ -213,49 +211,51 @@
 
 
 
-;;; ====== Problem 3 ======
-;
-;;; find-second-key:
-;;; 
-;;; Example: 
-;(define (find-second-key first-key p q)
-;  ...)
-;
-;;; Tests
-;
-;;; ====== Problem 4 ======
-;
-;;; break-code: nat nat -> (listof nat)
-;;; Given an RSA public key, determines the prime factors p,q and private key d
-;;; by factorization and returns them as (list p q d)
-;(define (break-code n e)
-;  (local
-;    ((define pq (prime-factors n))
-;     (define p (first pq))
-;     (define q (first (rest pq)))
-;     (define d (find-second-key e p q)))
-;    (list p q d)))
-;
-;;; power-mod: nat nat nat -> nat
-;;; Solves (base^exponent) mod modulus efficiently by Fermat's algorithm
-;(define (power-mod base exponent modulus)
-;  (if
-;   (= modulus 1)
-;   0
-;   (foldl
-;    (lambda (e-prime c) (modulo (* c base) modulus))
-;    1
-;    (generate-sequence 1 exponent))))
-;
-;;; decrypt: (listof nat) nat nat -> (listof nat)
-;;; Decrypts an RSA-encrypted message (given a private key and the modulus)
-;(define (decrypt lst n d)
-;  (map
-;   (lambda (c) (power-mod c d n))
-;   lst))
-;
-;;; Turtle command list format: Move Turn Draw, all concatenated in a flat list
-;
+;; ====== Problem 3 ======
+
+;; find-second-key:
+;; 
+;; Example: 
+(define (find-second-key first-key p q)
+  ...)
+
+;; Tests
+
+;; ====== Problem 4 ======
+
+;; break-code: nat nat -> (listof nat)
+;; Given an RSA public key, determines the prime factors p,q and private key d
+;; by factorization and returns them as (list p q d)
+(define (break-code n e)
+  (local
+    ((define pq (prime-factors n))
+     (define p (first pq))
+     (define q (first (rest pq)))
+     (define d (find-second-key e p q)))
+    (list p q d)))
+
+;; power-mod: nat nat nat -> nat
+;; Solves (base^exponent) mod modulus efficiently by Fermat's algorithm
+(define (power-mod base exponent modulus)
+  (if
+   (= modulus 1)
+   0
+   (foldl
+    (lambda (e-prime c) (modulo (* c base) modulus))
+    1
+    (generate-sequence 1 exponent))))
+
+;; decrypt: (listof nat) nat nat -> (listof nat)
+;; Decrypts an RSA-encrypted message (given a private key and the modulus)
+(define (decrypt lst n d)
+  (map
+   (lambda (c) (power-mod c d n))
+   lst))
+
+;; Turtle command list format: Move Turn Draw, all concatenated in a flat list
+
+;(require graphics/turtles)
+; 
 ;;; execute-turtle-sequence: (listof nat) -> (void)
 ;;; Interprets a list of turtle commands (format: see above) and executes them sequentially
 ;(define (execute-turtle-sequence seq)

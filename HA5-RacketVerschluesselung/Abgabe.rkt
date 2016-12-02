@@ -140,25 +140,31 @@
 ;; Example: (prime-sieve 11) = (list 1 2 3 5 7 11)
 (define (prime-sieve n)
   (local
-    ;; prime?: nat -> boolean
+    ;; prime?: nat (listof nat) -> (listof nat)
     ;;
-    ;; Checks if a given number is a prime number by checking all previous numbers if they can divide
-    ;; the number.
+    ;; Checks if the given number is a prime number by testing the previous calculated prime numbers
+    ;; against it. If it's not a prime number, the unmodified list will be returned.
     ;;
-    ;; Example: (prime? 7) = true
-    [(define (prime? check)
-       ; Filter all non-prime numbers
-       (foldl
-        ;; nat nat -> boolean
-        ;;
-        ;; Checks if a element below check can divide
-        (lambda (against old) (if old
-                                  ; If one element can divide "check", it's not prime number
-                                  (not (= (remainder check against) 0))
-                                  ; Previously found one element that could divide "check"
-                                  false))
-        true (generate-sequence 2 (- check 1))))]
-    (filter prime? (generate-sequence 1 n))))
+    ;; Example: (prime? 5 (list 1 2 3)) = (list 1 2 3 5)
+    [(define (prime? check lst)
+       ;; nat -> boolean
+       ;;
+       ;; Check if the given number can divide the check number and return after the first entry was found.
+       (if (ormap (lambda (against) (= (remainder check against) 0))
+                  ;; nat -> boolean
+                  ;;
+                  ;; According to the definitions of the sieve of eratosthenes, you only
+                  ;; have to check all previous prime numbers up to square root of check.
+                  ;;
+                  ;; All other combinations between the square root and check are already checked
+                  ;; using the previous prime numbers.
+                  (filter (lambda (x) (and (<= x (integer-sqrt check))
+                                           ; Ignore the 1, because it can divide every number
+                                           (> x 1))) lst))
+           ; It's not a prime number return the old list
+           lst
+           (append lst (list check))))]
+    (foldl prime? empty (generate-sequence 1 n))))
 
 ;; Tests
 (check-expect (prime-sieve 0) empty)
@@ -271,7 +277,7 @@
 
 ;; Turtle command list format: Move Turn Draw, all concatenated in a flat list
 
-(require graphics/turtles)
+;(require graphics/turtles)
 ;; execute-turtle-sequence: (listof number) -> void
 ;;
 ;; Interprets a list of turtle commands (format: see above) and executes them sequentially

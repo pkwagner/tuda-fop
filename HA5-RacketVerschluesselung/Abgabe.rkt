@@ -192,7 +192,7 @@
     [(define primes (prime-sieve n))
      (define prime-factors (foldl (lambda (prime1 previous)
                                   (if (and (= (remainder n prime1) 0) (member? (/ n prime1) primes))
-                                      (sort (list prime1 (/ n prime1)) <)
+                                      (list (/ n prime1) prime1)
                                       previous
                                   )) empty primes)
      )

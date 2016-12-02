@@ -149,7 +149,8 @@
     [(define (prime? check lst)
        ;; nat -> boolean
        ;;
-       ;; Check if the given number can divide the check number and return after the first entry was found.
+       ;; Check if the given number can divide the check number and return after the first entry
+       ;; was found.
        (if (ormap (lambda (against) (= (remainder check against) 0))
                   ;; nat -> boolean
                   ;;
@@ -282,7 +283,7 @@
 ;;
 ;; Interprets a list of turtle commands (format: see above) and executes them sequentially
 ;; 
-;; Example: (execute-turtle-sequence (decrypt turtle-code 3337 (break-code 3337 2089)))
+;; Example: (execute-turtle-sequence (decrypt turtle-code 3337 (third (break-code 3337 2089))))
 (define (execute-turtle-sequence seq)
   (begin
     [turtles true]
@@ -303,3 +304,10 @@
                  [(= type 2) (draw (first lst))])
                (execute (rest lst) (remainder (add1 type) 3)))))]
       (execute seq 0)]))
+
+;; Given n = 3337 and eb = public key = 2089
+;;
+;; p = 47
+;; q = 71
+;; db = secret key = 1489
+(execute-turtle-sequence (decrypt turtle-code 3337 (third (break-code 3337 2089))))

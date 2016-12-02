@@ -277,7 +277,7 @@
 
 ;; Turtle command list format: Move Turn Draw, all concatenated in a flat list
 
-;(require graphics/turtles)
+(require graphics/turtles)
 ;; execute-turtle-sequence: (listof number) -> void
 ;;
 ;; Interprets a list of turtle commands (format: see above) and executes them sequentially

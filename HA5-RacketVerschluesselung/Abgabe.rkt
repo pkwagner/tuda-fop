@@ -189,21 +189,21 @@
 ;; Example: (prime-factors 11) = (list 2 11) 
 (define (prime-factors n)
   (local
-    [(define primes (prime-sieve n))]
-    ;; prime (listof number) -> (listof number)
-    ;; Checks the the given prime number multiplicated another prime number
-    ;; could give the same value as n. It returns how n can be created or empty if not possible.
-    (foldl (lambda (prime1 def)
-             ;; prime (listof number) -> (listof number)
-             ;; Multiplicates the given prime number with the first prime number
-             ;; and returns how n can be created or empty if not possible.
-             (foldl (lambda (prime2 def) (cond
-                                           [(= (* prime1 prime2) n) (if (= prime2 1)
-                                                                        (list prime1)
-                                                                        (list prime2 prime1))]
-                                           [else def]))
-                    def primes))
-           empty primes)))
+    [(define primes (prime-sieve n))
+     (define prime-factors (foldl (lambda (prime1 previous)
+                                  (if (and (= (remainder n prime1) 0) (member? (/ n prime1) primes))
+                                      (sort (list prime1 (/ n prime1)) <)
+                                      previous
+                                  )) empty primes)
+     )
+    ]
+    
+    (if (and (not (empty? prime-factors))
+             (= (first prime-factors) 1))
+        (rest prime-factors)
+        prime-factors)
+  )
+)
 
 ;; Tests
 ; cannot be created only with two prime numbers

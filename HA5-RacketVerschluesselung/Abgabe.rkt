@@ -290,36 +290,36 @@
 
 ;; Turtle command list format: Move Turn Draw, all concatenated in a flat list
 
-(require graphics/turtles)
-;; execute-turtle-sequence: (listof number) -> void
-;;
-;; Interprets a list of turtle commands (format: see above) and executes them sequentially
-;; 
-;; Example: (execute-turtle-sequence (decrypt turtle-code 3337 (third (break-code 3337 2089))))
-(define (execute-turtle-sequence seq)
-  (begin
-    [turtles true]
-    [local
-      ;; execute: (listof number) nat -> void
-      ;;
-      ;; Executes the sequentially the turtle commands. If the list is smaller than
-      ;; three commands it will fail safetly.
-      ;;
-      ;; Example: (execute (list 20 90 5 15))
-      [(define (execute lst type)
-         (if (empty? lst)
-             void
-             (begin
-               (cond
-                 [(= type 0) (move (first lst))]
-                 [(= type 1) (turn (first lst))]
-                 [(= type 2) (draw (first lst))])
-               (execute (rest lst) (remainder (add1 type) 3)))))]
-      (execute seq 0)]))
-
-;; Given n = 3337 and eb = public key = 2089
-;;
-;; p = 47
-;; q = 71
-;; db = secret key = 1489
-(execute-turtle-sequence (decrypt turtle-code 3337 (third (break-code 3337 2089))))
+;(require graphics/turtles)
+;;; execute-turtle-sequence: (listof number) -> void
+;;;
+;;; Interprets a list of turtle commands (format: see above) and executes them sequentially
+;;; 
+;;; Example: (execute-turtle-sequence (decrypt turtle-code 3337 (third (break-code 3337 2089))))
+;(define (execute-turtle-sequence seq)
+;  (begin
+;    [turtles true]
+;    [local
+;      ;; execute: (listof number) nat -> void
+;      ;;
+;      ;; Executes the sequentially the turtle commands. If the list is smaller than
+;      ;; three commands it will fail safetly.
+;      ;;
+;      ;; Example: (execute (list 20 90 5 15))
+;      [(define (execute lst type)
+;         (if (empty? lst)
+;             void
+;             (begin
+;               (cond
+;                 [(= type 0) (move (first lst))]
+;                 [(= type 1) (turn (first lst))]
+;                 [(= type 2) (draw (first lst))])
+;               (execute (rest lst) (remainder (add1 type) 3)))))]
+;      (execute seq 0)]))
+;
+;;; Given n = 3337 and eb = public key = 2089
+;;;
+;;; p = 47
+;;; q = 71
+;;; db = secret key = 1489
+;(execute-turtle-sequence (decrypt turtle-code 3337 (third (break-code 3337 2089))))

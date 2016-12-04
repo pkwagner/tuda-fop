@@ -8,7 +8,7 @@
 ;; Yoshua Hitzel
 ;; Marcel Lackovic
 
-;; Last modified: Fri, 14 Oct 2016 05:00:25 GMT
+;; Last modified: Sat, 03 Dec 2016 09:03:33 GMT
 
 ;; A struct modelling a train connection from a common station
 ;; to-station: symbol - identifier of the train's destination
@@ -34,9 +34,9 @@
 ;; ====== Data: Small test network ======
 (define test-network
   (list (make-station 'AStadt (list (make-connection 'BDorf 'RB1 10)
-                                   (make-connection 'CStadt 'IC2 5)))
+                                    (make-connection 'CStadt 'IC2 5)))
         (make-station 'BDorf (list (make-connection 'AStadt 'RB1 10)))
-   (make-station 'CStadt (list (make-connection 'AStadt 'IC2 5)))))
+        (make-station 'CStadt (list (make-connection 'AStadt 'IC2 5)))))
 
 ;; ====== Data: Coarse-grain RMV network ======
 (define
@@ -315,7 +315,7 @@
 
 ;; A structure representing a node in the path tree
 ;; identifier: symbol - station that node represents
-;; children: path-node - a list of children (no fixed node degree)
+;; children: (listof path-node) - a list of children (no fixed node degree)
 ;; train: symbol - the train connecting this station/node to its parent
 ;; duration-to-start: number - the travel time to start node
 (define-struct path-node (identifier children train duration-to-start))

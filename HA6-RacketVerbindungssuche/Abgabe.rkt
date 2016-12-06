@@ -146,13 +146,14 @@
 
 ;; query-elem: (X -> symbol) (listof X) symbol -> X
 ;;
-;; Given the id procedure it searches through the list until it
-;; find an element which returns the same id symbol as the given elem.
+;; If it cannot find such element it returns empty.
 ;;
-;; If it cannot find such element it returns empty
+;; The id-op procedure should return unique id based on the input and return the same id for the same
+;; input. Otherwise it could happen that this procedure returns something differant than the expected
+;; instance.
 ;;
-;; Example: (query-elem)
-(define (query-elem id-op lst elem)
+;; Example: (query-elem (lambda (id) id) (list 'A 'B 'C) 'B) = 'B
+ (define (query-elem id-op lst elem)
   (if (empty? lst)
       empty
       (local
@@ -164,8 +165,8 @@
   
 ;; Tests
 (check-expect (query-elem (lambda (x) x) empty 'A) empty)
+(check-expect (query-elem (lambda (x) x) (list 'A) 'A) 'A)
 (check-expect (query-elem (lambda (x) x) (list 'A) 'B) empty)
-(check-expect (query-elem (lambda (x) x) (list 'A) 'B) 'A)
 (check-expect (query-elem (lambda (x) x) (list 'A 'B 'C) 'B) 'B)
 
 

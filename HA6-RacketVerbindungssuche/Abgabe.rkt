@@ -171,270 +171,270 @@
 
 
 
-;; query-distance-entry: 
-;; 
-;; Example: 
-(define (query-distance-entry distance-table station)
-  ...)
-  
-;; Tests
-
-
-
-;; =========================
-  
-;; query-station: (listof station) symbol -> station
-;; 
-;; Example: 
-(define (query-station network station)
-  ...)
-  
-;; Tests
-
-
-
-;; =========================
-  
-;; c)
-
-;; query-min-distance-station: 
-;; 
-;; Example: 
-(define (query-min-distance-station distance-table unvisited)
-  ...)
-  
-;; Tests
-
-
-
-;; =========================  
-
-;; update-distances-batch: (listof distance-entry) (listof distance-entry) -> (listof distance-entry)
-;; Update distance table wit a list of new entries - but check for all entries if distance is smaller
-;; Example: (update-distances-batch (list (make-distance-entry 'CStadt empty empty INFINITY)) (list (make-distance-entry 'CStadt 'AStadt 'IC2 5))
-;;          returns (list (make-distance-entry 'CStadt AStadt 'IC2 5))
-(define (update-distances-batch distance-table new-entries)
-  (local
-    ( ;; begin local definitions
-     ;; update-distance-entry: distance-entry (listof distance-entry) -> (listof distance-entry)
-     ;; Upates a single distance-entry in the table - if the station is found and the new entry has a smaller distance
-     ;; Example: see above
-     (define (update-distance-entry new-entry distance-table)
-       (local
-         (;; begin local definitions
-          ;; replace-entry: distance-entry -> (listof distance-entry)
-          ;; Given a single distance-entry, checks if the one we're trying to insert has the same station,
-          ;; then returns the one with the smaller distance
-          (define (replace-entry old-entry)
-            (if (and (symbol=?
-                      ;; check if the entries represent the same station...
-                      (distance-entry-station old-entry)
-                      (distance-entry-station new-entry))
-                     ;; ... if so, return the one with the smaller distance
-                     (< (distance-entry-distance new-entry)
-                        (distance-entry-distance old-entry)))
-                new-entry
-                old-entry))
-          ) ;; end local definitions
-         ;; apply the relacement function to the whole list
-         (map replace-entry distance-table))))
-    ;; use fold to apply the update-function to the whole list
-    (foldr update-distance-entry distance-table new-entries)))
-    
-;; Tests
-(check-expect (update-distances-batch (create-distance-table test-network 'AStadt) empty)
-              (create-distance-table test-network 'AStadt))
-(check-expect (update-distances-batch (create-distance-table test-network 'AStadt)
-                                      (list
-                                       (make-distance-entry 'CStadt 'AStadt 'IC2 5)))
-              (list
-               (make-distance-entry 'AStadt empty empty 0)
-               (make-distance-entry 'BDorf empty empty INFINITY)
-               (make-distance-entry 'CStadt 'AStadt 'IC2 5)))              
-(check-expect (update-distances-batch (create-distance-table test-network 'AStadt)
-                                      (list
-                                       (make-distance-entry 'CStadt 'AStadt 'IC2 (+ INFINITY 1))))
-              (list
-               (make-distance-entry 'AStadt empty empty 0)
-               (make-distance-entry 'BDorf empty empty INFINITY)
-               (make-distance-entry 'CStadt empty empty INFINITY)))
-
-
-
-;; =========================
-
-;; shortest-paths: (listof station) symbol -> (listof distance-entry)
-;; Finds shortest paths (in the sense of travel time) from the departure station to all other station in the network
-;; by using Dijkstra's algorithm -- as a side effect, we get a shortest-distance tree
-;; Example: (shortest-paths test-network 'AStadt) returns
-;;          (list
-;;            (make-distance-entry 'AStadt empty empty 0)
-;;            (make-distance-entry 'BDorf 'AStadt 'RB1 10)
-;;            (make-distance-entry 'CStadt 'AStadt 'IC1 5))
-(define (shortest-paths network dep-station)
-  (local
-    (;; begin local definitions
-     (define
-       ;; shortest-path-step: (listof distance-entry) (listof symbol) -> (listof distance-entry)
-       ;; Executes one Dijkstra step: given the list of unvisited stations, selects the one with
-       ;; the minimu distance and updates the table with this station as transit
-       (shortest-path-step distance-table unvisited)
-       (if (empty? unvisited) ;; no unvisited stations -> done, return current table!
-           distance-table
-           (local
-             (;; begin local definitions
-              ;; cache the minimum distance entry
-              (define u (query-min-distance-station distance-table unvisited))
-              (define s-u (query-station network u))
-              (define cur-entry (query-distance-entry distance-table u))
-              ;; tentative-distance: connection -> distance-entry
-              ;; Compute the tentative distance to a neighboring station (add time to current transit and distance from transit to this station)
-              ;; and pack that as distance entry
-              (define (tentative-distance conn)
-                (make-distance-entry (connection-to-station conn) u (connection-identifier conn) (+ (distance-entry-distance cur-entry) (connection-duration conn))))
-              ) ;; end local definitions
-             ;; execute next step on modified distance table...
-             (shortest-path-step
-              ;; try inserting tentative distances to neighbors into distance table
-              (update-distances-batch
-               distance-table
-               ;; compute tentative distances for all neighboring stations
-               (map tentative-distance (station-connections s-u)))
-              ;; upate unvisited queue
-              (remove u unvisited)))))
-     ) ;; end local definitions
-    ;; Start Dijkstra with initial table and a list of all stations
-    (shortest-path-step (create-distance-table network dep-station) (map station-identifier network))))
-
-;; Tests
-(check-expect
- (shortest-paths test-network 'AStadt)
- (list
-  (make-distance-entry 'AStadt empty empty 0)
-  (make-distance-entry 'BDorf 'AStadt 'RB1 10)
-  (make-distance-entry 'CStadt 'AStadt 'IC2 5)))
-(check-expect
- (shortest-paths
-  rmv-network
-  'Darmstadt)
- (list
-  (make-distance-entry 'Darmstadt empty empty 0)
-  (make-distance-entry 'GrossUmstadt 'Darmstadt 'R65 31)
-  (make-distance-entry 'Mainz 'Darmstadt 'RB75 32)
-  (make-distance-entry 'FrankfurtFlughafen 'Frankfurt 'S8 27)
-  (make-distance-entry 'Langen 'Darmstadt 'RB60 8)
-  (make-distance-entry 'Wiesbaden 'Mainz 'RB75 44)
-  (make-distance-entry 'Limburg 'Giessen 'RE25 108)
-  (make-distance-entry 'Frankfurt 'Langen 'RB60 17)
-  (make-distance-entry 'FrankfurtSued 'Frankfurt 'RE50 22)
-  (make-distance-entry 'Offenbach 'FrankfurtSued 'RE50 26)
-  (make-distance-entry 'Hanau 'Offenbach 'RE50 34)
-  (make-distance-entry 'Gelnhausen 'Hanau 'RE50 48)
-  (make-distance-entry 'Fulda 'Gelnhausen 'RE50 94)
-  (make-distance-entry 'Giessen 'Friedberg 'R98 56)
-  (make-distance-entry 'Nidda 'Friedberg 'R32 74)
-  (make-distance-entry 'Friedberg 'Frankfurt 'R98 39)
-  (make-distance-entry 'Marburg 'Giessen 'R98 70)))
-(check-expect
- (shortest-paths
-  rmv-network
-  'Gelnhausen)
- (list
-  (make-distance-entry 'Darmstadt 'Langen 'RB60 48)
-  (make-distance-entry 'GrossUmstadt 'Hanau 'R64 56)
-  (make-distance-entry 'Mainz 'FrankfurtFlughafen 'S8 67)
-  (make-distance-entry 'FrankfurtFlughafen 'Frankfurt 'S8 41)
-  (make-distance-entry 'Langen 'Frankfurt 'RB60 40)
-  (make-distance-entry 'Wiesbaden 'Frankfurt 'R10 66)
-  (make-distance-entry 'Limburg 'Giessen 'RE25 122)
-  (make-distance-entry 'Frankfurt 'FrankfurtSued 'RE50 31)
-  (make-distance-entry 'FrankfurtSued 'Offenbach 'RE50 26)
-  (make-distance-entry 'Offenbach 'Hanau 'RE50 22)
-  (make-distance-entry 'Hanau 'Gelnhausen 'RE50 14)
-  (make-distance-entry 'Gelnhausen empty empty 0)
-  (make-distance-entry 'Fulda 'Gelnhausen 'RE50 46)
-  (make-distance-entry 'Giessen 'Friedberg 'R98 70)
-  (make-distance-entry 'Nidda 'Gelnhausen 'R36 39)
-  (make-distance-entry 'Friedberg 'Frankfurt 'R98 53)
-  (make-distance-entry 'Marburg 'Giessen 'R98 84)))
-
-
-
-;; ====== Problem 7.2 ======
-
-;; A structure representing a node in the path tree
-;; identifier: symbol - station that node represents
-;; children: (listof path-node) - a list of children (no fixed node degree)
-;; train: symbol - the train connecting this station/node to its parent
-;; duration-to-start: number - the travel time to start node
-(define-struct path-node (identifier children train duration-to-start))
-
-;; find-root: (listof distance-entry) -> distance-entry
-;; Given a distance table, finds the root station/node for the path tree (representing the departure station)
-;; Example: (find-root (create-distance-table test-network)) returns (make-distance-entry 'AStadt empty empty 0)
-(define (find-root distance-table)
-  (local
-    ( ;; begin local definitions
-     ;; distance-entry -> true
-     ;; Checks if the parent field in a distance-entry is empty
-     (define filtered
-       (filter
-        ;; : distance-entry -> boolean
-        ;; returns true if the parent of the entry is empty
-        (lambda (x) (empty? (distance-entry-parent x)))
-        distance-table)))
-    (if (empty? filtered)
-        empty
-        (first filtered))))
-
-;; Tests
-(check-expect (find-root empty) empty)
-(check-expect (find-root (create-distance-table test-network 'AStadt)) (make-distance-entry 'AStadt empty empty 0))
-(check-expect (find-root (list
-                          (make-distance-entry 'CStadt 'AStadt 'IC2 5)
-                          (make-distance-entry 'BDorf empty empty 0)))
-              (make-distance-entry 'BDorf empty empty 0))
-
-
-
-
-;; =========================
-
-;; construct-path-tree:
-;; 
-;; Example: 
-(define (construct-path-tree distance-table)
-  ...)
-
-
-
-
-;; ====== Problem 7.3 ======
-
-
-;; A structure representing a transit entry in a connection plan
-;; train: symbol - train's identifier
-;; to: symbol - station name for train destination
-;; duration: number - travel time
-(define-struct transit (train to duration))
-
-;; in-subtree?: 
-;; 
-;; Example: 
-(define (in-subtree? subtree station)
-  ...)
-  
-;; Tests
-
-
-
-
-;; =========================
-    
-;; find-connection: 
-;; 
-;; Example: 
-(define (find-connection path-tree to-station)
-  ...)
-  
-;; Tests
+;;; query-distance-entry: 
+;;; 
+;;; Example: 
+;(define (query-distance-entry distance-table station)
+;  ...)
+;  
+;;; Tests
+;
+;
+;
+;;; =========================
+;  
+;;; query-station: (listof station) symbol -> station
+;;; 
+;;; Example: 
+;(define (query-station network station)
+;  ...)
+;  
+;;; Tests
+;
+;
+;
+;;; =========================
+;  
+;;; c)
+;
+;;; query-min-distance-station: 
+;;; 
+;;; Example: 
+;(define (query-min-distance-station distance-table unvisited)
+;  ...)
+;  
+;;; Tests
+;
+;
+;
+;;; =========================  
+;
+;;; update-distances-batch: (listof distance-entry) (listof distance-entry) -> (listof distance-entry)
+;;; Update distance table wit a list of new entries - but check for all entries if distance is smaller
+;;; Example: (update-distances-batch (list (make-distance-entry 'CStadt empty empty INFINITY)) (list (make-distance-entry 'CStadt 'AStadt 'IC2 5))
+;;;          returns (list (make-distance-entry 'CStadt AStadt 'IC2 5))
+;(define (update-distances-batch distance-table new-entries)
+;  (local
+;    ( ;; begin local definitions
+;     ;; update-distance-entry: distance-entry (listof distance-entry) -> (listof distance-entry)
+;     ;; Upates a single distance-entry in the table - if the station is found and the new entry has a smaller distance
+;     ;; Example: see above
+;     (define (update-distance-entry new-entry distance-table)
+;       (local
+;         (;; begin local definitions
+;          ;; replace-entry: distance-entry -> (listof distance-entry)
+;          ;; Given a single distance-entry, checks if the one we're trying to insert has the same station,
+;          ;; then returns the one with the smaller distance
+;          (define (replace-entry old-entry)
+;            (if (and (symbol=?
+;                      ;; check if the entries represent the same station...
+;                      (distance-entry-station old-entry)
+;                      (distance-entry-station new-entry))
+;                     ;; ... if so, return the one with the smaller distance
+;                     (< (distance-entry-distance new-entry)
+;                        (distance-entry-distance old-entry)))
+;                new-entry
+;                old-entry))
+;          ) ;; end local definitions
+;         ;; apply the relacement function to the whole list
+;         (map replace-entry distance-table))))
+;    ;; use fold to apply the update-function to the whole list
+;    (foldr update-distance-entry distance-table new-entries)))
+;    
+;;; Tests
+;(check-expect (update-distances-batch (create-distance-table test-network 'AStadt) empty)
+;              (create-distance-table test-network 'AStadt))
+;(check-expect (update-distances-batch (create-distance-table test-network 'AStadt)
+;                                      (list
+;                                       (make-distance-entry 'CStadt 'AStadt 'IC2 5)))
+;              (list
+;               (make-distance-entry 'AStadt empty empty 0)
+;               (make-distance-entry 'BDorf empty empty INFINITY)
+;               (make-distance-entry 'CStadt 'AStadt 'IC2 5)))              
+;(check-expect (update-distances-batch (create-distance-table test-network 'AStadt)
+;                                      (list
+;                                       (make-distance-entry 'CStadt 'AStadt 'IC2 (+ INFINITY 1))))
+;              (list
+;               (make-distance-entry 'AStadt empty empty 0)
+;               (make-distance-entry 'BDorf empty empty INFINITY)
+;               (make-distance-entry 'CStadt empty empty INFINITY)))
+;
+;
+;
+;;; =========================
+;
+;;; shortest-paths: (listof station) symbol -> (listof distance-entry)
+;;; Finds shortest paths (in the sense of travel time) from the departure station to all other station in the network
+;;; by using Dijkstra's algorithm -- as a side effect, we get a shortest-distance tree
+;;; Example: (shortest-paths test-network 'AStadt) returns
+;;;          (list
+;;;            (make-distance-entry 'AStadt empty empty 0)
+;;;            (make-distance-entry 'BDorf 'AStadt 'RB1 10)
+;;;            (make-distance-entry 'CStadt 'AStadt 'IC1 5))
+;(define (shortest-paths network dep-station)
+;  (local
+;    (;; begin local definitions
+;     (define
+;       ;; shortest-path-step: (listof distance-entry) (listof symbol) -> (listof distance-entry)
+;       ;; Executes one Dijkstra step: given the list of unvisited stations, selects the one with
+;       ;; the minimu distance and updates the table with this station as transit
+;       (shortest-path-step distance-table unvisited)
+;       (if (empty? unvisited) ;; no unvisited stations -> done, return current table!
+;           distance-table
+;           (local
+;             (;; begin local definitions
+;              ;; cache the minimum distance entry
+;              (define u (query-min-distance-station distance-table unvisited))
+;              (define s-u (query-station network u))
+;              (define cur-entry (query-distance-entry distance-table u))
+;              ;; tentative-distance: connection -> distance-entry
+;              ;; Compute the tentative distance to a neighboring station (add time to current transit and distance from transit to this station)
+;              ;; and pack that as distance entry
+;              (define (tentative-distance conn)
+;                (make-distance-entry (connection-to-station conn) u (connection-identifier conn) (+ (distance-entry-distance cur-entry) (connection-duration conn))))
+;              ) ;; end local definitions
+;             ;; execute next step on modified distance table...
+;             (shortest-path-step
+;              ;; try inserting tentative distances to neighbors into distance table
+;              (update-distances-batch
+;               distance-table
+;               ;; compute tentative distances for all neighboring stations
+;               (map tentative-distance (station-connections s-u)))
+;              ;; upate unvisited queue
+;              (remove u unvisited)))))
+;     ) ;; end local definitions
+;    ;; Start Dijkstra with initial table and a list of all stations
+;    (shortest-path-step (create-distance-table network dep-station) (map station-identifier network))))
+;
+;;; Tests
+;(check-expect
+; (shortest-paths test-network 'AStadt)
+; (list
+;  (make-distance-entry 'AStadt empty empty 0)
+;  (make-distance-entry 'BDorf 'AStadt 'RB1 10)
+;  (make-distance-entry 'CStadt 'AStadt 'IC2 5)))
+;(check-expect
+; (shortest-paths
+;  rmv-network
+;  'Darmstadt)
+; (list
+;  (make-distance-entry 'Darmstadt empty empty 0)
+;  (make-distance-entry 'GrossUmstadt 'Darmstadt 'R65 31)
+;  (make-distance-entry 'Mainz 'Darmstadt 'RB75 32)
+;  (make-distance-entry 'FrankfurtFlughafen 'Frankfurt 'S8 27)
+;  (make-distance-entry 'Langen 'Darmstadt 'RB60 8)
+;  (make-distance-entry 'Wiesbaden 'Mainz 'RB75 44)
+;  (make-distance-entry 'Limburg 'Giessen 'RE25 108)
+;  (make-distance-entry 'Frankfurt 'Langen 'RB60 17)
+;  (make-distance-entry 'FrankfurtSued 'Frankfurt 'RE50 22)
+;  (make-distance-entry 'Offenbach 'FrankfurtSued 'RE50 26)
+;  (make-distance-entry 'Hanau 'Offenbach 'RE50 34)
+;  (make-distance-entry 'Gelnhausen 'Hanau 'RE50 48)
+;  (make-distance-entry 'Fulda 'Gelnhausen 'RE50 94)
+;  (make-distance-entry 'Giessen 'Friedberg 'R98 56)
+;  (make-distance-entry 'Nidda 'Friedberg 'R32 74)
+;  (make-distance-entry 'Friedberg 'Frankfurt 'R98 39)
+;  (make-distance-entry 'Marburg 'Giessen 'R98 70)))
+;(check-expect
+; (shortest-paths
+;  rmv-network
+;  'Gelnhausen)
+; (list
+;  (make-distance-entry 'Darmstadt 'Langen 'RB60 48)
+;  (make-distance-entry 'GrossUmstadt 'Hanau 'R64 56)
+;  (make-distance-entry 'Mainz 'FrankfurtFlughafen 'S8 67)
+;  (make-distance-entry 'FrankfurtFlughafen 'Frankfurt 'S8 41)
+;  (make-distance-entry 'Langen 'Frankfurt 'RB60 40)
+;  (make-distance-entry 'Wiesbaden 'Frankfurt 'R10 66)
+;  (make-distance-entry 'Limburg 'Giessen 'RE25 122)
+;  (make-distance-entry 'Frankfurt 'FrankfurtSued 'RE50 31)
+;  (make-distance-entry 'FrankfurtSued 'Offenbach 'RE50 26)
+;  (make-distance-entry 'Offenbach 'Hanau 'RE50 22)
+;  (make-distance-entry 'Hanau 'Gelnhausen 'RE50 14)
+;  (make-distance-entry 'Gelnhausen empty empty 0)
+;  (make-distance-entry 'Fulda 'Gelnhausen 'RE50 46)
+;  (make-distance-entry 'Giessen 'Friedberg 'R98 70)
+;  (make-distance-entry 'Nidda 'Gelnhausen 'R36 39)
+;  (make-distance-entry 'Friedberg 'Frankfurt 'R98 53)
+;  (make-distance-entry 'Marburg 'Giessen 'R98 84)))
+;
+;
+;
+;;; ====== Problem 7.2 ======
+;
+;;; A structure representing a node in the path tree
+;;; identifier: symbol - station that node represents
+;;; children: (listof path-node) - a list of children (no fixed node degree)
+;;; train: symbol - the train connecting this station/node to its parent
+;;; duration-to-start: number - the travel time to start node
+;(define-struct path-node (identifier children train duration-to-start))
+;
+;;; find-root: (listof distance-entry) -> distance-entry
+;;; Given a distance table, finds the root station/node for the path tree (representing the departure station)
+;;; Example: (find-root (create-distance-table test-network)) returns (make-distance-entry 'AStadt empty empty 0)
+;(define (find-root distance-table)
+;  (local
+;    ( ;; begin local definitions
+;     ;; distance-entry -> true
+;     ;; Checks if the parent field in a distance-entry is empty
+;     (define filtered
+;       (filter
+;        ;; : distance-entry -> boolean
+;        ;; returns true if the parent of the entry is empty
+;        (lambda (x) (empty? (distance-entry-parent x)))
+;        distance-table)))
+;    (if (empty? filtered)
+;        empty
+;        (first filtered))))
+;
+;;; Tests
+;(check-expect (find-root empty) empty)
+;(check-expect (find-root (create-distance-table test-network 'AStadt)) (make-distance-entry 'AStadt empty empty 0))
+;(check-expect (find-root (list
+;                          (make-distance-entry 'CStadt 'AStadt 'IC2 5)
+;                          (make-distance-entry 'BDorf empty empty 0)))
+;              (make-distance-entry 'BDorf empty empty 0))
+;
+;
+;
+;
+;;; =========================
+;
+;;; construct-path-tree:
+;;; 
+;;; Example: 
+;(define (construct-path-tree distance-table)
+;  ...)
+;
+;
+;
+;
+;;; ====== Problem 7.3 ======
+;
+;
+;;; A structure representing a transit entry in a connection plan
+;;; train: symbol - train's identifier
+;;; to: symbol - station name for train destination
+;;; duration: number - travel time
+;(define-struct transit (train to duration))
+;
+;;; in-subtree?: 
+;;; 
+;;; Example: 
+;(define (in-subtree? subtree station)
+;  ...)
+;  
+;;; Tests
+;
+;
+;
+;
+;;; =========================
+;    
+;;; find-connection: 
+;;; 
+;;; Example: 
+;(define (find-connection path-tree to-station)
+;  ...)
+;  
+;;; Tests

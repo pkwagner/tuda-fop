@@ -144,13 +144,29 @@
   
 ;; b)
 
-;; query-elem: 
-;; 
-;; Example: 
+;; query-elem: (X -> symbol) (listof X) symbol -> X
+;;
+;; Given the id procedure it searches through the list until it
+;; find an element which returns the same id symbol as the given elem.
+;;
+;; If it cannot find such element it returns empty
+;;
+;; Example: (query-elem)
 (define (query-elem id-op lst elem)
-  ...)
+  (if (empty? lst)
+      empty
+      (local
+        [(define current (first lst))
+         (define id-cur (id-op current))]
+        (if (symbol=? id-cur elem)
+            current
+            (query-elem id-op (rest lst) elem)))))
   
 ;; Tests
+(check-expect (query-elem (lambda (x) x) empty 'A) empty)
+(check-expect (query-elem (lambda (x) x) (list 'A) 'B) empty)
+(check-expect (query-elem (lambda (x) x) (list 'A) 'B) 'A)
+(check-expect (query-elem (lambda (x) x) (list 'A 'B 'C) 'B) 'B)
 
 
 

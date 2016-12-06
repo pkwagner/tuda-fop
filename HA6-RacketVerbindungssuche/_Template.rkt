@@ -106,7 +106,7 @@
    (make-station 'Marburg (list
                            (make-connection 'Giessen 'R98 14)))))
                            
-;; ====== Problem 5.1 ======
+;; ====== Problem 7.1 ======
 
 ;; a)
 
@@ -311,7 +311,7 @@
   (make-distance-entry 'Friedberg 'Frankfurt 'R98 53)
   (make-distance-entry 'Marburg 'Giessen 'R98 84)))
   
-;; ====== Problem 5.2 ======
+;; ====== Problem 7.2 ======
 
 ;; A structure representing a node in the path tree
 ;; identifier: symbol - station that node represents
@@ -354,7 +354,7 @@
 (define (construct-path-tree distance-table)
   ...)
   
-;; ====== Problem 5.3 ======
+;; ====== Problem 7.3 ======
 
 
 ;; A structure representing a transit entry in a connection plan

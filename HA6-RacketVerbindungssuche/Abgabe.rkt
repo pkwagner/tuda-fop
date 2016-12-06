@@ -104,7 +104,7 @@
    (make-station 'Marburg (list
                            (make-connection 'Giessen 'R98 14)))))
                            
-;; ====== Problem 5.1 ======
+;; ====== Problem 7.1 ======
 
 ;; a)
 
@@ -359,7 +359,7 @@
 
 
 
-;; ====== Problem 5.2 ======
+;; ====== Problem 7.2 ======
 
 ;; A structure representing a node in the path tree
 ;; identifier: symbol - station that node represents
@@ -408,7 +408,7 @@
 
 
 
-;; ====== Problem 5.3 ======
+;; ====== Problem 7.3 ======
 
 
 ;; A structure representing a transit entry in a connection plan

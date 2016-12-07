@@ -175,10 +175,7 @@
 ;;
 ;; Example: 
 (define (query-distance-entry distance-table station)
-  ;; : 
-  ;;
-  ;;
-  (query-elem (lambda (entry) (distance-entry-station entry)) distance-table station))
+  (query-elem distance-entry-station distance-table station))
   
 ;; Tests
 (check-expect (query-distance-entry empty 'BDorf) empty)
@@ -198,10 +195,7 @@
 ;;
 ;; Example: 
 (define (query-station network station)
-  ;; :
-  ;;
-  ;;
-  (query-elem (lambda (station) (station-identifier station)) network station))
+  (query-elem station-identifier network station))
   
 ;; Tests
 (check-expect (query-station empty 'AStadt) empty)

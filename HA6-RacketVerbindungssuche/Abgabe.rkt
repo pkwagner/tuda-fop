@@ -614,14 +614,24 @@
 ;; find-connection: path-node symbol -> (listof transit)
 ;;
 ;; Builds a route from the root node to it's final destination. Every destination station will be mapped to
-;; a transit struct.
+;; a transit struct. If you already on your destination station or there is no route to it, the result will be empty.
 ;;
-;; If you already on your destination station or there is no route to it, the result will be empty.
-;;
-;; Example: ()
+;; Example: (find-connection (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'CTrain 10)) empty 0) 'BStadt)
+;;          = (list (make-transit 'CTrain 'BStadt 10))
 (define (find-connection path-tree to-station)
-  (local [(define (find-connection-loop path-tree to-station duration)
-            (foldl (lambda (child old) (if (in-subtree? child to-station)
+  (local [;; find-connection-loop: path-node symbol integer -> (listof transit)
+          ;;
+          ;; In addition to the parent function, this function summarizes the travel time until the top of the tree and subtracts it
+          ;; from the nodes total travel duration (duration-to-start) to receive the duration for 'transit'.
+          ;;
+          ;; The initial value of 'duration' is usually 0.
+          ;;
+          ;; Example: (find-connection-loop (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'CTrain 10)) empty 0) 'BStadt 0)
+          ;;          = (list (make-transit 'CTrain 'BStadt 10))
+          (define (find-connection-loop path-tree to-station duration)
+            (foldl ;; : path-node (listof path-node) -> (listof path-node)
+                   ;; Appends the current path node to a output list of path nodes if the current node contains the given station (to-station)
+                   (lambda (child old) (if (in-subtree? child to-station)
                                            (cons (make-transit (path-node-train child)
                                                                (path-node-identifier child)
                                                                (- (path-node-duration-to-start child) duration))

@@ -1,4 +1,4 @@
-; The first three lines of this file were inserted by DrRacket. They record metadata
+;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname Abgabe) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 
@@ -120,10 +120,14 @@
 ;;                      (make-distance-entry 'CStadt empty empty INFINITY))
 (define (create-distance-table network dep-station)
   (if (empty? network)
+      ; There no stations in this network
       empty
       (local
         [(define first-name (station-identifier (first network)))
+
+         ; If it's the departure station set 0 - otherwise INFINITY
          (define distance (if (symbol=? first-name dep-station) 0 INFINITY))]
+
         (cons (make-distance-entry first-name empty empty distance)
               (create-distance-table (rest network) dep-station)))))
   
@@ -153,30 +157,39 @@
 ;; If it cannot find such element it returns empty.
 ;;
 ;; The id-op procedure should return unique id based on the input and return the same id for the same
-;; input. Otherwise it could happen that this procedure returns something differant than the expected
-;; instance.
+;; input. Otherwise it returns the first element that returns the same id as the given one. That could
+;; be a different element than the expected one.
 ;;
 ;; Example: (query-elem (lambda (id) id) (list 'A 'B 'C) 'B) = 'B
 (define (query-elem id-op lst elem)
   (local
+    ;; X -> boolean
+    ;;
+    ;; Removes all elements that generates a different id.
     [(define filtered (filter (lambda (current) (symbol=? elem (id-op current))) lst))]
+
     (if (empty? filtered)
         empty
         (first filtered))))
-  
+
 ;; Tests
-(check-expect (query-elem (lambda (x) x) empty 'A) empty)
-(check-expect (query-elem (lambda (x) x) (list 'A) 'A) 'A)
-(check-expect (query-elem (lambda (x) x) (list 'A) 'B) empty)
-(check-expect (query-elem (lambda (x) x) (list 'A 'B 'C) 'B) 'B)
+; Simple id procedure that returns the element itself.
+(define id-proc (lambda (x) x))
+
+(check-expect (query-elem id-proc empty 'A) empty)
+(check-expect (query-elem id-proc (list 'A) 'A) 'A)
+(check-expect (query-elem id-proc (list 'A) 'B) empty)
+(check-expect (query-elem id-proc (list 'A 'B 'C) 'B) 'B)
 
 
 
 ;; query-distance-entry: (distance-entry -> symbol) (listof distance-entry) symbol -> distance-entry
 ;;
-;; 
+;; Finds the distance-entry struct whose departure starts from the given station name.
 ;;
-;; Example: 
+;; Example: (query-distance-entry (list (make-distance-entry 'AStadt empty empty INFINITY)
+;;                                     (make-distance-entry 'BDorf empty empty 0)) 'BDorf)
+;;         = (make-distance-entry 'BDorf empty empty 0)
 (define (query-distance-entry distance-table station)
   (query-elem distance-entry-station distance-table station))
   
@@ -194,9 +207,11 @@
   
 ;; query-station: (listof station) symbol -> station
 ;;
+;; Finds the station struct which has the same name as the given station name.
 ;;
-;;
-;; Example: 
+;; Example: (query-station test-network 'AStadt)
+;;          = (make-station 'AStadt (list (make-connection 'BDorf 'RB1 10)
+;;                                        (make-connection 'CStadt 'IC2 5)))
 (define (query-station network station)
   (query-elem station-identifier network station))
   
@@ -215,27 +230,40 @@
 
 ;; query-min-distance-station: (listof distance-entry) (listof symbol) -> symbol
 ;;
+;; Finds the shortest destination station from a given list of distance-entries and unvisited stations.
 ;;
+;; The result will always be station that is in the unvisited list too. If that's not the case
+;; or cannot find a connection it will return empty.
 ;;
-;; Example: 
+;; Example: (query-min-distance-station (create-distance-table test-network 'AStadt)
+;;                                          (list 'AStadt 'BDorf 'CStadt))
+;;          = 'AStadt
 (define (query-min-distance-station distance-table unvisited)
   (local
     [(define shortest-entry
        ;; : distance-entry distance-entry -> distance-entry
        ;;
-       ;; 
+       ;; Compares two distance-entries and returns the one with the shortest distance. If an entry
+       ;; has the constant INFINITY as distance, it means we cannot reach it and we will ignore it.
        (foldl (lambda (new old)
                 (local
                   [(define new-distance (distance-entry-distance new))]
+
                   (cond
                     [(= new-distance INFINITY) old]
                     [(empty? old) new]
                     [(< new-distance (distance-entry-distance old)) new]
                     [else old])))
               empty
+              ;; : distance-entry -> boolean
+              ;;
+              ;; Checks if the station of the distance-entry is in the unvisited list. Therefore
+              ;; it removes all entries that we already visited.
               (filter (lambda (entry) (member? (distance-entry-station entry) unvisited))
                       distance-table)))]
+
     (if (empty? shortest-entry)
+        ; There is no such entry
         empty
         (distance-entry-station shortest-entry))))
   
@@ -437,19 +465,105 @@
         (first filtered))))
 
 ;; Tests
+(check-expect (find-root empty) empty)
+(check-expect (find-root (create-distance-table test-network 'AStadt)) (make-distance-entry 'AStadt empty empty 0))
+(check-expect (find-root (list
+                          (make-distance-entry 'CStadt 'AStadt 'IC2 5)
+                          (make-distance-entry 'BDorf empty empty 0)))
+              (make-distance-entry 'BDorf empty empty 0))
+
 
 
 ;; =========================
 
 ;; construct-path-tree: (listof distance-entry) -> path-node
 ;;
+;; Builds a path tree with the distance-entry which has no parent as root node. All stations
+;; that this station can reach, will build child nodes. These child nodes could reach another
+;; stations as children of those nodes.
 ;;
+;; This continues until all connections starting from the root node to a (reachable) final destination 
+;; are mapped into this graph.
 ;;
-;; Example: 
+;; Example: (construct-path-tree (list (make-distance-entry 'A empty 'TrainA 0)
+;;                                         (make-distance-entry 'B 'A 'TrainB 2)
+;;                                         (make-distance-entry 'C 'A 'TrainC 3)))
+;;           = (make-path-node 'A (list (make-path-node 'B empty 'TrainB 2)
+;;                                      (make-path-node 'C empty 'TrainC 3))
+;;                             'TrainA 0)
 (define (construct-path-tree distance-table)
-  ...)
+  (local
+    [(define root (find-root distance-table))
+
+     ;; build-node: distance-entry time -> path-node
+     ;;
+     ;; Builds a path tree starting from the given root distance-entry to all connecting distance-entries
+     ;; and their childs.
+     ;;
+     ;; Example: (build-node (make-distance-entry 'A empty 'TrainA 0) 0)
+     ;;           = (make-path-node 'A (make-path-node 'B 'TrainB 3) 'TrainA 2)
+     ;;
+     ;;    if distance-table = (list (make-distance-entry 'A empty 'TrainA 0)
+     ;;                                  (make-distance-entry 'B 'A 'TrainB 2))
+     (define (build-node root distance)
+       (make-path-node (distance-entry-station root)
+                       ; Do the same with all connected stations
+                       (foldr cons empty
+                              ;; : distance-entry -> path-node
+                              ;;
+                              ;; Builds a path node with the distance value from it's parent in order to increase
+                              ;; the distance value to the start node
+                              (map (lambda (child) (build-node child (distance-entry-distance root)))
+                                   ;; : distance-entry -> boolean
+                                   ;;
+                                   ;; Returns true if the parent of the given entry the current
+                                   ;; root node. This means there is route of specific train
+                                   ;; that starts from root to another station
+                                   (filter (lambda (entry)
+                                             (local
+                                               [(define entry-parent (distance-entry-parent entry))]
+                                               ; Ignore very first root node - that has no parent
+                                               (and (not (empty? entry-parent))
+                                                    ; We only need the stations connected to the current root node
+                                                    (symbol=? entry-parent (distance-entry-station root)))))
+                                           distance-table)))
+                       ; Copy the distance and train info from the distance-entry struct
+                       (distance-entry-train root) (+ distance (distance-entry-distance root))))]
+
+    (if (empty? root) empty (build-node root 0))))
 
 ;; Tests
+(check-expect (construct-path-tree empty) empty)
+
+; single entry
+(check-expect (construct-path-tree (list (make-distance-entry 'A empty empty 0)))
+              (make-path-node 'A empty empty 0))
+
+; multiple children
+(check-expect (construct-path-tree (list (make-distance-entry 'A empty empty 0)
+                                         (make-distance-entry 'B 'A 'TrainB 2)
+                                         (make-distance-entry 'C 'A 'TrainC 3)))
+              (make-path-node 'A (list (make-path-node 'B empty 'TrainB 2)
+                                       (make-path-node 'C empty 'TrainC 3))
+                              empty 0))
+
+; nested children
+(check-expect (construct-path-tree (list (make-distance-entry 'A empty empty 0)
+                                         (make-distance-entry 'B 'A 'TrainB 2)
+                                         (make-distance-entry 'C 'B 'TrainC 3)))
+              (make-path-node 'A
+                              (list (make-path-node 'B
+                                                    (list (make-path-node 'C empty 'TrainC 5))
+                                                    'TrainB 2))
+                              empty 0))
+
+; multiple trains
+(check-expect (construct-path-tree (list (make-distance-entry 'A empty empty 0)
+                                         (make-distance-entry 'B 'A 'TrainB1 2)
+                                         (make-distance-entry 'B 'A 'TrainB2 3)))
+              (make-path-node 'A (list (make-path-node 'B empty 'TrainB1 2)
+                                       (make-path-node 'B empty 'TrainB2 3))
+                              empty 0))
 
 
 
@@ -462,27 +576,67 @@
 ;; duration: number - travel time
 (define-struct transit (train to duration))
 
-;; in-subtree?: 
+;; in-subtree?: path-node symbol -> boolean
 ;;
+;; Checks if a path-node of the given station name exists in that subtree
 ;;
-;;
-;; Example: 
+;; Example: (in-subtree? (make-path-node 'AStadt
+;;                                           (list (make-path-node 'BStadt empty 'TrainB 5)
+;;                                                 (make-path-node 'CStadt empty 'TrainC 3))
+;;                                           empty 0) 'BStadt)
+;;          = true
 (define (in-subtree? subtree station)
-  ...)
+  (if (symbol=? (path-node-identifier subtree) station)
+      ; The root node is the searching element
+      true
+      ;; : path-node boolean -> boolean
+      ;;
+      ;; Checks if that child or any children of that child as parent contains a path-node with the given station name
+      (foldl (lambda (node found) (if found
+                                      ; We already found one element. So don't continue checking or overriding the old
+                                      ; value
+                                      true
+                                      (in-subtree? node station)))
+             false (path-node-children subtree))))
 
 ;; Tests
-
+(check-expect (in-subtree? (make-path-node 'AStadt empty empty 0) 'AStadt) true)
+(check-expect (in-subtree? (make-path-node 'AStadt empty empty 0) 'BStadt) false)
+(check-expect (in-subtree? (make-path-node 'AStadt
+                                           (list (make-path-node 'BStadt empty 'TrainB 5)
+                                                 (make-path-node 'CStadt empty 'TrainC 3))
+                                           empty 0) 'BStadt) true)
 
 
 
 ;; =========================
 
-;; find-connection: 
+;; find-connection: path-node symbol -> (listof transit)
 ;;
+;; Builds a route from the root node to it's final destination. Every destination station will be mapped to
+;; a transit struct.
 ;;
+;; If you already on your destination station or there is no route to it, the result will be empty.
 ;;
-;; Example: 
+;; Example: ()
 (define (find-connection path-tree to-station)
-  ...)
+  (foldl (lambda (child old) (if (in-subtree? child to-station)
+                                 (cons (make-transit (path-node-train child)
+                                                     (path-node-identifier child)
+                                                     (path-node-duration-to-start child))
+                                       (find-connection child to-station))
+                                 old))
+         empty (path-node-children path-tree)))
   
 ;; Tests
+(check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'BStadt) empty)
+(check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'AStadt) empty)
+
+; AStadt -> CStadt -> DStadt
+(check-expect (find-connection (make-path-node 'AStadt
+                                               (list (make-path-node 'BStadt empty 'TrainB 2)
+                                                     (make-path-node 'CStadt
+                                                                     (list (make-path-node 'DStadt empty 'TrainD 5))
+                                                                     'TrainC 3))
+                                               empty 0) 'DStadt) (list (make-transit 'TrainC 'CStadt 3)
+                                                                       (make-transit 'TrainD 'DStadt 2)))

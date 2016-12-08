@@ -103,7 +103,7 @@
                              (make-connection 'Frankfurt 'R98 22)))
    (make-station 'Marburg (list
                            (make-connection 'Giessen 'R98 14)))))
-                           
+
 ;; ====== Problem 7.1 ======
 
 ;; a)
@@ -124,13 +124,13 @@
       empty
       (local
         [(define first-name (station-identifier (first network)))
-
+         
          ; If it's the departure station set 0 - otherwise INFINITY
          (define distance (if (symbol=? first-name dep-station) 0 INFINITY))]
-
+        
         (cons (make-distance-entry first-name empty empty distance)
               (create-distance-table (rest network) dep-station)))))
-  
+
 ;; Tests
 ; not in network
 (check-expect (create-distance-table empty 'A) empty)
@@ -146,7 +146,7 @@
 
 
 ;; =========================
-  
+
 ;; b)
 
 ;; query-elem: (X -> symbol) (listof X) symbol -> X
@@ -167,7 +167,7 @@
     ;;
     ;; Removes all elements that generates a different id.
     [(define filtered (filter (lambda (current) (symbol=? elem (id-op current))) lst))]
-
+    
     (if (empty? filtered)
         empty
         (first filtered))))
@@ -192,7 +192,7 @@
 ;;         = (make-distance-entry 'BDorf empty empty 0)
 (define (query-distance-entry distance-table station)
   (query-elem distance-entry-station distance-table station))
-  
+
 ;; Tests
 (check-expect (query-distance-entry empty 'BDorf) empty)
 (check-expect (query-distance-entry (list (make-distance-entry 'AStadt empty empty INFINITY)
@@ -204,7 +204,7 @@
 
 
 ;; =========================
-  
+
 ;; query-station: (listof station) symbol -> station
 ;;
 ;; Finds the station struct which has the same name as the given station name.
@@ -214,7 +214,7 @@
 ;;                                        (make-connection 'CStadt 'IC2 5)))
 (define (query-station network station)
   (query-elem station-identifier network station))
-  
+
 ;; Tests
 (check-expect (query-station empty 'AStadt) empty)
 (check-expect (query-station test-network 'AStadt)
@@ -225,7 +225,7 @@
 
 
 ;; =========================
-  
+
 ;; c)
 
 ;; query-min-distance-station: (listof distance-entry) (listof symbol) -> symbol
@@ -248,7 +248,7 @@
        (foldl (lambda (new old)
                 (local
                   [(define new-distance (distance-entry-distance new))]
-
+                  
                   (cond
                     [(= new-distance INFINITY) old]
                     [(empty? old) new]
@@ -261,12 +261,12 @@
               ;; it removes all entries that we already visited.
               (filter (lambda (entry) (member? (distance-entry-station entry) unvisited))
                       distance-table)))]
-
+    
     (if (empty? shortest-entry)
         ; There is no such entry
         empty
         (distance-entry-station shortest-entry))))
-  
+
 ;; Tests
 ; No more unvisited paths
 (check-expect (query-min-distance-station (create-distance-table test-network 'AStadt) empty) empty)
@@ -317,7 +317,7 @@
          (map replace-entry distance-table))))
     ;; use fold to apply the update-function to the whole list
     (foldr update-distance-entry distance-table new-entries)))
-    
+
 ;; Tests
 (check-expect (update-distances-batch (create-distance-table test-network 'AStadt) empty)
               (create-distance-table test-network 'AStadt))
@@ -494,7 +494,7 @@
 (define (construct-path-tree distance-table)
   (local
     [(define root (find-root distance-table))
-
+     
      ;; build-node: distance-entry time -> path-node
      ;;
      ;; Builds a path tree starting from the given root distance-entry to all connecting distance-entries
@@ -529,7 +529,7 @@
                                            distance-table)))
                        ; Copy the distance and train info from the distance-entry struct
                        (distance-entry-train root) (+ distance (distance-entry-distance root))))]
-
+    
     (if (empty? root) empty (build-node root 0))))
 
 ;; Tests
@@ -620,14 +620,16 @@
 ;;
 ;; Example: ()
 (define (find-connection path-tree to-station)
-  (foldl (lambda (child old) (if (in-subtree? child to-station)
-                                 (cons (make-transit (path-node-train child)
-                                                     (path-node-identifier child)
-                                                     (path-node-duration-to-start child))
-                                       (find-connection child to-station))
-                                 old))
-         empty (path-node-children path-tree)))
-  
+  (local [(define (find-connection-loop path-tree to-station duration)
+            (foldl (lambda (child old) (if (in-subtree? child to-station)
+                                           (cons (make-transit (path-node-train child)
+                                                               (path-node-identifier child)
+                                                               (- (path-node-duration-to-start child) duration))
+                                                 (find-connection-loop child to-station (+ duration (path-node-duration-to-start child))))
+                                           old))
+                   empty (path-node-children path-tree)))]
+    (find-connection-loop path-tree to-station 0)))
+
 ;; Tests
 (check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'BStadt) empty)
 (check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'AStadt) empty)

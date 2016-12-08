@@ -589,15 +589,12 @@
   (if (symbol=? (path-node-identifier subtree) station)
       ; The root node is the searching element
       true
-      ;; : path-node boolean -> boolean
+      ;; : path-node -> boolean
       ;;
       ;; Checks if that child or any children of that child as parent contains a path-node with the given station name
-      (foldl (lambda (node found) (if found
-                                      ; We already found one element. So don't continue checking or overriding the old
-                                      ; value
-                                      true
-                                      (in-subtree? node station)))
-             false (path-node-children subtree))))
+      ; We are allowed to use ormap in replacement to fold and/or map
+      ; https://moodle.informatik.tu-darmstadt.de/mod/forum/discuss.php?d=4572
+      (ormap (lambda (node) (in-subtree? node station)) (path-node-children subtree))))
 
 ;; Tests
 (check-expect (in-subtree? (make-path-node 'AStadt empty empty 0) 'AStadt) true)

@@ -12,7 +12,7 @@
 
 ;; A struct modelling a train connection from a common station
 ;; to-station: symbol - identifier of the train's destination
-;; train-identifier: symbol - unique identifier (usually train kind + running number) of train
+;; identifier: symbol - unique identifier (usually train kind + running number) of train
 ;; duration: number - durantion of trainride in minutes
 (define-struct connection (to-station identifier duration))
 

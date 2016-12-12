@@ -586,9 +586,8 @@
 ;;                                           empty 0) 'BStadt)
 ;;          = true
 (define (in-subtree? subtree station)
-  (if (symbol=? (path-node-identifier subtree) station)
-      ; The root node is the searching element
-      true
+  (or ; Is the root node the searching element?
+      (symbol=? (path-node-identifier subtree) station)
       ;; : path-node -> boolean
       ;;
       ;; Checks if that child or any children of that child as parent contains a path-node with the given station name

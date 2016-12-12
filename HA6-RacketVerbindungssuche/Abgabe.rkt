@@ -586,16 +586,19 @@
 ;;                                           empty 0) 'BStadt)
 ;;          = true
 (define (in-subtree? subtree station)
-  (or ; Is the root node the searching element?
-      (symbol=? (path-node-identifier subtree) station)
-      ;; : path-node -> boolean
-      ;;
-      ;; Checks if that child or any children of that child as parent contains a path-node with the given station name
-      ; We are allowed to use ormap in replacement to fold and/or map
-      ; https://moodle.informatik.tu-darmstadt.de/mod/forum/discuss.php?d=4572
-      (ormap (lambda (node) (in-subtree? node station)) (path-node-children subtree))))
+  (cond
+    [(empty? subtree) false]
+    ; Is the root node the searching element?
+    [(symbol=? (path-node-identifier subtree) station) true]
+    ;; : path-node -> boolean
+    ;;
+    ;; Checks if that child or any children of that child as parent contains a path-node with the given station name
+    ; We are allowed to use ormap in replacement to fold and/or map
+    ; https://moodle.informatik.tu-darmstadt.de/mod/forum/discuss.php?d=4572
+    [else (ormap (lambda (node) (in-subtree? node station)) (path-node-children subtree))]))
 
 ;; Tests
+(check-expect (in-subtree? empty 'A) false)
 (check-expect (in-subtree? (make-path-node 'AStadt empty empty 0) 'AStadt) true)
 (check-expect (in-subtree? (make-path-node 'AStadt empty empty 0) 'BStadt) false)
 (check-expect (in-subtree? (make-path-node 'AStadt

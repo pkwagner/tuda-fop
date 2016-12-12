@@ -619,7 +619,7 @@
 ;;          = (list (make-transit empty 'AStadt 0)
 ;;                  (make-transit 'BTrain 'BStadt 10))
 (define (find-connection path-tree to-station)
-  (local [;; find-connection-loop : path-tree to-station
+  (local [;; find-connection-loop : path-node symbol -> (listof transit)
           ;; 
           ;; Generates a route based on path-tree to a given destination. Returns a transit list not
           ;; including the start station.

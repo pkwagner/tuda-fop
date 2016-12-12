@@ -611,35 +611,32 @@
 ;; find-connection: path-node symbol -> (listof transit)
 ;;
 ;; Builds a route from the root node to it's final destination. Every destination station will be mapped to
-;; a transit struct. If you already on your destination station or there is no route to it, the result will be empty.
+;; a transit struct.
 ;;
-;; Example: (find-connection (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'CTrain 10)) empty 0) 'BStadt)
-;;          = (list (make-transit 'CTrain 'BStadt 10))
+;; If there is no route to your destination, the result will be empty.
+;;
+;; Example: (find-connection (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'BTrain 10)) empty 0) 'BStadt)
+;;          = (list (make-transit empty 'AStadt 0)
+;;                  (make-transit 'BTrain 'BStadt 10))
 (define (find-connection path-tree to-station)
-  (local [;; find-connection-loop: path-node symbol integer -> (listof transit)
-          ;;
-          ;; In addition to the parent function, this function summarizes the travel time until the top of the tree and subtracts it
-          ;; from the nodes total travel duration (duration-to-start) to receive the duration for 'transit'.
-          ;;
-          ;; The initial value of 'duration' is usually 0.
-          ;;
-          ;; Example: (find-connection-loop (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'CTrain 10)) empty 0) 'BStadt 0)
-          ;;          = (list (make-transit 'CTrain 'BStadt 10))
-          (define (find-connection-loop path-tree to-station duration)
-            (foldl ;; : path-node (listof path-node) -> (listof path-node)
-                   ;; Appends the current path node to a output list of path nodes if the current node contains the given station (to-station)
-                   (lambda (child old) (if (in-subtree? child to-station)
-                                           (cons (make-transit (path-node-train child)
-                                                               (path-node-identifier child)
-                                                               (- (path-node-duration-to-start child) duration))
-                                                 (find-connection-loop child to-station (+ duration (path-node-duration-to-start child))))
-                                           old))
-                   empty (path-node-children path-tree)))]
-    (find-connection-loop path-tree to-station 0)))
+  (if (in-subtree? path-tree to-station)
+      ;; : path-node (listof transit) -> (listof transit)
+      ;;
+      ;; Appends a transit choice if the destination is in direction of the current child.
+      (foldl (lambda (child old)
+               (if (in-subtree? child to-station)
+                   (cons (make-transit (path-node-train child)
+                                       (path-node-identifier child)
+                                       (path-node-duration-to-start child))
+                         (find-connection child to-station))
+                   old))
+             empty
+             (path-node-children path-tree))
+      empty))
 
 ;; Tests
 (check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'BStadt) empty)
-(check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'AStadt) empty)
+(check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'AStadt) (list (make-transit empty 'AStadt 0)))
 
 ; AStadt -> CStadt -> DStadt
 (check-expect (find-connection (make-path-node 'AStadt
@@ -647,5 +644,6 @@
                                                      (make-path-node 'CStadt
                                                                      (list (make-path-node 'DStadt empty 'TrainD 5))
                                                                      'TrainC 3))
-                                               empty 0) 'DStadt) (list (make-transit 'TrainC 'CStadt 3)
-                                                                       (make-transit 'TrainD 'DStadt 2)))
+                                               empty 0) 'DStadt) (list (make-transit empty 'AStadt 0)
+                                                                       (make-transit 'TrainC 'CStadt 3)
+                                                                       (make-transit 'TrainD 'DStadt 5)))

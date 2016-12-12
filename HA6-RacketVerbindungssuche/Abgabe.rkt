@@ -620,22 +620,22 @@
 ;;                  (make-transit 'BTrain 'BStadt 10))
 (define (find-connection path-tree to-station)
   (local [(define (find-connection-loop path-tree to-station)
-  (if (in-subtree? path-tree to-station)
-      ;; : path-node (listof transit) -> (listof transit)
-      ;;
-      ;; Appends a transit choice if the destination is in direction of the current child.
-      (foldl (lambda (child old)
-               (if (in-subtree? child to-station)
-                   (cons (make-transit (path-node-train child)
-                                       (path-node-identifier child)
-                                       (path-node-duration-to-start child))
-                         (find-connection-loop child to-station))
-                   old))
-             empty
-             (path-node-children path-tree))
-      empty))]
+            (if (in-subtree? path-tree to-station)
+                ;; : path-node (listof transit) -> (listof transit)
+                ;;
+                ;; Appends a transit choice if the destination is in direction of the current child.
+                (foldl (lambda (child old)
+                         (if (in-subtree? child to-station)
+                             (cons (make-transit (path-node-train child)
+                                                 (path-node-identifier child)
+                                                 (path-node-duration-to-start child))
+                                   (find-connection-loop child to-station))
+                             old))
+                       empty
+                       (path-node-children path-tree))
+                empty))]
       
-  (if (in-subtree? path-tree to-station) (cons (make-transit empty (path-node-identifier path-tree) 0) (find-connection-loop path-tree to-station)) empty)))
+    (if (in-subtree? path-tree to-station) (cons (make-transit empty (path-node-identifier path-tree) 0) (find-connection-loop path-tree to-station)) empty)))
 
 ;; Tests
 (check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'BStadt) empty)

@@ -611,15 +611,22 @@
 ;; find-connection: path-node symbol -> (listof transit)
 ;;
 ;; Builds a route from the root node to it's final destination. Every destination station will be mapped to
-;; a transit struct.
-;;
-;; If there is no route to your destination, the result will be empty.
+;; a transit struct. If there is no route to your destination, the result will be empty.
+;; 
+;; In contrast to find-connection-loop a new transit for the start station will be added to possible routes
 ;;
 ;; Example: (find-connection (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'BTrain 10)) empty 0) 'BStadt)
 ;;          = (list (make-transit empty 'AStadt 0)
 ;;                  (make-transit 'BTrain 'BStadt 10))
 (define (find-connection path-tree to-station)
-  (local [(define (find-connection-loop path-tree to-station)
+  (local [;; find-connection-loop : path-tree to-station
+          ;; 
+          ;; Generates a route based on path-tree to a given destination. Returns a transit list not
+          ;; including the start station.
+          ;; 
+          ;; Example: (find-connection-loop (make-path-node 'AStadt (list (make-path-node 'BStadt empty 'BTrain 10)) empty 0) 'BStadt)
+          ;;          = (list (make-transit 'BTrain 'BStadt 10))
+          (define (find-connection-loop path-tree to-station)
             (if (in-subtree? path-tree to-station)
                 ;; : path-node (listof transit) -> (listof transit)
                 ;;
@@ -634,8 +641,12 @@
                        empty
                        (path-node-children path-tree))
                 empty))]
-      
-    (if (in-subtree? path-tree to-station) (cons (make-transit empty (path-node-identifier path-tree) 0) (find-connection-loop path-tree to-station)) empty)))
+    
+    ; If there is a valid route add start station transit as first element
+    (if (in-subtree? path-tree to-station)
+        (cons (make-transit empty (path-node-identifier path-tree) 0)
+              (find-connection-loop path-tree to-station))
+        empty)))
 
 ;; Tests
 (check-expect (find-connection (make-path-node 'AStadt empty empty 0) 'BStadt) empty)

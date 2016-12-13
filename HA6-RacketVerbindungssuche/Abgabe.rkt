@@ -495,25 +495,21 @@
   (local
     [(define root (find-root distance-table))
      
-     ;; build-node: distance-entry time -> path-node
+     ;; build-node: distance-entry -> path-node
      ;;
      ;; Builds a path tree starting from the given root distance-entry to all connecting distance-entries
      ;; and their childs.
      ;;
-     ;; Example: (build-node (make-distance-entry 'A empty 'TrainA 0) 0)
+     ;; Example: (build-node (make-distance-entry 'A empty 'TrainA 0))
      ;;           = (make-path-node 'A (make-path-node 'B 'TrainB 3) 'TrainA 2)
      ;;
      ;;    if distance-table = (list (make-distance-entry 'A empty 'TrainA 0)
      ;;                                  (make-distance-entry 'B 'A 'TrainB 2))
-     (define (build-node root distance)
+     (define (build-node root)
        (make-path-node (distance-entry-station root)
                        ; Do the same with all connected stations
                        (foldr cons empty
-                              ;; : distance-entry -> path-node
-                              ;;
-                              ;; Builds a path node with the distance value from it's parent in order to increase
-                              ;; the distance value to the start node
-                              (map (lambda (child) (build-node child (distance-entry-distance root)))
+                              (map build-node
                                    ;; : distance-entry -> boolean
                                    ;;
                                    ;; Returns true if the parent of the given entry the current
@@ -528,9 +524,9 @@
                                                     (symbol=? entry-parent (distance-entry-station root)))))
                                            distance-table)))
                        ; Copy the distance and train info from the distance-entry struct
-                       (distance-entry-train root) (+ distance (distance-entry-distance root))))]
+                       (distance-entry-train root) (distance-entry-distance root)))]
     
-    (if (empty? root) empty (build-node root 0))))
+    (if (empty? root) empty (build-node root))))
 
 ;; Tests
 (check-expect (construct-path-tree empty) empty)
@@ -550,7 +546,7 @@
 ; nested children
 (check-expect (construct-path-tree (list (make-distance-entry 'A empty empty 0)
                                          (make-distance-entry 'B 'A 'TrainB 2)
-                                         (make-distance-entry 'C 'B 'TrainC 3)))
+                                         (make-distance-entry 'C 'B 'TrainC 5)))
               (make-path-node 'A
                               (list (make-path-node 'B
                                                     (list (make-path-node 'C empty 'TrainC 5))

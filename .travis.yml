@@ -27,4 +27,4 @@ script:
   # Racket testing
   - raco test -x $(find -name *.rkt ! -name _*)
   # Maven/Java testing
-  - find . -name "pom.xml" -exec mvn test -f '{}' \;
+  - find -name pom.xml | xargs mvn test -f

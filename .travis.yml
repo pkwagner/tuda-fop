@@ -1,4 +1,4 @@
-language: c
+language: java
 
 # To use Travis CI's newer container infrastructure, use the following
 # line. (Also be sure RACKET_DIR is set to somewhere like ~/racket
@@ -14,6 +14,8 @@ env:
     # Test against the newest Racket release version
     - RACKET_VERSION=6.7
 
+jdk: [oraclejdk8]
+
 # Download and install racket
 install:
   - git clone https://github.com/greghendershott/travis-racket.git
@@ -22,4 +24,7 @@ install:
 
 # Actual testing here
 script:
-  -  raco test -x $(find -name *.rkt ! -name _*)
+  # Racket testing
+  - raco test -x $(find -name *.rkt ! -name _*)
+  # Maven/Java testing
+  - find . -name "pom.xml" -exec mvn test -f '{}' \;

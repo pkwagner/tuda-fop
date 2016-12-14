@@ -10,3 +10,6 @@ TAGS
 
 # Ignore backup merge conflict files created by git
 *.orig
+
+# Ignore maven output
+*/target/

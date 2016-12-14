@@ -9,6 +9,12 @@ Main folder
   - Aufgabe 2
 - Übung 2
 
+## Checklist for Java projects
+
+- [ ] @author tag in every class
+- [ ] Complete javadoc
+- [ ] Zip the project with Unr_Name (name = author) on submission
+
 ## Checklist for Racket projects
 
 - [ ] Useful names

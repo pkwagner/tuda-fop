@@ -13,3 +13,23 @@ TAGS
 
 # Ignore maven output
 */target/
+
+# IntelliJ
+.idea/
+*.iml
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+nb-configuration.xml
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+tmp/

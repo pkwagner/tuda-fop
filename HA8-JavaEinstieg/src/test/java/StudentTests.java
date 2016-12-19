@@ -50,6 +50,9 @@
 //		JacobiSimulation sim = new JacobiSimulation(new String[] { "" + width, "" + height, "100", "10" });
 //
 //		double[][] current = sim.getCurrent();
+//		assertEquals("Init: number of lines (1st dimenson) must be " + height + " ", height, current.length);
+//		assertNotNull("First line of current must not be null ", current[0]);
+//		assertEquals("Init: number of rows (2nd dimension) must be " + width + " ", width, current[0].length);
 //		double[][] previous = sim.getPrevious();
 //
 //		// ******************************************************************************************************
@@ -86,6 +89,7 @@
 //		// Start simulation
 //		sim.start();
 //
+//		current = sim.getCurrent();
 //		// Transpose results if necessary
 //		if (dimOneIsWidth)
 //			current = transposeArray(current);

@@ -9,7 +9,7 @@ public class JacobiSimulation extends ConsoleProgram {
     /**
      * available characters for display
      */
-    static char[] chars = {'\u2003', '\u2581', '\u2582', '\u2583', '\u2584',
+    static char[] CHARS = {'\u2003', '\u2581', '\u2582', '\u2583', '\u2584',
             '\u2585', '\u2586', '\u2587', '\u2588'};
 
     int width, height, maxSteps, delay;
@@ -49,15 +49,24 @@ public class JacobiSimulation extends ConsoleProgram {
         }
     }
 
-    private char getValueChar(double value, double min, double max, char chars[]) {
-        return chars[(int) Math.round(((max - min) / (value - min)) * (chars.length - 1))];
+    /**
+     * Gets a UTF-8 character representing the given percent value. Every character has the same width and height.
+     * <p>
+     * The higher the percent value is the more is character filled with black color from the bottom to the up.
+     *
+     * @param percent percent value between 0.0 for 0% and 1.0 for 100%
+     * @return a character representing the given percent value
+     */
+    private char getFilledChar(double percent) {
+        int index = (int) ((CHARS.length - 1) * percent);
+        return CHARS[index];
     }
 
     private void printState() {
         println("Iteration " + String.valueOf(currentStep));
         for (double row[] : jacobiMap_current) {
             for (double element : row) {
-                print(getValueChar(element, 0.0, 1.0, chars));
+                print(getFilledChar(element));
             }
 
             println();

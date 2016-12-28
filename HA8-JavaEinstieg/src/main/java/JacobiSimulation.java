@@ -18,6 +18,8 @@ public class JacobiSimulation extends ConsoleProgram {
     double jacobiMap_current[][];
     double jacobiMap_previous[][];
 
+    private double difference;
+
     public JacobiSimulation(String args[]) {
         width = Integer.valueOf(args[0]);
         height = Integer.valueOf(args[1]);
@@ -41,10 +43,16 @@ public class JacobiSimulation extends ConsoleProgram {
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                jacobiMap_current[i][j] = 0.25 * (j > 0 ? jacobiMap_previous[i][j - 1] : 1.0)
+                double newVal = 0.25 * (j > 0 ? jacobiMap_previous[i][j - 1] : 1.0)
                         + (j < height - 1 ? jacobiMap_previous[i][j + 1] : 1.0)
                         + (i > 0 ? jacobiMap_previous[i - 1][j] : 1.0)
                         + (i < width - 1 ? jacobiMap_previous[i + 1][j] : 1.0);
+
+                jacobiMap_current[i][j] = newVal;
+
+                //the difference should be always positive, so calculate the absolute value
+                double previousVal = jacobiMap_previous[i][j];
+                difference += Math.abs(newVal - previousVal);
             }
         }
     }
@@ -63,7 +71,7 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     private void printState() {
-        println("Iteration " + String.valueOf(currentStep));
+        println("Iteration " + String.valueOf(currentStep) + " Difference: " + difference);
         for (double row[] : jacobiMap_current) {
             for (double element : row) {
                 print(getFilledChar(element));
@@ -79,6 +87,15 @@ public class JacobiSimulation extends ConsoleProgram {
 
     public double[][] getPrevious() {
         return jacobiMap_previous;
+    }
+
+    /**
+     * Gets the absolute difference after the most recent iteration.
+     *
+     * @return the absolute difference between the last iteration and the iteration before that one
+     */
+    public double getAbsoluteDifference() {
+        return difference;
     }
 
     /**

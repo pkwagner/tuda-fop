@@ -30,6 +30,7 @@ public class JacobiSimulation extends ConsoleProgram {
     private double difference;
 
     public JacobiSimulation(String args[]) {
+        //dimensions
         width = Integer.valueOf(args[0]);
         height = Integer.valueOf(args[1]);
 
@@ -115,13 +116,23 @@ public class JacobiSimulation extends ConsoleProgram {
         return CHARS[index];
     }
 
+    /**
+     * Visualize the current state. It prints the current state to the user on the GUI.
+     */
     private void printState() {
+        //clear the the window content
+        getConsole().clear();
+
+        //general information
         println("Iteration " + currentStep + " Difference: " + difference);
+
+        //simulation content:
         for (double row[] : current) {
             for (double element : row) {
                 print(getFilledChar(element));
             }
 
+            //we finished the current line switch to the next one
             println();
         }
     }
@@ -144,9 +155,17 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Starts the program
+     * Starts the program. This program requires 4 arguments to work correctly.
      *
-     * @param args not used
+     * Please specify the arguments in the correct order as their meanings here:
+     * <ul>
+     *     <li>map width</li>
+     *     <li>map height</li>
+     *     <li>max iteration steps</li>
+     *     <li>wait time in milliseconds</li>
+     * </ul>
+     *
+     * @param args arguments array with the contents from above
      */
     public static void main(String args[]) {
         new JacobiSimulation(args).start();

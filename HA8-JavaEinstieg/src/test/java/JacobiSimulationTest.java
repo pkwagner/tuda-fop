@@ -3,7 +3,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Simulates the jacobi-iteration
+ * Custom created tests with more test cases
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

@@ -1,57 +1,74 @@
 import acm.program.ConsoleProgram;
 
+import java.util.Arrays;
+
 /**
+ * Simulates the jacobi-iteration
  *
- *
- *
+ * @author Alexander Siegler
+ * @author Paul Konstantin Wagner
+ * @author Yoshua Hitzel
+ * @author Marcel Lackovic
  */
 public class JacobiSimulation extends ConsoleProgram {
+
     /**
      * available characters for display
      */
-    static char[] CHARS = {'\u2003', '\u2581', '\u2582', '\u2583', '\u2584',
+    private static char[] CHARS = {'\u2003', '\u2581', '\u2582', '\u2583', '\u2584',
             '\u2585', '\u2586', '\u2587', '\u2588'};
 
-    int width, height, maxSteps, delay;
-    int currentStep;
+    private int width;
+    private int height;
+    private int maxSteps;
+    private int waitTime;
+    private int currentStep;
 
-    double jacobiMap_current[][];
-    double jacobiMap_previous[][];
+    private double current[][];
+    private double previous[][];
 
     private double difference;
 
     public JacobiSimulation(String args[]) {
         width = Integer.valueOf(args[0]);
         height = Integer.valueOf(args[1]);
-        maxSteps = Integer.valueOf(args[2]);
-        delay = Integer.valueOf(args[3]);
 
-        jacobiMap_current = new double[height][width];
-        jacobiMap_previous = new double[height][width];
+        maxSteps = Integer.valueOf(args[2]);
+        waitTime = Integer.valueOf(args[3]);
+
+        //all components will be initialized with 0
+        current = new double[height][width];
+        previous = new double[height][width];
     }
 
     public void run() {
-        for (currentStep = 0; currentStep < maxSteps; currentStep++) {
+        //loop simulation steps
+        for (currentStep = 1; currentStep <= maxSteps; currentStep++) {
             simulate();
             printState();
-            pause(delay);
+            pause(waitTime);
         }
     }
 
     private void simulate() {
-        jacobiMap_previous = jacobiMap_current;
+        //reset the working state
+        difference = 0;
+        //just move the reference, but we have to create a new current
+        //so it wouldn't be the same object as the previous object
+        previous = current;
+        current = new double[height][width];
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                double newVal = 0.25 * (j > 0 ? jacobiMap_previous[i][j - 1] : 1.0)
-                        + (j < height - 1 ? jacobiMap_previous[i][j + 1] : 1.0)
-                        + (i > 0 ? jacobiMap_previous[i - 1][j] : 1.0)
-                        + (i < width - 1 ? jacobiMap_previous[i + 1][j] : 1.0);
+                double newVal = 0.25 * (j > 0 ? previous[i][j - 1] : 1.0)
+                        + (j < height - 1 ? previous[i][j + 1] : 1.0)
+                        + (i > 0 ? previous[i - 1][j] : 1.0)
+                        + (i < width - 1 ? previous[i + 1][j] : 1.0);
 
-                jacobiMap_current[i][j] = newVal;
+                current[i][j] = newVal;
 
                 //the difference should be always positive, so calculate the absolute value
-                double previousVal = jacobiMap_previous[i][j];
+                double previousVal = previous[i][j];
                 difference += Math.abs(newVal - previousVal);
             }
         }
@@ -71,8 +88,8 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     private void printState() {
-        println("Iteration " + String.valueOf(currentStep) + " Difference: " + difference);
-        for (double row[] : jacobiMap_current) {
+        println("Iteration " + currentStep + " Difference: " + difference);
+        for (double row[] : current) {
             for (double element : row) {
                 print(getFilledChar(element));
             }
@@ -82,11 +99,11 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     public double[][] getCurrent() {
-        return jacobiMap_current;
+        return Arrays.copyOf(current, current.length);
     }
 
     public double[][] getPrevious() {
-        return jacobiMap_previous;
+        return Arrays.copyOf(previous, previous.length);
     }
 
     /**

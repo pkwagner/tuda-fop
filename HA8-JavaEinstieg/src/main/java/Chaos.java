@@ -10,7 +10,6 @@
  * @author Marcel Lackovic
  */
 public class Chaos {
-
     /**
      * Calculates the gcd (greatest common divisor) using the extended euclid algorithm.
      * <p>

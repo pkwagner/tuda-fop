@@ -1,3 +1,14 @@
+/**
+ * Decrypts a encrypted hardcoded string using given prime numbers
+ * and the public key. Then it display the decrypted part on the command line.
+ * <p>
+ * Optimized code for Schematic Inc written in 2016
+ *
+ * @author Alexander Siegler
+ * @author Paul Konstantin Wagner
+ * @author Yoshua Hitzel
+ * @author Marcel Lackovic
+ */
 public class Chaos {
 
 	/*

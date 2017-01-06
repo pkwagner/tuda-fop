@@ -157,9 +157,12 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Visualize the current state on the GUI to the user, but buffers the output before it flushes it to the GUI.
+     * Visualize the current state on the GUI to the user.
+     *
+     * Compared to {@link #printState() printState} method, this method buffers the output before it flushes it
+     * to the GUI.
      */
-    public void printStateWithoutFlickering() {
+    private void printStateWithoutFlickering() {
         String lineSep = System.getProperty("line.separator");
         //starts from a fresh output
         StringBuilder outputBuilder = new StringBuilder();
@@ -194,7 +197,7 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Gets the absolute difference after the most recent iteration.
+     * Gets the absolute difference of the most recent iteration compared to the iteration before.
      *
      * @return the absolute difference between the last iteration and the iteration before that one
      */

@@ -1,4 +1,5 @@
 public class Chaos {
+
 	/*
 	 * Finds the greatest common divisor (gcd) using extended Euklid algorithm
 	 * 

@@ -29,6 +29,19 @@ public class JacobiSimulation extends ConsoleProgram {
 
     private double difference;
 
+    /**
+     * Starts the program. This program requires 4 arguments to work correctly.
+     *
+     * Please specify the arguments in the correct order as their meanings here:
+     * <ul>
+     *     <li>map width</li>
+     *     <li>map height</li>
+     *     <li>max iteration steps</li>
+     *     <li>wait time in milliseconds</li>
+     * </ul>
+     *
+     * @param args arguments array with the contents from above
+     */
     public JacobiSimulation(String args[]) {
         //dimensions
         width = Integer.valueOf(args[0]);
@@ -42,15 +55,20 @@ public class JacobiSimulation extends ConsoleProgram {
         previous = new double[height][width];
     }
 
+    @Override
     public void run() {
         //loop simulation steps
-        for (currentStep = 1; currentStep <= maxSteps; currentStep++) {
+        for (currentStep = 0; currentStep < maxSteps; currentStep++) {
             simulate();
             printState();
+//            printStateWithoutFlickering();
             pause(waitTime);
         }
     }
 
+    /**
+     * Performs the calculations for another iteration step
+     */
     private void simulate() {
         //reset the working state of difference and jacobi maps
         difference = 0;
@@ -104,7 +122,8 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Gets a UTF-8 character representing the given percent value. Every character has the same width and height.
+     * Gets a UTF-8 character representing the given percent value. Every character (should) has the same
+     * width and height.
      * <p>
      * The higher the percent value is the more is character filled with black color from the bottom to the up.
      *
@@ -117,7 +136,7 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Visualize the current state. It prints the current state to the user on the GUI.
+     * Visualize the current state on the GUI to the user.
      */
     private void printState() {
         //clear the the window content
@@ -135,6 +154,35 @@ public class JacobiSimulation extends ConsoleProgram {
             //we finished the current line switch to the next one
             println();
         }
+    }
+
+    /**
+     * Visualize the current state on the GUI to the user, but buffers the output before it flushes it to the GUI.
+     */
+    public void printStateWithoutFlickering() {
+        String lineSep = System.getProperty("line.separator");
+        //starts from a fresh output
+        StringBuilder outputBuilder = new StringBuilder();
+
+        outputBuilder.append("Iterations: ")
+                .append(currentStep)
+                .append(" Difference: ")
+                .append(difference)
+                .append(lineSep);
+
+        //simulation content:
+        for (double[] line : current) {
+            for (double column : line) {
+                outputBuilder.append(getFilledChar(column));
+            }
+
+            //we finished the current line switch to the next one
+            outputBuilder.append(lineSep);
+        }
+
+        //flush changes
+        getConsole().clear();
+        print(outputBuilder);
     }
 
     public double[][] getCurrent() {
@@ -155,17 +203,10 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Starts the program. This program requires 4 arguments to work correctly.
+     * See the documentation of JacobiSimulation
      *
-     * Please specify the arguments in the correct order as their meanings here:
-     * <ul>
-     *     <li>map width</li>
-     *     <li>map height</li>
-     *     <li>max iteration steps</li>
-     *     <li>wait time in milliseconds</li>
-     * </ul>
-     *
-     * @param args arguments array with the contents from above
+     * @param args checkout the references documentation
+     * @see JacobiSimulation
      */
     public static void main(String args[]) {
         new JacobiSimulation(args).start();

@@ -11,7 +11,7 @@
  */
 public class Chaos {
 
-	/*
+	/**
 	 * Finds the greatest common divisor (gcd) using extended Euklid algorithm
 	 * 
 	 * @param i First number
@@ -25,7 +25,7 @@ public class Chaos {
 		return new int[] { k[0], k[2], k[1] - (i / j) * k[2] };
 	}
 
-	/*
+	/**
 	 * Decrypts an encrypted char using RSA
 	 * 
 	 * @param i Char that should be decrypted
@@ -37,7 +37,7 @@ public class Chaos {
 		return (char) (Math.pow(i, j) % k);
 	}
 
-	/*
+	/**
 	 * Generates a new RSA key out of given values and
 	 * decrypts a predefined message with it.
 	 * 
@@ -55,4 +55,4 @@ public class Chaos {
 			message[i] = (char) (decryptChar(message_encrypted[i], privateKey, n) + 'A');// print it!
 		System.out.println(message);
 	}
-}// optimized code for Schematic Inc written in 2016
+}

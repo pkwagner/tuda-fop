@@ -186,6 +186,16 @@ public class JacobiSimulation extends ConsoleProgram {
         //flush changes
         getConsole().clear();
         print(outputBuilder);
+        /*
+        Task: 7.3:
+        Although of this optimization the simulation will flicker nevertheless. This happens because we only buffer
+        the string output, but not the actual drawing. So the window/frame could be updated while we are still drawing
+        the characters.
+
+        This can be fixed with page flipping (within Java's BufferStrategy). So we are painting to different frame.
+        When we are finished, we flip to the current painted frame. After that we could the old frame and do the same
+        again for the next iteration.
+         */
     }
 
     /**

@@ -42,7 +42,6 @@ public class Chaos {
 	 * decrypts a predefined message with it.
 	 * 
 	 * @param l Default execution commands (ignored)
-	 * @return A predefined plain text
 	 */
 	public static void main(String[] l) {
 		int p = 3, q = 11, n = p * q, phi = (p - 1) * (q - 1);

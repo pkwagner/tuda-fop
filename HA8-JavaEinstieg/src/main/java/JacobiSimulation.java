@@ -31,7 +31,7 @@ public class JacobiSimulation extends ConsoleProgram {
 
     /**
      * Starts the program. This program requires 4 arguments to work correctly.
-     *
+     * <p>
      * Please specify the arguments in the correct order as their meanings here:
      * <ul>
      *     <li>map width</li>
@@ -158,7 +158,7 @@ public class JacobiSimulation extends ConsoleProgram {
 
     /**
      * Visualize the current state on the GUI to the user.
-     *
+     * <p>
      * Compared to {@link #printState() printState} method, this method buffers the output before it flushes it
      * to the GUI.
      */
@@ -188,10 +188,20 @@ public class JacobiSimulation extends ConsoleProgram {
         print(outputBuilder);
     }
 
+    /**
+     * Gets the most recent state of a iteration
+     *
+     * @return most recent state
+     */
     public double[][] getCurrent() {
         return Arrays.copyOf(current, current.length);
     }
 
+    /**
+     * Gets the state of the previous iteration (before current).
+     *
+     * @return the state from the previous iteration.
+     */
     public double[][] getPrevious() {
         return Arrays.copyOf(previous, previous.length);
     }

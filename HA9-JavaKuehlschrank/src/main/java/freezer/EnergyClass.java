@@ -1,65 +1,89 @@
 package freezer;
 
 /**
- * Created by alphath on 1/11/17.
+ * Represents the energy efficiency clazz for a freezer
+ *
+ * @author Alexander Siegler
+ * @author Paul Konstantin Wagner
+ * @author Yoshua Hitzel
+ * @author Marcel Lackovic
  */
 public class EnergyClass {
-    private static final int Appp = 429;
-    private static final int App = 100;
-    private static final int Ap = 428;
-    private static final int A = 174;
-    private static final int B = 272;
-    private static final int C = 925;
-    private static final int D = 48;
 
-    private int energyClass;
+    private final String name;
+    private final double minEfficiency;
 
-    public EnergyClass (int energyClass) {
-        this.energyClass = energyClass;
+    /**
+     * Creates a new energy class
+     *
+     * @param name name of this class type
+     * @param minEfficiency the min efficiency that this class fulfills
+     *
+     */
+    public EnergyClass(String name, double minEfficiency) {
+        this.name = name;
+        this.minEfficiency = minEfficiency;
     }
 
-    public double getMinEfficiency () {
-        switch (this.energyClass) {
-            case EnergyClass.Appp:
-                return 0.2;
-            case EnergyClass.App:
-                return 0.18;
-            case EnergyClass.Ap:
-                return 0.16;
-            case EnergyClass.A:
-                return 0.14;
-            case EnergyClass.B:
-                return 0.12;
-            case EnergyClass.C:
-                return 0.1;
-            default:
-                return 0;
+    /**
+     * Gets the minimal efficiency by this class
+     *
+     * @return minimal efficiency by this class
+     */
+    public double getMinEfficiency() {
+        return minEfficiency;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    //this have to be public in order to provide access from the given StudentTests
+    public static final EnergyClass Appp = new EnergyClass("A+++", 0.2);
+    public static final EnergyClass App = new EnergyClass("A++", 0.18);
+    public static final EnergyClass Ap = new EnergyClass("A+", 0.16);
+    public static final EnergyClass A = new EnergyClass("A", 0.14);
+    public static final EnergyClass B = new EnergyClass("B", 0.12);
+    public static final EnergyClass C = new EnergyClass("C", 0.1);
+    public static final EnergyClass D = new EnergyClass("D", 0);
+
+    /**
+     * Gets the efficiency class that reflects the given efficiency
+     *
+     * @param efficiency freezer efficiency
+     * @return the energy efficiency class for the given efficiency
+     */
+    public static EnergyClass getEnergyClass(double efficiency) {
+        EnergyClass result = EnergyClass.D;
+        if (efficiency >= EnergyClass.C.getMinEfficiency()) {
+            result = EnergyClass.C;
         }
-    }
 
-    public static EnergyClass getEnergyClass (double efficiency) {
-        // TODO Needs to be filled up with code!
-        return null;
-    }
-
-    public String toString () {
-        switch (this.energyClass) {
-            case EnergyClass.Appp:
-                return "A+++";
-            case EnergyClass.App:
-                return "A++";
-            case EnergyClass.Ap:
-                return "A+";
-            case EnergyClass.A:
-                return "A";
-            case EnergyClass.B:
-                return "B";
-            case EnergyClass.C:
-                return "C";
-            case EnergyClass.D:
-                return "D";
-            default:
-                return "undefined";
+        if (efficiency >= EnergyClass.B.getMinEfficiency()) {
+            result = EnergyClass.B;
         }
+
+        if (efficiency >= EnergyClass.A.getMinEfficiency()) {
+            result = EnergyClass.A;
+        }
+
+        if (efficiency >= EnergyClass.A.getMinEfficiency()) {
+            result = EnergyClass.A;
+        }
+
+        if (efficiency >= EnergyClass.Ap.getMinEfficiency()) {
+            result = EnergyClass.Ap;
+        }
+
+        if (efficiency >= EnergyClass.App.getMinEfficiency()) {
+            result = EnergyClass.App;
+        }
+
+        if (efficiency >= EnergyClass.Appp.getMinEfficiency()) {
+            result = EnergyClass.Appp;
+        }
+
+        return result;
     }
 }

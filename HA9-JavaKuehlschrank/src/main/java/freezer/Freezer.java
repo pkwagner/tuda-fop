@@ -1,6 +1,7 @@
 package freezer;
 
 import freezer.doors.Door;
+import freezer.interiors.Interior;
 
 /**
  * Created by alphath on 1/11/17.
@@ -9,7 +10,7 @@ public class Freezer implements Part {
     private double width, height, depth, wallThickness;
     private double innerWidth, innerHeight, innerDepth;
     private Door door;
-    //private Interior interior;
+    private Interior interior;
 
     public Freezer (double width, double height, double depth, double wallThickness) {
         this.width = width;
@@ -25,12 +26,21 @@ public class Freezer implements Part {
 
     @Override
     public String getArticleNumber() {
-        return null;
+        String string_width = String.valueOf(this.width*10);
+        String string_height = String.valueOf(this.height*10);
+        String string_depth = String.valueOf(this.depth*10);
+        String string_wallThickness = String.valueOf(this.wallThickness*100);
+        string_width = (string_width.length() == 1) ? "0"+string_width : string_width;
+        string_height = (string_height.length() == 1) ? "0"+string_height : string_height;
+        string_depth = (string_depth.length() == 1) ? "0"+string_depth : string_depth;
+        string_wallThickness = (string_wallThickness.length() == 1) ? "0"+string_wallThickness : string_wallThickness;
+
+        return "FSDN" + string_width + string_height + string_depth + string_wallThickness + this.door.getArticleNumber() + this.interior.getArticleNumber();
     }
 
     @Override
     public double getPrice() {
-        return 0;
+        return Math.round((this.getOuterSurfaceArea()*7.32 + this.getInnerSurfaceArea()*0.625 + this.door.getPrice() + this.interior.getPrice()) * 100) / 100;
     }
 
 
@@ -78,5 +88,13 @@ public class Freezer implements Part {
 
     public void setDoor(Door door) {
         this.door = door;
+    }
+
+    public Interior getInterior() {
+        return interior;
+    }
+
+    public void setInterior(Interior interior) {
+        this.interior = interior;
     }
 }

@@ -1,7 +1,13 @@
 package freezer;
 
+import freezer.conditions.Condition;
 import freezer.doors.Door;
 import freezer.interiors.Interior;
+
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by alphath on 1/11/17.
@@ -96,5 +102,58 @@ public class Freezer implements Part {
 
     public void setInterior(Interior interior) {
         this.interior = interior;
+    }
+
+    @Override
+    public String toString() {
+        return getArticleNumber();
+    }
+
+    @Override
+    protected Freezer clone() {
+        Freezer clone = new Freezer(width, height, depth, wallThickness);
+        clone.setDoor(door);
+        clone.setInterior(interior);
+        return clone;
+    }
+
+    /**
+     * @param conditions show only freezers that returns true on these conditions
+     * @return available freezers fulfills the given conditions (this can be also an empty list)
+     */
+    public static LinkedList<Freezer> getAvailableFreezers(Condition[] conditions) {
+        Stream.Builder<Freezer> availableFreezers = Stream.builder();
+
+        //cartesian product
+        for (double width : StaticFreezer.availableWidths) {
+            for (double height : StaticFreezer.availableHeights) {
+                for (double depth : StaticFreezer.availableDepths) {
+                    for (double thickness : StaticFreezer.availableWallThickness) {
+                        for (Door door : Door.getAvailableDoors()) {
+                            Freezer basicFreezer = new Freezer(width, height, depth, thickness);
+                            basicFreezer.setDoor(door);
+                            for (Interior interior : Interior.getAvailableInteriors(basicFreezer)) {
+                                //Create a new instance in order to prevent overriding of the interior
+                                Freezer newFreezer = basicFreezer.clone();
+                                newFreezer.setInterior(interior);
+                                availableFreezers.add(newFreezer);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //filter all content that does not match the conditions
+        Stream<Freezer> stream = availableFreezers.build();
+        for (Condition condition : conditions) {
+            stream = stream.filter(condition::isFullfilled);
+        }
+
+        //sort the output and return the result as the required LinkedList
+        Comparator<Freezer> comparator = new StringComparator();
+        return stream
+                .sorted(comparator)
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 }

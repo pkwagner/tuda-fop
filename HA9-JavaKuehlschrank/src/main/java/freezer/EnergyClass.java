@@ -68,10 +68,6 @@ public class EnergyClass {
             result = EnergyClass.A;
         }
 
-        if (efficiency >= EnergyClass.A.getMinEfficiency()) {
-            result = EnergyClass.A;
-        }
-
         if (efficiency >= EnergyClass.Ap.getMinEfficiency()) {
             result = EnergyClass.Ap;
         }

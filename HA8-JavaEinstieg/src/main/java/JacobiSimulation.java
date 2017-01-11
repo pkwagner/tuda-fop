@@ -43,6 +43,11 @@ public class JacobiSimulation extends ConsoleProgram {
      * @param args arguments array with the contents from above
      */
     public JacobiSimulation(String args[]) {
+        if (args.length != 4) {
+            System.err.println("Usage: java JacobiSimulation <width> <height> <maxIterations> <waitTime>");
+            System.exit(1);
+        }
+
         //dimensions
         width = Integer.valueOf(args[0]);
         height = Integer.valueOf(args[1]);
@@ -80,11 +85,11 @@ public class JacobiSimulation extends ConsoleProgram {
 
         for (int posY = 0; posY < height; posY++) {
             for (int posX = 0; posX < width; posX++) {
-                double left = getOrDefault(previous, posY, posX - 1, 1);
-                double right = getOrDefault(previous, posY, posX + 1, 1);
+                double left = getOrDefault(posY, posX - 1);
+                double right = getOrDefault(posY, posX + 1);
 
-                double above = getOrDefault(previous, posY - 1, posX, 1);
-                double below = getOrDefault(previous, posY + 1, posX, 1);
+                double above = getOrDefault(posY - 1, posX);
+                double below = getOrDefault(posY + 1, posX);
 
                 double newVal = 0.25 * (left + right + above + below);
                 current[posY][posX] = newVal;
@@ -97,28 +102,20 @@ public class JacobiSimulation extends ConsoleProgram {
     }
 
     /**
-     * Gets an element of the two dimensional array or return the given default value if it's outside
+     * Gets an element of the two dimensional previous array or return the 1 as default value if it's outside
      * of the array.
      *
-     * @param array the array to be searched in
-     * @param posX  index of the second dimension
      * @param posY  index of the first dimension
-     * @param def   default value if it's outside the array
+     * @param posX  index of the second dimension
      * @return the array element or the default value
      */
-    private double getOrDefault(double[][] array, int posY, int posX, double def) {
+    private double getOrDefault(int posY, int posX) {
         //the first dimension is out of range
-        if (posY < 0 || posY >= array.length) {
-            return def;
+        if (posX < 0 || posX >= width || posY < 0 || posY >= height) {
+            return 1;
         }
 
-        //second dimension is out of range
-        double[] val = array[posY];
-        if (posX < 0 || posX >= val.length) {
-            return def;
-        }
-
-        return val[posX];
+        return previous[posY][posX];
     }
 
     /**
@@ -201,7 +198,7 @@ public class JacobiSimulation extends ConsoleProgram {
     /**
      * Gets the most recent state of a iteration
      *
-     * @return most recent state
+     * @return a copy of the most recent state
      */
     public double[][] getCurrent() {
         return Arrays.copyOf(current, current.length);
@@ -210,7 +207,7 @@ public class JacobiSimulation extends ConsoleProgram {
     /**
      * Gets the state of the previous iteration (before current).
      *
-     * @return the state from the previous iteration.
+     * @return a copy of the state from the previous iteration.
      */
     public double[][] getPrevious() {
         return Arrays.copyOf(previous, previous.length);

@@ -10,6 +10,7 @@
  * @author Marcel Lackovic
  */
 public class Chaos {
+
     /**
      * Calculates the gcd (greatest common divisor) using the extended euclid algorithm.
      * <p>
@@ -48,7 +49,7 @@ public class Chaos {
     public static void main(String[] args) {
         int prime1 = 3;
         int prime2 = 11;
-        int n = prime1 * prime2;
+        int modulo = prime1 * prime2;
         int phi = (prime1 - 1) * (prime2 - 1);
 
         int publicKey = 7;
@@ -58,7 +59,7 @@ public class Chaos {
         char[] decrypted = encrypted.clone();
 
         for (int i = 0; i < encrypted.length; i++) {
-            decrypted[i] = (char) (decryptChar(encrypted[i], privateKey, n) + 'A');
+            decrypted[i] = (char) (decryptChar(encrypted[i], privateKey, modulo) + 'A');
         }
 
         //print it!

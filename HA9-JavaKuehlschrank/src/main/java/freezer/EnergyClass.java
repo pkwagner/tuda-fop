@@ -18,7 +18,6 @@ public class EnergyClass {
      *
      * @param name name of this class type
      * @param minEfficiency the min efficiency that this class fulfills
-     *
      */
     public EnergyClass(String name, double minEfficiency) {
         this.name = name;
@@ -55,31 +54,19 @@ public class EnergyClass {
      * @return the energy efficiency class for the given efficiency
      */
     public static EnergyClass getEnergyClass(double efficiency) {
-        EnergyClass result = EnergyClass.D;
-        if (efficiency >= EnergyClass.C.getMinEfficiency()) {
-            result = EnergyClass.C;
-        }
-
-        if (efficiency >= EnergyClass.B.getMinEfficiency()) {
-            result = EnergyClass.B;
-        }
-
-        if (efficiency >= EnergyClass.A.getMinEfficiency()) {
-            result = EnergyClass.A;
-        }
-
-        if (efficiency >= EnergyClass.Ap.getMinEfficiency()) {
-            result = EnergyClass.Ap;
-        }
-
-        if (efficiency >= EnergyClass.App.getMinEfficiency()) {
-            result = EnergyClass.App;
-        }
-
-        if (efficiency >= EnergyClass.Appp.getMinEfficiency()) {
-            result = EnergyClass.Appp;
-        }
-
-        return result;
+        if (efficiency >= EnergyClass.Appp.getMinEfficiency())
+            return EnergyClass.Appp;
+        else if (efficiency >= EnergyClass.App.getMinEfficiency())
+            return EnergyClass.App;
+        else if (efficiency >= EnergyClass.Ap.getMinEfficiency())
+            return EnergyClass.Ap;
+        else if (efficiency >= EnergyClass.A.getMinEfficiency())
+            return EnergyClass.A;
+        else if (efficiency >= EnergyClass.B.getMinEfficiency())
+            return EnergyClass.B;
+        else if (efficiency >= EnergyClass.C.getMinEfficiency())
+            return EnergyClass.C;
+        else
+            return EnergyClass.D;
     }
 }

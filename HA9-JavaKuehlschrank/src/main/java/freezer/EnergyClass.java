@@ -4,13 +4,13 @@ package freezer;
  * Created by alphath on 1/11/17.
  */
 public class EnergyClass {
-    private static final int Appp = 429;
-    private static final int App = 100;
-    private static final int Ap = 428;
-    private static final int A = 174;
-    private static final int B = 272;
-    private static final int C = 925;
-    private static final int D = 48;
+    public static final int Appp = 429;
+    public static final int App = 100;
+    public static final int Ap = 428;
+    public static final int A = 174;
+    public static final int B = 272;
+    public static final int C = 925;
+    public static final int D = 48;
 
     private int energyClass;
 

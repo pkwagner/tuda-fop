@@ -30,6 +30,6 @@ public abstract class Interior implements Part {
 
     public static Interior[] getAvailableInteriors (Freezer freezer) {
         //create a new instance every to prevent users to use the **same** object
-        return ((freezer.getInnerVolume() >= 1) ? new Interior[]{new Standard(freezer), new ArcticSpecial(freezer)} : new Interior[]{new Standard(freezer)});
+        return ((freezer.getInnerVolume() >= 1) ? new Interior[]{new Standard(freezer), new ArcticSpecial(freezer), null} : new Interior[]{new Standard(freezer), null});
     }
 }

@@ -33,7 +33,8 @@ public class StudentTest {
 		assertEquals(4.86, f.getInnerSurfaceArea(), 0.0001);
 
 		assertEquals(0.15, f.getEnergyEfficiency(), 0.0001);
-		assertEquals(EnergyClass.A, f.getEnergyClass());
+		// TODO Was this what you wanted to check?
+		assertEquals(EnergyClass.A, EnergyClass.getEnergyClass(f.getEnergyEfficiency()));
 
 		assertEquals(51.57, f.getPrice(), 0.0);
 	}

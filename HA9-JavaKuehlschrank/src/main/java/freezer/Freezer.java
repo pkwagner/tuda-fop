@@ -10,7 +10,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Created by alphath on 1/11/17.
+ * Represents the energy efficiency clazz for a freezer
+ *
+ * @author Alexander Siegler
+ * @author Paul Konstantin Wagner
+ * @author Yoshua Hitzel
+ * @author Marcel Lackovic
  */
 public class Freezer implements Part {
     private double width, height, depth, wallThickness;
@@ -18,55 +23,105 @@ public class Freezer implements Part {
     private Door door;
     private Interior interior;
 
-    public Freezer (double width, double height, double depth, double wallThickness) {
+    /**
+     * Creates a new instance of class Freezer
+     *
+     * @param width         Outer width of the freezer
+     * @param height        Outer width of the freezer
+     * @param depth         Outer depth of the freezer
+     * @param wallThickness Distance between each inner and outer wall
+     */
+    public Freezer(double width, double height, double depth, double wallThickness) {
+        // Apply the values provided by the constructor
         this.width = width;
         this.height = height;
         this.depth = depth;
         this.wallThickness = wallThickness;
 
-        this.innerWidth = width - 2*wallThickness;
-        this.innerHeight = height - 2*wallThickness;
-        this.innerDepth = depth - 2*wallThickness;
+        // Calculate inner values in advance, cause they're used multiple times later
+        this.innerWidth = width - 2 * wallThickness;
+        this.innerHeight = height - 2 * wallThickness;
+        this.innerDepth = depth - 2 * wallThickness;
     }
 
 
     @Override
     public String getArticleNumber() {
-        String string_width = String.valueOf(this.width*10);
-        String string_height = String.valueOf(this.height*10);
-        String string_depth = String.valueOf(this.depth*10);
-        String string_wallThickness = String.valueOf(this.wallThickness*100);
-        string_width = (string_width.length() == 1) ? "0"+string_width : string_width;
-        string_height = (string_height.length() == 1) ? "0"+string_height : string_height;
-        string_depth = (string_depth.length() == 1) ? "0"+string_depth : string_depth;
-        string_wallThickness = (string_wallThickness.length() == 1) ? "0"+string_wallThickness : string_wallThickness;
+        // Convert sizes to the target unit and convert them to strings
+        // (String conversions are needed to define the length)
+        String string_width = String.valueOf(this.width * 10);                  // m -> dm
+        String string_height = String.valueOf(this.height * 10);                // m -> dm
+        String string_depth = String.valueOf(this.depth * 10);                  // m -> dm
+        String string_wallThickness = String.valueOf(this.wallThickness * 100); // m -> cm
 
+        // Add a leading '0' to every value with only one digit
+        string_width = (string_width.length() == 1) ? "0" + string_width : string_width;
+        string_height = (string_height.length() == 1) ? "0" + string_height : string_height;
+        string_depth = (string_depth.length() == 1) ? "0" + string_depth : string_depth;
+        string_wallThickness = (string_wallThickness.length() == 1) ? "0" + string_wallThickness : string_wallThickness;
+
+        // Build and return article number
         return "FSDN" + string_width + string_height + string_depth + string_wallThickness + this.door.getArticleNumber() + this.interior.getArticleNumber();
     }
 
     @Override
     public double getPrice() {
-        return Math.round((this.getOuterSurfaceArea()*7.32 + this.getInnerSurfaceArea()*0.625 + this.door.getPrice() + this.interior.getPrice()) * 100) / 100;
+        // Calculate the price using outer surface area, inner surface area and prices of the parts itself & round it
+        return Math.round(
+                (this.getOuterSurfaceArea() * 7.32
+                        + this.getInnerSurfaceArea() * 0.625
+                        + this.door.getPrice()
+                        + this.interior.getPrice()) * 100)
+                / 100;
     }
 
 
-    public double getOuterVolume () {
+    /**
+     * Calculates the volume of the freezer based on the outer size
+     *
+     * @return The outer volume of the freezer
+     */
+    public double getOuterVolume() {
         return this.width * this.height * this.depth;
     }
 
-    public double getOuterSurfaceArea () {
-        return 2*(this.width*this.height) + 2*(this.width*this.depth) + 2*(this.height*this.depth);
+    /**
+     * Calculates the surface area of the freezer based on the outer size
+     *
+     * @return The outer surface area of the freezer
+     */
+    public double getOuterSurfaceArea() {
+        return 2 * (this.width * this.height)       // Front & back plate
+                + 2 * (this.width * this.depth)     // Top & bottom plate
+                + 2 * (this.height * this.depth);   // Side plates
     }
 
-    public double getInnerVolume () {
+    /**
+     * Calculates the volume of the freezer based on the inner size
+     *
+     * @return The inner volume of the freezer
+     */
+    public double getInnerVolume() {
         return this.innerWidth * this.innerHeight * this.innerDepth;
     }
 
-    public double getInnerSurfaceArea () {
-        return 2*(this.innerWidth*this.innerHeight) + 2*(this.innerWidth*this.innerDepth) + 2*(this.innerHeight*this.innerDepth);
+    /**
+     * Calculates the surface area of the freezer based on the inner size
+     *
+     * @return The inner surface area of the freezer
+     */
+    public double getInnerSurfaceArea() {
+        return 2 * (this.innerWidth * this.innerHeight)     // Front & back plate
+                + 2 * (this.innerWidth * this.innerDepth)   // Top & bottom plate
+                + 2 * (this.innerHeight * this.innerDepth); // Side plates
     }
 
-    public double getEnergyEfficiency () {
+    /**
+     * Calculates the energy efficiency of the freezer using it's inner volume and surface area
+     *
+     * @return The energy efficiency of the freezer
+     */
+    public double getEnergyEfficiency() {
         return this.getInnerVolume() / this.getInnerSurfaceArea();
     }
 

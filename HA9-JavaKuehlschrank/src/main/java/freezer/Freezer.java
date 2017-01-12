@@ -78,7 +78,8 @@ public class Freezer implements Part {
         }
 
         //round it to numbers after the decimal dot
-        return Math.round(price * 100) / 100;
+        //divide by decimal to trigger a double/float division
+        return Math.round(price * 100) / 100.0;
     }
 
 

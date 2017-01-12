@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Represents the energy efficiency clazz for a freezer
+ * Represents a freezer
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

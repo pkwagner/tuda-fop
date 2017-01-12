@@ -1,7 +1,7 @@
 package freezer;
 
 /**
- * Represents the energy efficiency clazz for a freezer
+ * Represents the energy efficiency class for a freezer
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

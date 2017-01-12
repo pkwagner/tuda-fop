@@ -3,7 +3,7 @@ package freezer.interiors;
 import freezer.Freezer;
 
 /**
- * Represents the energy efficiency clazz for a freezer
+ * Represents a standard interior
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

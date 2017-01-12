@@ -7,7 +7,7 @@
     <packaging>jar</packaging>
 
     <version>1.0-SNAPSHOT</version>
-    <name>Uebung9</name>
+    <name>Uebung9-Freezer</name>
 
     <build>
         <plugins>

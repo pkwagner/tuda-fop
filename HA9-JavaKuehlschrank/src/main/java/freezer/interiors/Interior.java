@@ -4,7 +4,7 @@ import freezer.Freezer;
 import freezer.Part;
 
 /**
- * Represents the energy efficiency clazz for a freezer
+ * Represents any kind of interior for a freezer
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

@@ -1,7 +1,7 @@
 package freezer.doors;
 
 /**
- * Represents the energy efficiency clazz for a freezer
+ * Represents a premium door
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

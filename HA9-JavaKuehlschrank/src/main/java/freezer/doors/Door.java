@@ -3,7 +3,7 @@ package freezer.doors;
 import freezer.Part;
 
 /**
- * Represents the energy efficiency clazz for a freezer
+ * Represents a abstract door of a freezer
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner

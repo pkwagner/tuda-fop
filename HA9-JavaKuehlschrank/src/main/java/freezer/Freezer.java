@@ -49,10 +49,10 @@ public class Freezer implements Part {
     public String getArticleNumber() {
         // Convert sizes to the target unit and convert them to strings
         // (String conversions are needed to define the length)
-        String string_width = String.valueOf(this.width * 10);                  // m -> dm
-        String string_height = String.valueOf(this.height * 10);                // m -> dm
-        String string_depth = String.valueOf(this.depth * 10);                  // m -> dm
-        String string_wallThickness = String.valueOf(this.wallThickness * 100); // m -> cm
+        String string_width = String.valueOf((int) this.width * 10);                  // m -> dm
+        String string_height = String.valueOf((int) this.height * 10);                // m -> dm
+        String string_depth = String.valueOf((int) this.depth * 10);                  // m -> dm
+        String string_wallThickness = String.valueOf((int) this.wallThickness * 100); // m -> cm
 
         // Add a leading '0' to every value with only one digit
         string_width = (string_width.length() == 1) ? "0" + string_width : string_width;

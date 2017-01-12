@@ -31,5 +31,15 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>acm</groupId>
+            <artifactId>acm</artifactId>
+            <!--The file is smaller than the latest version (2.0), so we can assume it's older-->
+            <version>1.0-SNAPSHOT</version>
+            <!--The dependency doesn't seem to be available in a public repository-->
+            <scope>system</scope>
+            <systemPath>${basedir}/../acm.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

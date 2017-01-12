@@ -134,34 +134,75 @@ public class Freezer implements Part {
 
 
     // Getters & Setters
+
+    /**
+     * Returns the width of the freezer in meters
+     *
+     * @return The width of the freezer [m]
+     */
     public double getWidth() {
         return width;
     }
 
+    /**
+     * Returns the height of the freezer in meters
+     *
+     * @return The height of the freezer [m]
+     */
     public double getHeight() {
         return height;
     }
 
+    /**
+     * Returns the depth of the freezer in meters
+     *
+     * @return The depth of the freezer [m]
+     */
     public double getDepth() {
         return depth;
     }
 
+    /**
+     * Returns the wall thickness of the freezer in meters
+     *
+     * @return The wall thickness of the freezer [m]
+     */
     public double getWallThickness() {
         return wallThickness;
     }
 
+    /**
+     * Returns the previously set door of the freezer
+     *
+     * @return The door of the freezer
+     */
     public Door getDoor() {
         return door;
     }
 
+    /**
+     * Sets a door for the freezer
+     *
+     * @param door The door the freezer contains
+     */
     public void setDoor(Door door) {
         this.door = door;
     }
 
+    /**
+     * Returns the previously set interior of the freezer
+     *
+     * @return The interior of the freezer
+     */
     public Interior getInterior() {
         return interior;
     }
 
+    /**
+     * Sets a door for the freezer
+     *
+     * @param interior The interior the freezer contains
+     */
     public void setInterior(Interior interior) {
         this.interior = interior;
     }

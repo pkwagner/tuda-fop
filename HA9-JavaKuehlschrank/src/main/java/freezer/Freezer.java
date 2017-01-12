@@ -221,6 +221,9 @@ public class Freezer implements Part {
     }
 
     /**
+     * Gets all available freezers that meets the given conditions in a list. This list
+     * is sorted by the string representation of the created freezers which is the article name.
+     *
      * @param conditions show only freezers that returns true on these conditions
      * @return available freezers fulfills the given conditions (this can be also an empty list)
      */

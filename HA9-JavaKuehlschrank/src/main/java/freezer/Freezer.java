@@ -61,18 +61,24 @@ public class Freezer implements Part {
         string_wallThickness = (string_wallThickness.length() == 1) ? "0" + string_wallThickness : string_wallThickness;
 
         // Build and return article number
-        return "FSDN" + string_width + string_height + string_depth + string_wallThickness + this.door.getArticleNumber() + this.interior.getArticleNumber();
+        return "FSDN" + string_width + string_height + string_depth + string_wallThickness
+                + this.door.getArticleNumber()
+                + (interior == null ? "" : this.interior.getArticleNumber());
     }
 
     @Override
     public double getPrice() {
-        // Calculate the price using outer surface area, inner surface area and prices of the parts itself & round it
-        return Math.round(
-                (this.getOuterSurfaceArea() * 7.32
-                        + this.getInnerSurfaceArea() * 0.625
-                        + this.door.getPrice()
-                        + this.interior.getPrice()) * 100)
-                / 100;
+        // Calculate the price using outer surface area, inner surface area and prices of the parts itself &
+        double price = getOuterSurfaceArea() * 7.32
+                + getInnerSurfaceArea() * 0.625
+                + door.getPrice();
+
+        if (interior != null) {
+            price += interior.getPrice();
+        }
+
+        //round it to numbers after the decimal dot
+        return Math.round(price * 100) / 100;
     }
 
 

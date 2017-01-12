@@ -26,15 +26,6 @@ public abstract class Interior implements Part {
         this.price = price;
     }
 
-    /**
-     * Create a new instance using the default interior template
-     */
-    public Interior() {
-        // Default freezer interior
-        this.articleNumber = "_";
-        this.price = 0;
-    }
-
     @Override
     public String getArticleNumber() {
         return articleNumber;

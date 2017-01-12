@@ -1,10 +1,12 @@
 package freezer.tests;
 
-import freezer.*;
-import org.junit.*;
-import static org.junit.Assert.*;
+import freezer.EnergyClass;
+import freezer.Freezer;
+import org.junit.Test;
 
 import java.util.LinkedList;
+
+import static org.junit.Assert.assertEquals;
 
 public class StudentTest {
 	class TestCondition implements freezer.conditions.Condition {
@@ -33,7 +35,6 @@ public class StudentTest {
 		assertEquals(4.86, f.getInnerSurfaceArea(), 0.0001);
 
 		assertEquals(0.15, f.getEnergyEfficiency(), 0.0001);
-		// TODO Was this what you wanted to check?
 		assertEquals(EnergyClass.A, EnergyClass.getEnergyClass(f.getEnergyEfficiency()));
 
 		assertEquals(51.57, f.getPrice(), 0.0);

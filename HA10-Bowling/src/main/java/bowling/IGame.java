@@ -6,6 +6,7 @@ package bowling;
  * @author Nicolas Weber
  */
 public interface IGame {
+
     /**
      * Adds a player to the game
      * 
@@ -125,7 +126,7 @@ public interface IGame {
     /**
      * Throws a ball
      * 
-     * @param count
+     * @param count number of pins this ball hits
      * @return true if the throw was valid, false if any error occurred, e.g., game
      *         not started, invalid count, ...
      */

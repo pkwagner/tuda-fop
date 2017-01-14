@@ -224,7 +224,7 @@ public class Freezer implements Part {
      * Gets all available freezers that meets the given conditions in a list. This list
      * is sorted by the string representation of the created freezers which is the article name.
      *
-     * @param conditions show only freezers that returns true on these conditions
+     * @param conditions conditions that the returned freezers should match. If there are none. Choose an empty array
      * @return available freezers fulfills the given conditions (this can be also an empty list)
      */
     public static LinkedList<Freezer> getAvailableFreezers(Condition[] conditions) {

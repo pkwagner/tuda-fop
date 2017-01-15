@@ -8,7 +8,7 @@ import java.util.Arrays;
 import static org.junit.Assert.*;
 
 /**
- * Represents a bowling game test
+ * Represents a bowling game test. It tests bowling specific implementations
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner
@@ -118,6 +118,23 @@ public class BowlingTest {
 
         //on the last round the strike is counted as normal
         assertEquals(3 * 10, Arrays.stream(bowling.getScore(activePlayer)).sum());
+    }
+
+    @Test
+    public void testWinner() {
+        for (int round = 1; round <= 10; round = bowling.getRound()) {
+            //first player - spare always
+            bowling.throwBall(5);
+            bowling.throwBall(5);
+
+            //second player - strike always
+            bowling.throwBall(10);
+
+            //always skip the third player with zero points
+            skipRound();
+        }
+
+        assertEquals("Player2", bowling.getWinner().getName());
     }
 
     /**

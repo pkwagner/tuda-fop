@@ -135,6 +135,7 @@ public class BowlingTest {
         }
 
         assertEquals("Player2", bowling.getWinner().getName());
+        //todo: ask what should happen on same score
     }
 
     /**

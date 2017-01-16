@@ -1,11 +1,13 @@
 package bowling;
 
-import acm.graphics.*;
-import java.awt.*;
+import acm.graphics.GLabel;
+import acm.graphics.GOval;
+import acm.program.GraphicsProgram;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
-import javax.swing.*;
+import javax.swing.JOptionPane;
 
 public class GUI extends acm.program.GraphicsProgram implements KeyListener {
 	IGame game;
@@ -14,13 +16,14 @@ public class GUI extends acm.program.GraphicsProgram implements KeyListener {
 	GOval[] pins;
 	GLabel roundAndThrowLabel;
 	Random random;
+	int nrPinsCleared = 0, maxPins = 10;
 
 	private void initGame() {
 		random = new Random();
 
 		String[] args = getArgumentArray();
 
-		if (args[0].equals("Tannenbaum"))
+		if (args.length >= 1 && args[0].equals("Tannenbaum"))
 			game = new TannenbaumKegeln(args.length - 1);
 		else
 			game = new Bowling(args.length - 1);
@@ -87,9 +90,15 @@ public class GUI extends acm.program.GraphicsProgram implements KeyListener {
 
 	@Override
 	public void run() {
-		initGUI();
-		initGame();
-		initPlayer();
+  	    if (getArgumentArray().length < 3) {
+	        System.err.println("Usage: java GUI <gameMode> <playerNameA> <playerNameB> <playerC...>");
+	        System.exit(0);
+	    }
+	    else {
+	 		initGUI();
+			initGame();
+			initPlayer();
+		}
 	}
 
 	private void updateLabels() {
@@ -117,7 +126,7 @@ public class GUI extends acm.program.GraphicsProgram implements KeyListener {
 	}
 
 	private void throwBall() {
-		if (game.getThrow() == 1) {
+		if (game.getThrow() == 1 || game.getPinsLeft() == game.getPinCount()) {
 			for (GOval pin : pins)
 				pin.setFillColor(Color.BLACK);
 		}
@@ -130,7 +139,6 @@ public class GUI extends acm.program.GraphicsProgram implements KeyListener {
 				count++;
 			}
 		}
-
 		game.throwBall(count);
 	}
 

@@ -24,14 +24,8 @@ public class Bowling extends Game {
      * the player id (first dimension) and the round number (second dimension).
      *
      * <p>
-     * This only contains the highest score type (strike &gt; spare &gt; normal).
-     *
-     * <p>
-     * Example: Round 3
-     * <br>
-     * throws(5) = normal
-     * <br>
-     * throws(5) = overrides normal and sets spare
+     * This only contains the highest score type (strike &gt; spare &gt; normal &gt; miss).
+     * See {@link #getHighestScoreType(BowlingScoreType)} for examples.
      */
     private BowlingScoreType[][] roundScoreType;
 
@@ -107,8 +101,10 @@ public class Bowling extends Game {
         }
 
         int afterPins = getPinsLeft();
-        BowlingScoreType scoreType = getHighestType(beforePins, afterPins);
-        if (getThrow() >= getMaxThrows(scoreType)) {
+        BowlingScoreType scoreType = getScoreType(beforePins, afterPins);
+
+        BowlingScoreType highestType = getHighestScoreType(scoreType);
+        if (getThrow() >= getMaxThrows(highestType)) {
             nextPlayer();
         } else if (afterPins == 0) {
             //in case there was spare or strike we reset it for the same player
@@ -117,7 +113,6 @@ public class Bowling extends Game {
         }
 
         //Save the state
-        roundScoreType[activePlayer.getID()][round] = scoreType;
         updateScore(count);
         return true;
     }
@@ -188,8 +183,10 @@ public class Bowling extends Game {
     }
 
     /**
-     * Gets the highest (strike &gt; spare &gt; normal) score type for the current round
-     * (including the most recent throw).
+     * Gets the highest (strike &gt; spare &gt; normal &gt; miss) score type for the current round
+     * (including the most recent throw). It compares the highest type from the last throws of that round and
+     * the given new type. If the newest type is higher it will be override the old one. As a result it will
+     * always return the highest score type.
      *
      * <p>
      * Example (with the result <b>after</b> the throw):
@@ -208,16 +205,14 @@ public class Bowling extends Game {
      * <br>
      * throws(3)  = Strike (keeps strike)
      *
-     * @param beforePins pins before the throw
-     * @param afterPins pins after the throw
+     * @param newType the new score type caused by the last throw
      * @return the highest score type on the current round
      */
-    private BowlingScoreType getHighestType(int beforePins, int afterPins) {
-        BowlingScoreType newType = getScoreType(beforePins, afterPins);
-
+    private BowlingScoreType getHighestScoreType(BowlingScoreType newType) {
         //previous highest score type
         BowlingScoreType prevType = roundScoreType[activePlayer.getID()][round];
         if (prevType == null || prevType.ordinal() < newType.ordinal()) {
+            roundScoreType[activePlayer.getID()][round] = newType;
             return newType;
         }
 
@@ -237,6 +232,7 @@ public class Bowling extends Game {
         }
 
         if (afterPins == 0) {
+            //the third throw on the last round will be always treated as normal
             if (getThrow() == 1) {
                 return BowlingScoreType.STRIKE;
             } else if (getThrow() == 2) {

@@ -110,7 +110,7 @@ public class Bowling extends Game {
         updateHighestType(newType);
         updateScore(count);
 
-        if (getThrow() >= getMaxThrows()) {
+        if (currentThrow++ >= getMaxThrows()) {
             nextPlayer();
         } else if (afterPins == 0) {
             //in case there was spare or strike we reset it for the same player
@@ -136,10 +136,9 @@ public class Bowling extends Game {
             BowlingScoreType lastType = lastRoundType[activePlayer.getID()];
 
             //spare -> the one throw of this round will be added on top of the last round
-            int throwCount = getThrow();
-            if ((lastType == BowlingScoreType.SPARE && throwCount == 1)
+            if ((lastType == BowlingScoreType.SPARE && currentThrow == 1)
                     //strike -> the two throws of this round will be added on top of the last round
-                    || (lastType == BowlingScoreType.STRIKE && throwCount <= 2)) {
+                    || (lastType == BowlingScoreType.STRIKE && currentThrow <= 2)) {
                 scores[activePlayer.getID()][round - 1] += pinsHit;
             }
         }
@@ -232,9 +231,9 @@ public class Bowling extends Game {
 
         if (afterPins == 0) {
             //the third throw on the last round will be always treated as normal
-            if (getThrow() == 1) {
+            if (currentThrow == 1) {
                 return BowlingScoreType.STRIKE;
-            } else if (getThrow() == 2) {
+            } else if (currentThrow == 2) {
                 return BowlingScoreType.SPARE;
             }
         }

@@ -1,5 +1,10 @@
 package bowling;
 
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 /**
  * Represents a bowling game with 10 pins and 10 rounds.
  * <p>
@@ -79,24 +84,12 @@ public class Bowling extends Game {
             return null;
         }
 
-        //use -1 in order to return the first player if all players have 0 points
-        Player highestPlayer = null;
-        int highestScore = -1;
-        for (Player player : players) {
-            if (player == null) {
-                //no more players are in this game
-                break;
-            }
-
-            int playerScore = scores[player.getID()][getRoundCount() - 1];
-            if (playerScore > highestScore) {
-                //found a higher value
-                highestPlayer = player;
-                highestScore = playerScore;
-            }
-        }
-
-        return highestPlayer;
+        //retrieves the final score of that player
+        Function<Player, Integer> finalScoreMapper = player -> scores[player.getID()][getRoundCount() - 1];
+        return Stream.of(players)
+                //elements could be null if we have less active players than max players
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(finalScoreMapper::apply)).get();
     }
 
     @Override
@@ -155,10 +148,10 @@ public class Bowling extends Game {
     }
 
     @Override
-    protected void nextPlayer() {
+    protected boolean nextPlayer() {
         lastRoundType[activePlayer.getID()] = currentRoundType;
         currentRoundType = null;
-        super.nextPlayer();
+        return super.nextPlayer();
     }
 
     /**

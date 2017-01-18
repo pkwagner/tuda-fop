@@ -151,12 +151,20 @@ public abstract class Game implements IGame {
     }
 
 
+    /**
+     * Resets the amount of remaining pins to the original value
+     */
     protected void resetPins() {
         this.pinsLeft = this.maxPins;
     }
 
+    /**
+     * Moves the active player pointer forward to the next player and resets remaining pins
+     */
     protected void nextPlayer() {
         int activePlayerId = this.activePlayer.getID();
+
+        // Check if there are players with higher IDs, otherwise start a new round
         this.activePlayer = this.getPlayer(
                 (activePlayerId < (this.activePlayersCounter - 1))
                         ? (activePlayerId + 1)

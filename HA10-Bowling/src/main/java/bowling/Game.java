@@ -17,7 +17,7 @@ public abstract class Game implements IGame {
     protected String gameMode;
 
     // Default params set when initializing
-    protected int round, currentThrow, scores[][], activePlayersCounter;
+    protected int round, currentThrow, scores[][], activePlayersCounter, pinsLeft;
     protected Player players[], activePlayer, winner;
     protected boolean started, finished;
 
@@ -124,5 +124,34 @@ public abstract class Game implements IGame {
             System.out.println("[Error] This game has been already started.");
 
         return false;
+    }
+
+    @Override
+    public boolean throwBall(int count) {
+        if (this.started && !this.finished) {
+            if (count >= 0 && count <= this.pinsLeft) {
+                this.pinsLeft -= count;
+                return true;
+            } else
+                System.out.println("[Error] The given pin count is either less than 0 or greater than the amount of remaining pins.");
+        } else
+            System.out.println("[Error] The game has not been started or is already finished.");
+
+        return false;
+    }
+
+
+    protected void resetPins() {
+        this.pinsLeft = this.maxPins;
+    }
+
+    protected void nextPlayer() {
+        int activePlayerId = this.activePlayer.getID();
+        this.activePlayer = this.getPlayer(
+                (activePlayerId < (this.activePlayersCounter - 1))
+                        ? (activePlayerId + 1)
+                        : 0);
+
+        resetPins();
     }
 }

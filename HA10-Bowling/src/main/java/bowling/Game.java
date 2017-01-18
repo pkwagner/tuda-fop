@@ -69,6 +69,16 @@ public abstract class Game implements IGame {
     }
 
     @Override
+    public int getPinCount() {
+        return this.maxPins;
+    }
+
+    @Override
+    public int getPinsLeft() {
+        return this.pinsLeft;
+    }
+
+    @Override
     public Player getPlayer(int id) {
         if (id >= 0 && id < this.activePlayersCounter) {
             return this.players[id];

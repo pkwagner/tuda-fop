@@ -114,10 +114,15 @@ public abstract class Game implements IGame {
     @Override
     public boolean startGame() {
         // Checks if the game was already started or finished
-        if (!this.started && !this.finished) {
-            this.started = true;
-            return true;
+        if (!this.started) {
+            if (this.activePlayersCounter >= 2) {
+                this.started = true;
+                return true;
+            } else
+                System.out.println("[Error] There are less than 2 active players.");
         } else
-            return false;
+            System.out.println("[Error] This game has been already started.");
+
+        return false;
     }
 }

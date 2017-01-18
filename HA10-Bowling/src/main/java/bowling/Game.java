@@ -131,9 +131,9 @@ public abstract class Game implements IGame {
                 this.started = true;
                 return true;
             } else
-                System.out.println("[Error] There are less than 2 active players.");
+                System.err.println("[Error] There are less than 2 active players.");
         } else
-            System.out.println("[Error] This game has been already started.");
+            System.err.println("[Error] This game has been already started.");
 
         return false;
     }
@@ -145,9 +145,9 @@ public abstract class Game implements IGame {
                 this.pinsLeft -= count;
                 return true;
             } else
-                System.out.println("[Error] The given pin count is either less than 0 or greater than the amount of remaining pins.");
+                System.err.println("[Error] The given pin count is either less than 0 or greater than the amount of remaining pins.");
         } else
-            System.out.println("[Error] The game has not been started or is already finished.");
+            System.err.println("[Error] The game has not been started or is already finished.");
 
         return false;
     }
@@ -185,7 +185,7 @@ public abstract class Game implements IGame {
             return true;
         }
 
-        System.out.println("Amount of maximum rounds reached.");
+        System.err.println("Amount of maximum rounds reached.");
         return false;
     }
 }

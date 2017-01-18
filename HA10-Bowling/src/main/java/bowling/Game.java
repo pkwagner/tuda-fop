@@ -126,6 +126,7 @@ public abstract class Game implements IGame {
         // Checks if the game was already started or finished
         if (!this.started) {
             if (this.activePlayersCounter >= 2) {
+                this.activePlayer = this.getPlayer(0);
                 this.resetPins();
                 this.started = true;
                 return true;

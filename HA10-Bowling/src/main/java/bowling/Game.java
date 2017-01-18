@@ -31,7 +31,6 @@ public abstract class Game implements IGame {
 
         this.round = 1;
         this.currentThrow = 1;
-        this.scores = new int[maxPlayer][];
         this.activePlayersCounter = 0;
         this.players = new Player[maxPlayer];
         this.started = false;
@@ -127,6 +126,7 @@ public abstract class Game implements IGame {
         if (!this.started) {
             if (this.activePlayersCounter >= 2) {
                 this.activePlayer = this.getPlayer(0);
+                this.scores = new int[this.activePlayersCounter][this.maxRounds];
                 this.resetPins();
                 this.started = true;
                 return true;

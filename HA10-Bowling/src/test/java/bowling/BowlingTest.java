@@ -36,7 +36,7 @@ public class BowlingTest {
     @Test
     public void testThrowNormal() {
         //test the start condition
-        assertEquals(1, bowling.getThrow());
+        assertEquals("Throw number doesn't start with one", 1, bowling.getThrow());
 
         //you could also hit nothing
         assertTrue(bowling.throwBall(0));
@@ -102,7 +102,7 @@ public class BowlingTest {
         assertTrue(bowling.throwBall(7));
 
         //on the last round the spare is counted as normal
-        assertEquals((5 + 5) + 7, Arrays.stream(bowling.getScore(activePlayer)).sum());
+        assertEquals((5 + 5) + 7, bowling.getScore(activePlayer)[10]);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class BowlingTest {
         assertTrue(bowling.throwBall(10));
 
         //on the last round the strike is counted as normal
-        assertEquals(3 * 10, Arrays.stream(bowling.getScore(activePlayer)).sum());
+        assertEquals(3 * 10, bowling.getScore(activePlayer)[10]);
     }
 
     @Test
@@ -135,7 +135,18 @@ public class BowlingTest {
         }
 
         assertEquals("Player2", bowling.getWinner().getName());
-        //todo: ask what should happen on same score
+    }
+
+    @Test
+    public void testWinnerSame() {
+        for (int round = 1; round <= 10; round = bowling.getRound()) {
+            for (int i = 0; i < 2 * 3; i++) {
+                bowling.throwBall(3);
+            }
+        }
+
+        //same points it should return the first player
+        assertEquals("Player1", bowling.getWinner().getName());
     }
 
     /**

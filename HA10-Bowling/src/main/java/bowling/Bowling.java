@@ -1,7 +1,5 @@
 package bowling;
 
-import java.util.Arrays;
-
 /**
  * Represents a bowling game with 10 pins and 10 rounds.
  * <p>
@@ -50,9 +48,8 @@ public class Bowling extends Game {
     /**
      * Gets current score of this player
      * <p>
-     * <b>Warning:</b> If the player threw a strike or spare previously, older rounds could still be updated to a higher
-     * score. This happens because the throws (strike - the next two throws; spare - the next throw) following
-     * on such cases will be added on top of the ten points.
+     * <b>Warning:</b> If the player threw a strike or spare on the last round, the next throw (for a strike) or the
+     * next two throws will be added on top of the current round
      * <p>
      * Otherwise the points will be counted by how many pins the player hit on that round.
      *
@@ -78,6 +75,7 @@ public class Bowling extends Game {
     @Override
     public Player getWinner() {
         if (!hasFinished()) {
+            System.err.println("Game not finished yet");
             return null;
         }
 
@@ -85,7 +83,7 @@ public class Bowling extends Game {
         Player highestPlayer = null;
         int highestScore = -1;
         for (Player player : players) {
-            int playerScore = Arrays.stream(scores[player.getID()]).sum();
+            int playerScore = scores[player.getID()][getRoundCount() - 1];
             if (playerScore > highestScore) {
                 //found a higher value
                 highestPlayer = player;
@@ -122,16 +120,17 @@ public class Bowling extends Game {
     }
 
     /**
-     * Updates the score for this round and for the previous one if there was a strike or spare
+     * Updates the score for this round
      *
      * @param pinsHit amount of pins hit
      */
     protected void updateScore(int pinsHit) {
-        //add normal hits
-        scores[activePlayer.getID()][round] += pinsHit;
+        int roundScore = 0;
 
         //there is no previous round if it's the first round
         if (round > 1) {
+            roundScore = scores[activePlayer.getID()][round - 1];
+
             //get the score type of the last round
             BowlingScoreType lastType = lastRoundType[activePlayer.getID()];
 
@@ -139,9 +138,13 @@ public class Bowling extends Game {
             if ((lastType == BowlingScoreType.SPARE && currentThrow == 1)
                     //strike -> the two throws of this round will be added on top of the last round
                     || (lastType == BowlingScoreType.STRIKE && currentThrow <= 2)) {
-                scores[activePlayer.getID()][round - 1] += pinsHit;
+                roundScore += pinsHit;
             }
         }
+
+        //add normal hits
+        roundScore += pinsHit;
+        scores[activePlayer.getID()][round] = roundScore;
     }
 
     /**

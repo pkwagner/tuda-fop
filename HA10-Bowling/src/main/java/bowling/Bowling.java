@@ -83,6 +83,11 @@ public class Bowling extends Game {
         Player highestPlayer = null;
         int highestScore = -1;
         for (Player player : players) {
+            if (player == null) {
+                //no more players are in this game
+                break;
+            }
+
             int playerScore = scores[player.getID()][getRoundCount() - 1];
             if (playerScore > highestScore) {
                 //found a higher value
@@ -125,12 +130,14 @@ public class Bowling extends Game {
      * @param pinsHit amount of pins hit
      */
     protected void updateScore(int pinsHit) {
-        int roundScore = 0;
+        int roundScore = scores[activePlayer.getID()][round - 1];
+        if (currentThrow == 1 && round > 1) {
+            //if it's the first throw of the 2+ round init it with the value from the previous round
+            roundScore = scores[activePlayer.getID()][round - 2];
+        }
 
         //there is no previous round if it's the first round
         if (round > 1) {
-            roundScore = scores[activePlayer.getID()][round - 1];
-
             //get the score type of the last round
             BowlingScoreType lastType = lastRoundType[activePlayer.getID()];
 
@@ -144,26 +151,14 @@ public class Bowling extends Game {
 
         //add normal hits
         roundScore += pinsHit;
-        scores[activePlayer.getID()][round] = roundScore;
+        scores[activePlayer.getID()][round - 1] = roundScore;
     }
 
-    /**
-     * Checks if it's the last round.
-     *
-     * @return if it's the last round
-     */
-    protected boolean isLastRound() {
-        return round == maxRounds;
-    }
-
-    protected void resetPins() {
-        //...
-    }
-
+    @Override
     protected void nextPlayer() {
         lastRoundType[activePlayer.getID()] = currentRoundType;
-        resetPins();
-        //...
+        currentRoundType = null;
+        super.nextPlayer();
     }
 
     /**
@@ -186,6 +181,15 @@ public class Bowling extends Game {
         }
 
         return 2;
+    }
+
+    /**
+     * Checks if it's the last round.
+     *
+     * @return if it's the last round
+     */
+    private boolean isLastRound() {
+        return round == maxRounds;
     }
 
     /**

@@ -58,9 +58,9 @@ public class BowlingTest {
         bowling.throwBall(2);
 
         //current round counted as normal
-        assertEquals(3 + 2, bowling.getScore(activePlayer)[1]);
+        assertEquals(5 + 5, bowling.getScore(activePlayer)[0]);
         //for a spare the next throw is added on top to the 10 points
-        assertEquals((5 + 5) + 3, bowling.getScore(activePlayer)[0]);
+        assertEquals((5 + 5) + (3 + 2) + 3, bowling.getScore(activePlayer)[1]);
     }
 
     @Test
@@ -72,9 +72,9 @@ public class BowlingTest {
         bowling.throwBall(2);
 
         //current round counted as normal
-        assertEquals(3 + 2, bowling.getScore(activePlayer)[1]);
+        assertEquals(10, bowling.getScore(activePlayer)[0]);
         //for a strike the next two throws are added on top to the 10 points
-        assertEquals((5 + 5) + (3 + 2), bowling.getScore(activePlayer)[0]);
+        assertEquals(10 + (3 + 2) + (3 + 2), bowling.getScore(activePlayer)[1]);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class BowlingTest {
         assertTrue(bowling.throwBall(7));
 
         //on the last round the spare is counted as normal
-        assertEquals((5 + 5) + 7, bowling.getScore(activePlayer)[10]);
+        assertEquals((5 + 5) + 7, bowling.getScore(activePlayer)[9]);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class BowlingTest {
         assertTrue(bowling.throwBall(10));
 
         //on the last round the strike is counted as normal
-        assertEquals(3 * 10, bowling.getScore(activePlayer)[10]);
+        assertEquals(3 * 10, bowling.getScore(activePlayer)[9]);
     }
 
     @Test

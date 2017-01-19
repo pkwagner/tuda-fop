@@ -141,9 +141,10 @@ public abstract class Game implements IGame {
             if (count >= 0 && count <= this.pinsLeft) {
                 this.pinsLeft -= count;
 
+                // TODO Move into if-clause
                 onThrow(count);
 
-                if (this.getThrow() > this.getMaxThrows(count)) {
+                if (this.getThrow() >= this.getMaxThrows(count)) {
                     if (!this.nextPlayer())
                         this.finished = true;
                 }

@@ -13,7 +13,7 @@ public abstract class Game implements IGame {
     protected int maxPlayer;
 
     // Params set by child class
-    protected int maxRounds, maxPins;
+    protected int maxRounds, maxPins, maxThrows;
     protected String gameMode;
 
     // Default params set when initializing
@@ -162,7 +162,9 @@ public abstract class Game implements IGame {
     protected abstract void onThrow(int count);
 
     // TODO Contract
-    protected abstract int getMaxThrows(int count);
+    protected int getMaxThrows(int count) {
+        return this.maxThrows;
+    }
 
 
     /**

@@ -108,11 +108,6 @@ public abstract class Game implements IGame {
     }
 
     @Override
-    public Player getWinner() {
-        return this.winner;
-    }
-
-    @Override
     public boolean hasFinished() {
         return this.finished;
     }
@@ -145,6 +140,14 @@ public abstract class Game implements IGame {
         if (this.started && !this.finished) {
             if (count >= 0 && count <= this.pinsLeft) {
                 this.pinsLeft -= count;
+
+                if ((this.getThrow() > TannenbaumKegeln.maxThrows) || (count == this.pinsLeft)) {
+                    if (!this.nextPlayer())
+                        this.finished = true;
+                }
+
+                onThrow(count);
+
                 this.currentThrow++;
                 return true;
             } else
@@ -154,6 +157,9 @@ public abstract class Game implements IGame {
 
         return false;
     }
+
+    // TODO Contract
+    public abstract void onThrow(int count);
 
 
     /**

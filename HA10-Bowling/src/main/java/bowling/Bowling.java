@@ -31,7 +31,21 @@ public class Bowling extends Game {
      * This saves the highest score type for the current round
      * <p>
      * This only contains the highest score type (strike &gt; spare &gt; normal &gt; miss).
-     * See {@link #updateHighestType(BowlingScoreType)} for examples.
+     * <p>Example (with the result <b>after</b> the throw):
+     *
+     * <p>
+     * throws(5) = Normal
+     * <br>
+     * throws(5) = Spare (overrides Normal)
+     *
+     * <p>
+     * Last Round:
+     * <br>
+     * throws(10) = Strike
+     * <br>
+     * throws(5)  = Strike (keeps strike)
+     * <br>
+     * throws(3)  = Strike (keeps strike)
      */
     private BowlingScoreType currentRoundType;
 
@@ -94,28 +108,14 @@ public class Bowling extends Game {
     }
 
     @Override
-    public boolean throwBall(int count) {
-        int beforePins = getPinsLeft();
-        if (!super.throwBall(count)) {
-            return false;
+    public void onThrow(int pinsHit) {
+        BowlingScoreType newType = getScoreType(pinsHit, getPinsLeft());
+
+        //previous highest score type
+        BowlingScoreType prevType = currentRoundType;
+        if (prevType == null || prevType.ordinal() < newType.ordinal()) {
+            currentRoundType = newType;
         }
-
-        int afterPins = getPinsLeft();
-        BowlingScoreType newType = getScoreType(beforePins, afterPins);
-
-        //Save the state
-        updateHighestType(newType);
-        updateScore(count);
-
-        if (currentThrow++ >= getMaxThrows()) {
-            nextPlayer();
-        } else if (afterPins == 0) {
-            //in case there was spare or strike we reset it for the same player
-            //this could happen on the last round there you could do more than 1 strike or spare
-            resetPins();
-        }
-
-        return true;
     }
 
     /**
@@ -123,6 +123,7 @@ public class Bowling extends Game {
      *
      * @param pinsHit amount of pins hit
      */
+    @Override
     protected void updateScore(int pinsHit) {
         int roundScore = scores[activePlayer.getID()][round - 1];
         if (currentThrow == 1 && round > 1) {
@@ -149,10 +150,10 @@ public class Bowling extends Game {
     }
 
     @Override
-    protected boolean nextPlayer() {
+    protected void nextPlayer() {
         lastRoundType[activePlayer.getID()] = currentRoundType;
         currentRoundType = null;
-        return super.nextPlayer();
+        super.nextPlayer();
     }
 
     /**
@@ -160,7 +161,8 @@ public class Bowling extends Game {
      *
      * @return amount of throws the player could make
      */
-    private int getMaxThrows() {
+    @Override
+    protected int getMaxThrows(int pinsHit) {
         if (isLastRound()) {
             //check if this player made a strike or spare previously in this round
             if (currentRoundType == BowlingScoreType.SPARE || currentRoundType == BowlingScoreType.STRIKE) {
@@ -187,46 +189,14 @@ public class Bowling extends Game {
     }
 
     /**
-     * It compares the highest type from the last throws of that round and
-     * the given new type. If the newest type is higher it will be override the old one.
-     *
-     * <p>
-     * Example (with the result <b>after</b> the throw):
-     *
-     * <p>
-     * throws(5) = Normal
-     * <br>
-     * throws(5) = Spare (overrides Normal)
-     *
-     * <p>
-     * Last Round:
-     * <br>
-     * throws(10) = Strike
-     * <br>
-     * throws(5)  = Strike (keeps strike)
-     * <br>
-     * throws(3)  = Strike (keeps strike)
-     *
-     * @param newType the new score type caused by the last throw
-     * @return the highest score type on the current round
-     */
-    private void updateHighestType(BowlingScoreType newType) {
-        //previous highest score type
-        BowlingScoreType prevType = currentRoundType;
-        if (prevType == null || prevType.ordinal() < newType.ordinal()) {
-            currentRoundType = newType;
-        }
-    }
-
-    /**
      * Gets the score type caused by the last throw
      *
-     * @param beforePins pins before the throw
+     * @param pinsHit pins before the throw
      * @param afterPins pins after the throw
      * @return score type caused by the recent throw
      */
-    private BowlingScoreType getScoreType(int beforePins, int afterPins) {
-        if (beforePins == afterPins) {
+    private BowlingScoreType getScoreType(int pinsHit, int afterPins) {
+        if (pinsHit == 0) {
             return BowlingScoreType.MISS;
         }
 

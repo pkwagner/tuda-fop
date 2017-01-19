@@ -122,13 +122,22 @@ public class BowlingTest {
 
     @Test
     public void testWinner() {
-        for (int round = 1; round <= 10; round = bowling.getRound()) {
+        for (int round = 1; round <= 10; round++) {
             //first player - spare always
             bowling.throwBall(5);
             bowling.throwBall(5);
+            if (round == 10) {
+                //on a spare you can make three throws
+                bowling.throwBall(3);
+            }
 
             //second player - strike always
             bowling.throwBall(10);
+            if (round == 10) {
+                //on a strike you can make three throws
+                bowling.throwBall(2);
+                bowling.throwBall(1);
+            }
 
             //always skip the third player with zero points
             skipRound();
@@ -139,7 +148,7 @@ public class BowlingTest {
 
     @Test
     public void testWinnerSame() {
-        for (int round = 1; round <= 10; round = bowling.getRound()) {
+        for (int round = 1; round <= 10; round++) {
             for (int i = 0; i < 2 * 3; i++) {
                 bowling.throwBall(3);
             }
@@ -156,7 +165,7 @@ public class BowlingTest {
     private void skipRound() {
         int prevRound = bowling.getRound();
         //continue until we reach the next round
-        for (int round = prevRound; round == prevRound; round = bowling.getRound()) {
+        for (int round = prevRound; round == prevRound && !bowling.hasFinished(); round = bowling.getRound()) {
             bowling.throwBall(0);
         }
     }

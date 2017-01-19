@@ -36,6 +36,8 @@ public abstract class Game implements IGame {
         this.players = new Player[maxPlayer];
         this.started = false;
         this.finished = false;
+
+        this.resetPins();
     }
 
     @Override
@@ -47,10 +49,10 @@ public abstract class Game implements IGame {
             // Increase active players counter after adding the new player
             this.players[this.activePlayersCounter++] = newPlayer;
             return newPlayer;
-        } else
-            return null;
-    }
+        }
 
+        return null;
+    }
 
     @Override
     public Player getActivePlayer() {
@@ -87,8 +89,9 @@ public abstract class Game implements IGame {
         // Check if the given id is valid, otherwise return null
         if (id >= 0 && id < this.activePlayersCounter) {
             return this.players[id];
-        } else
-            return null;
+        }
+
+        return null;
     }
 
     @Override
@@ -148,17 +151,22 @@ public abstract class Game implements IGame {
 
                 // TODO Move into if-clause
                 onThrow(count);
+                updateScore(count);
 
-                if (this.getThrow() >= this.getMaxThrows(count)) {
-                    if (!this.nextPlayer())
-                        this.finished = true;
+                if (currentThrow++ >= getMaxThrows(count)) {
+                    nextPlayer();
+                } else if (pinsLeft == 0) {
+                    //in case there was spare or strike we reset it for the same player
+                    //this could happen on the last round there you could do more than 1 strike or spare
+                    resetPins();
                 }
 
-                this.currentThrow++;
                 return true;
             } else
-                System.err.println("[Error] The given pin count is either less than 0 or greater than the amount of remaining pins.");
+                System.err.println("[Error] The given pin count is either less than 0 or greater than the amount of " +
+                        "remaining pins.");
         } else
+            throw new RuntimeException();
             System.err.println("[Error] The game has not been started or is already finished.");
 
         return false;
@@ -177,12 +185,16 @@ public abstract class Game implements IGame {
      * @param count the number of pins thrown (to handle some special cases)
      * @return the amount of maximum throws for this round
      */
-    protected int getMaxThrows(int count) {
-        return this.maxThrows;
+    protected int getMaxThrows(int pinsHit) {
+        if (pinsLeft == 0) {
+            return currentThrow;
+        }
+
+        return maxThrows;
     }
 
+    protected abstract void updateScore(int pinsHit);
 
-    // TODO Do we really need this method?!
     /**
      * Resets the amount of remaining pins to the original value
      */
@@ -201,37 +213,30 @@ public abstract class Game implements IGame {
 
     /**
      * Moves the active player pointer forward to the next player and resets remaining pins
-     *
-     * @return true if everything went fine, false if the amount of maximum rounds is reached
      */
-    protected boolean nextPlayer() {
+    protected void nextPlayer() {
         int activePlayerId = this.activePlayer.getID();
-        boolean success = true;
 
         // Check if there are players with higher IDs, otherwise start a new round
-        if (activePlayerId < (this.activePlayersCounter - 1))
+        if (activePlayerId < (this.activePlayersCounter - 1)) {
             this.activePlayer = this.getPlayer(activePlayerId + 1);
-        else {
+        } else {
             this.activePlayer = this.getPlayer(0);
-            success = nextRound();
+            nextRound();
         }
 
+        currentThrow = 1;
         resetPins();
-        return success;
     }
 
     /**
-     * Increases the round counter and checks if there is the amount of maximum rounds is reached
-     *
-     * @return true if everything went fine, false if the amount of maximum rounds is reached
+     * Increases the round counter
      */
-    private boolean nextRound() {
+    private void nextRound() {
         if (this.round < this.maxRounds) {
             this.round++;
-            return true;
+        } else {
+            this.finished = true;
         }
-
-        System.err.println("Amount of maximum rounds reached.");
-        return false;
     }
 }

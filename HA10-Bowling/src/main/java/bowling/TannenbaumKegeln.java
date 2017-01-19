@@ -65,12 +65,12 @@ public class TannenbaumKegeln extends Game {
 
     private Player getPlayerWithBestFirTree() {
         int firTreeResults[] = Stream.of(firTreeMaps)
-                .mapToInt((firTree) -> firTree.getRemainingGoalsAmount())
+                .mapToInt(FirTreeMap::getRemainingGoalsAmount)
                 .toArray();
 
         int bestPlayerId = 0, bestPlayerScore = -1;
         for (int i = 0; i < firTreeResults.length; i++) {
-            if (firTreeResults[i] > bestPlayerScore) {
+            if ((firTreeResults[i] < bestPlayerScore) || (bestPlayerScore == -1)) {
                 bestPlayerId = i;
                 bestPlayerScore = firTreeResults[i];
             }

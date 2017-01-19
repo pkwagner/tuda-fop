@@ -73,6 +73,7 @@ public class Bowling extends Game {
         }
 
         //initialize all necessary data for this concrete implementation
+        scores = new int[this.activePlayersCounter][this.maxRounds];
         lastRoundType = new BowlingScoreType[getActivePlayerCount()];
         return true;
     }

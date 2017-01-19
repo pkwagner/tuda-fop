@@ -35,6 +35,8 @@ public abstract class Game implements IGame {
         this.players = new Player[maxPlayer];
         this.started = false;
         this.finished = false;
+
+        this.resetPins();
     }
 
     @Override
@@ -143,6 +145,7 @@ public abstract class Game implements IGame {
         if (this.started && !this.finished) {
             if (count >= 0 && count <= this.pinsLeft) {
                 this.pinsLeft -= count;
+                this.currentThrow++;
                 return true;
             } else
                 System.err.println("[Error] The given pin count is either less than 0 or greater than the amount of remaining pins.");
@@ -161,7 +164,18 @@ public abstract class Game implements IGame {
     }
 
     /**
+     * Returns the total amount of thrown pins in this round
+     *
+     * @return The amount of thrown pins in this round
+     */
+    protected int getThrownPins() {
+        return this.maxPins - this.pinsLeft;
+    }
+
+    /**
      * Moves the active player pointer forward to the next player and resets remaining pins
+     *
+     * @return true if everything went fine, false if the amount of maximum rounds is reached
      */
     protected boolean nextPlayer() {
         int activePlayerId = this.activePlayer.getID();
@@ -179,6 +193,11 @@ public abstract class Game implements IGame {
         return success;
     }
 
+    /**
+     * Increases the round counter and checks if there is the amount of maximum rounds is reached
+     *
+     * @return true if everything went fine, false if the amount of maximum rounds is reached
+     */
     private boolean nextRound() {
         if (this.round < this.maxRounds) {
             this.round++;

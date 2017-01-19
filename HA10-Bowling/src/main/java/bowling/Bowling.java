@@ -91,12 +91,7 @@ public class Bowling extends Game {
     }
 
     @Override
-    public Player getWinner() {
-        if (!hasFinished()) {
-            System.err.println("Game not finished yet");
-            return null;
-        }
-
+    public Player findWinner() {
         //retrieves the final score of that player
         Function<Player, Integer> finalScoreMapper = player -> scores[player.getID()][getRoundCount() - 1];
         return Stream.of(players)

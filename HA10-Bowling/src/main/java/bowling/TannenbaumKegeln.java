@@ -54,7 +54,7 @@ public class TannenbaumKegeln extends Game {
     }
 
     @Override
-    public Player getWinner() {
+    public Player findWinner() {
         int bestPlayerId = 0, bestPlayerScore = -1;
         for (int i = 0; i < scores.length; i++) {
             int playerScore = Arrays.stream(scores[i]).sum();

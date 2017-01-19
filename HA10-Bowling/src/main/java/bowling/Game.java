@@ -81,6 +81,16 @@ public abstract class Game implements IGame {
     }
 
     @Override
+    public Player getWinner() {
+        if (!hasFinished()) {
+            System.err.println("Game not finished yet");
+            return null;
+        }
+
+        return winner;
+    }
+
+    @Override
     public int getPinsLeft() {
         return this.pinsLeft;
     }
@@ -188,6 +198,8 @@ public abstract class Game implements IGame {
         return maxThrows;
     }
 
+    protected abstract Player findWinner();
+
     /**
      * Resets the amount of remaining pins to the original value
      */
@@ -230,6 +242,7 @@ public abstract class Game implements IGame {
             this.round++;
         } else {
             this.finished = true;
+            winner = findWinner();
         }
     }
 }

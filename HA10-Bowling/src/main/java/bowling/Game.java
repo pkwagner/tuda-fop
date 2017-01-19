@@ -141,12 +141,12 @@ public abstract class Game implements IGame {
             if (count >= 0 && count <= this.pinsLeft) {
                 this.pinsLeft -= count;
 
+                onThrow(count);
+
                 if ((this.getThrow() > TannenbaumKegeln.maxThrows) || (count == this.pinsLeft)) {
                     if (!this.nextPlayer())
                         this.finished = true;
                 }
-
-                onThrow(count);
 
                 this.currentThrow++;
                 return true;

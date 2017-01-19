@@ -1,7 +1,7 @@
 package bowling;
 
 /**
- * Represents a player for the game
+ * Represents a general game instance
  *
  * @author Alexander Siegler
  * @author Paul Konstantin Wagner
@@ -29,25 +29,28 @@ public abstract class Game implements IGame {
     public Game(int maxPlayer) {
         this.maxPlayer = maxPlayer;
 
+        // Initialize general vars
         this.round = 1;
         this.currentThrow = 1;
         this.activePlayersCounter = 0;
         this.players = new Player[maxPlayer];
         this.started = false;
         this.finished = false;
-
-        this.resetPins();
     }
 
     @Override
     public Player addPlayer(String name) {
+        // Is the player limit already reached?
         if (this.activePlayersCounter < this.maxPlayer) {
+            // Set player id to the next available array index
             Player newPlayer = new Player(name, this.activePlayersCounter);
+            // Increase active players counter after adding the new player
             this.players[this.activePlayersCounter++] = newPlayer;
             return newPlayer;
         } else
             return null;
     }
+
 
     @Override
     public Player getActivePlayer() {
@@ -81,6 +84,7 @@ public abstract class Game implements IGame {
 
     @Override
     public Player getPlayer(int id) {
+        // Check if the given id is valid, otherwise return null
         if (id >= 0 && id < this.activePlayersCounter) {
             return this.players[id];
         } else
@@ -121,7 +125,9 @@ public abstract class Game implements IGame {
     public boolean startGame() {
         // Checks if the game was already started or finished
         if (!this.started) {
+            // Checks if there are enough players in this game (at least 2)
             if (this.activePlayersCounter >= 2) {
+                // Set first player as active player
                 this.activePlayer = this.getPlayer(0);
                 this.resetPins();
                 this.started = true;
@@ -158,15 +164,25 @@ public abstract class Game implements IGame {
         return false;
     }
 
-    // TODO Contract
+    /**
+     * Handles game mode-specific actions when throwing a ball
+     *
+     * @param count the number of pins thrown
+     */
     protected abstract void onThrow(int count);
 
-    // TODO Contract
+    /**
+     * Returns the amount of maximum throws for this round
+     *
+     * @param count the number of pins thrown (to handle some special cases)
+     * @return the amount of maximum throws for this round
+     */
     protected int getMaxThrows(int count) {
         return this.maxThrows;
     }
 
 
+    // TODO Do we really need this method?!
     /**
      * Resets the amount of remaining pins to the original value
      */

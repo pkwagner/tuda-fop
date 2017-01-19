@@ -21,6 +21,7 @@ public class TannenbaumKegeln extends Game {
     public TannenbaumKegeln(int maxPlayer) {
         super(maxPlayer);
 
+        // Initialize game-specific vars
         this.maxRounds = 100;
         this.maxPins = 9;
         this.maxThrows = 2;
@@ -30,7 +31,9 @@ public class TannenbaumKegeln extends Game {
     @Override
     public boolean startGame() {
         if (super.startGame()) {
-            this.scores = new int[this.activePlayersCounter][10];
+            // Initialize the fire tree as var 'scores'
+            // NOTE: Even if there is no goal for 0 pins, it's added to match the index used in this class (starting with 1)
+            this.scores = new int[this.activePlayersCounter][];
             for (int i = 0; i < this.scores.length; i++)
                 this.scores[i] = new int[]{0, 1, 2, 7, 6, 5, 4, 3, 2, 1};
 
@@ -45,7 +48,7 @@ public class TannenbaumKegeln extends Game {
         if (this.getThrow() >= this.getMaxThrows(count)) {
             this.scores[this.getActivePlayer().getID()][this.getThrownPins()] -= (this.scores[this.getActivePlayer().getID()][this.getThrownPins()] > 0) ? 1 : 0;
 
-            if (this.checkFirTree(this.getActivePlayer())) {
+            if (this.checkIfFirTreeEmpty(this.getActivePlayer())) {
                 // Set current player as winner
                 this.finished = true;
                 this.winner = this.getActivePlayer();
@@ -65,6 +68,7 @@ public class TannenbaumKegeln extends Game {
 
     @Override
     public Player getWinner() {
+        // If the winner is null, there's apparently nobody with an empty fir tree, so calculate the best player
         if (this.winner == null) {
             return getPlayerWithBestFirTree();
         } else
@@ -73,20 +77,28 @@ public class TannenbaumKegeln extends Game {
 
 
     /**
-     * Checks if a given user's firTree is empty (game aim)
+     * Checks if a given user's fir tree is empty (game aim)
      *
-     * @param player the player whose firTree should be checked
+     * @param player the player whose fir tree should be checked
      * @return true if the firTree is empty, false if there are still pending goals
      */
-    private boolean checkFirTree(Player player) {
+    private boolean checkIfFirTreeEmpty(Player player) {
+        // Check if every goal is reached (-> value is 0)
         return Stream.of(scores[player.getID()]).allMatch(Predicate.isEqual(0));
     }
 
+    /**
+     * Returns the player with the lowest amount of remaining goals in it's fir tree
+     *
+     * @return the player with the best (-> lowest number of remaining goals) firTree
+     */
     private Player getPlayerWithBestFirTree() {
         int bestPlayerId = 0, bestPlayerScore = -1;
         for (int i = 0; i < scores.length; i++) {
+            // Summarize the amount of remaining goals (negative score)
             int playerScore = Arrays.stream(scores[i]).sum();
 
+            // Check if this player is the best (or first) one, then overwrite highscore
             if ((playerScore < bestPlayerScore) || (bestPlayerScore == -1)) {
                 bestPlayerId = i;
                 bestPlayerScore = playerScore;

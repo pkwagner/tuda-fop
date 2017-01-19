@@ -33,6 +33,7 @@ public abstract class Game implements IGame {
         this.round = 1;
         this.currentThrow = 1;
         this.activePlayersCounter = 0;
+        this.maxThrows = 2;
         this.players = new Player[maxPlayer];
         this.started = false;
         this.finished = false;

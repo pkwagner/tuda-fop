@@ -123,7 +123,6 @@ public abstract class Game implements IGame {
         if (!this.started) {
             if (this.activePlayersCounter >= 2) {
                 this.activePlayer = this.getPlayer(0);
-                this.scores = new int[this.activePlayersCounter][this.maxRounds];
                 this.resetPins();
                 this.started = true;
                 return true;

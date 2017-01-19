@@ -143,7 +143,7 @@ public abstract class Game implements IGame {
 
                 onThrow(count);
 
-                if ((this.getThrow() > TannenbaumKegeln.maxThrows) || (count == this.pinsLeft)) {
+                if (this.getThrow() > this.getMaxThrows(count)) {
                     if (!this.nextPlayer())
                         this.finished = true;
                 }
@@ -159,7 +159,10 @@ public abstract class Game implements IGame {
     }
 
     // TODO Contract
-    public abstract void onThrow(int count);
+    protected abstract void onThrow(int count);
+
+    // TODO Contract
+    protected abstract int getMaxThrows(int count);
 
 
     /**

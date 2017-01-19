@@ -151,14 +151,8 @@ public abstract class Game implements IGame {
 
                 // TODO Move into if-clause
                 onThrow(count);
-                updateScore(count);
-
                 if (currentThrow++ >= getMaxThrows(count)) {
                     nextPlayer();
-                } else if (pinsLeft == 0) {
-                    //in case there was spare or strike we reset it for the same player
-                    //this could happen on the last round there you could do more than 1 strike or spare
-                    resetPins();
                 }
 
                 return true;
@@ -192,8 +186,6 @@ public abstract class Game implements IGame {
 
         return maxThrows;
     }
-
-    protected abstract void updateScore(int pinsHit);
 
     /**
      * Resets the amount of remaining pins to the original value

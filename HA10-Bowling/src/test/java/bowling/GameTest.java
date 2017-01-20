@@ -20,8 +20,6 @@ public class GameTest {
     public void setUp() throws Exception {
         game = new Game(4) {
 
-
-
             @Override
             protected void onThrow(int count) {
                 throw new UnsupportedOperationException("This is just a mock class");
@@ -33,6 +31,7 @@ public class GameTest {
             }
         };
 
+        game.maxRounds = 3;
         game.addPlayer("Kader");
     }
 

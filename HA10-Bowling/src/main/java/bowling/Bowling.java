@@ -43,7 +43,16 @@ public class Bowling extends Game {
      */
     private BowlingScoreType currentRoundType;
 
-    private int[] scoreNextPending;
+    /**
+     * How many times the current throw should be added additionally to the score points. This could happen if there
+     * was a strike or spare previously
+     */
+    private int[] scoreCurrentPending;
+
+    /**
+     * Similar to {@link #scoreCurrentPending}, but this saves how many times the pins should count for the throw
+     * following after the current one.
+     */
     private int[] scoreFuturePending;
 
     /**
@@ -85,7 +94,7 @@ public class Bowling extends Game {
 
         //initialize all necessary data for this concrete implementation
         scores = new int[activePlayersCounter][maxRounds];
-        scoreNextPending = new int[activePlayersCounter];
+        scoreCurrentPending = new int[activePlayersCounter];
         scoreFuturePending = new int[activePlayersCounter];
         return true;
     }
@@ -143,13 +152,13 @@ public class Bowling extends Game {
     protected void updateScore(int pinsHit) {
         int roundScore = getCurrentScore();
 
-        if (scoreNextPending[activePlayer.getID()] > 0) {
-            roundScore += pinsHit * scoreNextPending[activePlayer.getID()];
-            scoreNextPending[activePlayer.getID()] = 0;
+        if (scoreCurrentPending[activePlayer.getID()] > 0) {
+            roundScore += pinsHit * scoreCurrentPending[activePlayer.getID()];
+            scoreCurrentPending[activePlayer.getID()] = 0;
         }
 
         if (scoreFuturePending[activePlayer.getID()] > 0) {
-            scoreNextPending[activePlayer.getID()] = scoreFuturePending[activePlayer.getID()];
+            scoreCurrentPending[activePlayer.getID()] = scoreFuturePending[activePlayer.getID()];
             scoreFuturePending[activePlayer.getID()] = 0;
         }
 
@@ -162,10 +171,12 @@ public class Bowling extends Game {
     protected void nextPlayer() {
         if (round > 0) {
             if (currentRoundType == BowlingScoreType.STRIKE) {
+                //if it's a strike the next two throws should be added on top of the score
                 scoreFuturePending[activePlayer.getID()]++;
-                scoreNextPending[activePlayer.getID()]++;
+                scoreCurrentPending[activePlayer.getID()]++;
             } else if (currentRoundType == BowlingScoreType.SPARE) {
-                scoreNextPending[activePlayer.getID()]++;
+                //if it's a spare the next throw should be added on top of the score
+                scoreCurrentPending[activePlayer.getID()]++;
             }
         }
 

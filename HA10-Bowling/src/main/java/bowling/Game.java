@@ -186,7 +186,7 @@ public abstract class Game implements IGame {
     /**
      * Returns the amount of maximum throws for this round
      *
-     * @param count the number of pins thrown (to handle some special cases)
+     * @param pinsHit the number of pins thrown (to handle some special cases)
      * @return the amount of maximum throws for this round
      */
     protected int getMaxThrows(int pinsHit) {

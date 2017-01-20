@@ -75,7 +75,7 @@ public class TannenbaumKegelnTest {
         }
 
         // Game should abort after starting round 101
-        assertEquals(101, counter);
+        assertEquals(201, counter);
         assertEquals(0, tk.getActivePlayer().getID());
     }
 

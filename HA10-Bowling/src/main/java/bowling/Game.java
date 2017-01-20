@@ -160,7 +160,6 @@ public abstract class Game implements IGame {
             if (count >= 0 && count <= this.pinsLeft) {
                 this.pinsLeft -= count;
 
-                // TODO Move into if-clause
                 onThrow(count);
                 if (currentThrow++ >= getMaxThrows(count) || pinsLeft == 0) {
                     nextPlayer();
@@ -197,6 +196,11 @@ public abstract class Game implements IGame {
         return maxThrows;
     }
 
+    /**
+     * Returns the winner of the current game
+     *
+     * @return the winner of the current game
+     */
     protected abstract Player findWinner();
 
     /**

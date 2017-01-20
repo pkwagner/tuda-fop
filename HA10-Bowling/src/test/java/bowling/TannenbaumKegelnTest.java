@@ -3,6 +3,8 @@ package bowling;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 /**
@@ -75,6 +77,7 @@ public class TannenbaumKegelnTest {
         }
 
         // Game should abort after starting round 101
+        // 201 = (2 throws per round * 100 rounds per game) + 1 [game goes to the next round but doesn't play it]
         assertEquals(201, counter);
         assertEquals(0, tk.getActivePlayer().getID());
     }
@@ -83,7 +86,43 @@ public class TannenbaumKegelnTest {
     public void firTreeEmptyStop() {
         assertTrue(tk.startGame());
 
-        int counter = 1;
+        // Throw the complete fir tree
+        throwTargetMultipleTimes(1, 1);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(2, 2);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(3, 7);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(4, 6);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(5, 5);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(6, 4);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(7, 3);
+        skipRoundWithStrikes();
+        throwTargetMultipleTimes(8, 2);
+        skipRoundWithStrikes();
+        assertTrue(tk.throwBall(9));
 
+        assertTrue(tk.hasFinished());
+        assertEquals(0, tk.getWinner().getID());
+    }
+
+
+    private void skipRoundWithStrikes() {
+        for (int i = 0; i < (tk.getActivePlayerCount() - 1); i++) {
+            assertTrue(tk.throwBall(9));
+        }
+    }
+
+    private void throwTargetMultipleTimes(int target, int loops) {
+        for (int i = 0; i < loops; i++) {
+            assertTrue(tk.throwBall(target));
+            assertTrue(tk.throwBall(0));
+
+            if (i < (loops - 1))
+                skipRoundWithStrikes();
+        }
     }
 }

@@ -43,8 +43,8 @@ public class Bowling extends Game {
      */
     private BowlingScoreType currentRoundType;
 
-    private int[] lastRoundPending;
-    private int[] last2RoundPending;
+    private int[] scoreNextPending;
+    private int[] scoreFuturePending;
 
     /**
      * Creates a new bowling game
@@ -85,8 +85,8 @@ public class Bowling extends Game {
 
         //initialize all necessary data for this concrete implementation
         scores = new int[activePlayersCounter][maxRounds];
-        lastRoundPending = new int[activePlayersCounter];
-        last2RoundPending = new int[activePlayersCounter];
+        scoreNextPending = new int[activePlayersCounter];
+        scoreFuturePending = new int[activePlayersCounter];
         return true;
     }
 
@@ -140,16 +140,17 @@ public class Bowling extends Game {
      *
      * @param pinsHit amount of pins hit
      */
-    @Override
     protected void updateScore(int pinsHit) {
         int roundScore = getCurrentScore();
 
-        if (lastRoundPending[activePlayer.getID()]-- > 0) {
-            roundScore += pinsHit;
+        if (scoreNextPending[activePlayer.getID()] > 0) {
+            roundScore += pinsHit * scoreNextPending[activePlayer.getID()];
+            scoreNextPending[activePlayer.getID()] = 0;
         }
 
-        if (last2RoundPending[activePlayer.getID()]-- > 0) {
-            roundScore += pinsHit;
+        if (scoreFuturePending[activePlayer.getID()] > 0) {
+            scoreNextPending[activePlayer.getID()] = scoreFuturePending[activePlayer.getID()];
+            scoreFuturePending[activePlayer.getID()] = 0;
         }
 
         //add normal hits
@@ -159,19 +160,13 @@ public class Bowling extends Game {
 
     @Override
     protected void nextPlayer() {
-        if (round > 1) {
-            last2RoundPending[activePlayer.getID()] = lastRoundPending[activePlayer.getID()];
-        }
-
         if (round > 0) {
-            int pending = 0;
             if (currentRoundType == BowlingScoreType.STRIKE) {
-                pending = 2;
+                scoreFuturePending[activePlayer.getID()]++;
+                scoreNextPending[activePlayer.getID()]++;
             } else if (currentRoundType == BowlingScoreType.SPARE) {
-                pending = 1;
+                scoreNextPending[activePlayer.getID()]++;
             }
-
-            lastRoundPending[activePlayer.getID()] = pending;
         }
 
         currentRoundType = null;

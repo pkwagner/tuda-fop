@@ -20,18 +20,15 @@ public class GameTest {
     public void setUp() throws Exception {
         game = new Game(4) {
 
+
+
             @Override
             protected void onThrow(int count) {
                 throw new UnsupportedOperationException("This is just a mock class");
             }
 
             @Override
-            protected void updateScore(int pinsHit) {
-                throw new UnsupportedOperationException("This is just a mock class");
-            }
-
-            @Override
-            public Player getWinner() {
+            protected Player findWinner() {
                 throw new UnsupportedOperationException("This is just a mock class");
             }
         };

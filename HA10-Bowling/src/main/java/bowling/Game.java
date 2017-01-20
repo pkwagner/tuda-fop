@@ -162,7 +162,7 @@ public abstract class Game implements IGame {
 
                 // TODO Move into if-clause
                 onThrow(count);
-                if (currentThrow++ >= getMaxThrows(count)) {
+                if (currentThrow++ >= getMaxThrows(count) || pinsLeft == 0) {
                     nextPlayer();
                 }
 

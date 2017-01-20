@@ -45,9 +45,9 @@ public class TannenbaumKegeln extends Game {
 
     @Override
     protected void onThrow(int count) {
-        updateScore(count);
-
         if (currentThrow == 2 || pinsLeft == 0) {
+            updateScore(count);
+
             if (this.checkFirTree(this.getActivePlayer()))
                 finished = true;
         }
@@ -70,7 +70,7 @@ public class TannenbaumKegeln extends Game {
 
     protected void updateScore(int pinsHit) {
         int count = this.scores[this.getActivePlayer().getID()][this.getThrownPins()];
-        if (count > 1) {
+        if (count >= 1) {
             this.scores[this.getActivePlayer().getID()][this.getThrownPins()]--;
         }
     }

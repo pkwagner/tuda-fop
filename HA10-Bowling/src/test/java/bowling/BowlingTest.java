@@ -127,14 +127,14 @@ public class BowlingTest {
             bowling.throwBall(5);
             bowling.throwBall(5);
             if (round == 10) {
-                //on a spare you can make three throws
+                //on a spare you can make three throws in the last round
                 bowling.throwBall(3);
             }
 
             //second player - strike always
             bowling.throwBall(10);
             if (round == 10) {
-                //on a strike you can make three throws
+                //on a strike you can make three throws in the last round
                 bowling.throwBall(2);
                 bowling.throwBall(1);
             }

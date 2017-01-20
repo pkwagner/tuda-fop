@@ -148,7 +148,7 @@ public class GameTest {
      * Shortcut for {@link #skipRound(Game)} until we reach the final round
      */
     public static void skipToLastRound(Game game) {
-        while (game.getRound() <= game.getRoundCount() && !game.hasFinished()) {
+        while (game.getRound() < game.getRoundCount()) {
             skipRound(game);
         }
     }

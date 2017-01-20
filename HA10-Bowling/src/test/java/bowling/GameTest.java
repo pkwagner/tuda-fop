@@ -14,7 +14,8 @@ import static org.junit.Assert.*;
  * @author Marcel Lackovic
  */
 public class GameTest {
-    Game game;
+
+    private Game game;
 
     @Before
     public void setUp() throws Exception {
@@ -22,16 +23,18 @@ public class GameTest {
 
             @Override
             protected void onThrow(int count) {
-                throw new UnsupportedOperationException("This is just a mock class");
+                //This is just a mock class
             }
 
             @Override
             protected Player findWinner() {
-                throw new UnsupportedOperationException("This is just a mock class");
+                //This is just a mock class
+                return null;
             }
         };
 
         game.maxRounds = 3;
+        game.maxPins = 7;
         game.addPlayer("Kader");
     }
 
@@ -84,5 +87,69 @@ public class GameTest {
         assertEquals(1, game.getActivePlayer().getID());
         game.nextPlayer();
         assertEquals(0, game.getActivePlayer().getID());
+    }
+
+    @Test
+    public void testEnoughPlayers() {
+        assertFalse(game.startGame());
+
+        //min 2 players are required to start a game
+        game.addPlayer("Player2");
+        assertTrue(game.startGame());
+    }
+
+    @Test
+    public void testThrowCount() {
+        game.addPlayer("Player2");
+        game.startGame();
+
+        //invalid counts
+        assertFalse(game.throwBall(-5));
+        assertFalse(game.throwBall(11));
+
+        //first valid
+        assertTrue(game.throwBall(3));
+
+        assertEquals(2, game.getThrow());
+        //if three pins are hit by the first one, you can only hit 4 remaining
+        assertFalse(game.throwBall(5));
+        assertTrue(game.throwBall(4));
+    }
+
+    @Test
+    public void testMaxRounds() {
+        game.addPlayer("Player2");
+        game.startGame();
+        GameTest.skipToLastRound(game);
+
+        for (int player = 0; player < game.getActivePlayerCount(); player++) {
+            game.throwBall(0);
+            game.throwBall(0);
+        }
+
+        //max rounds already reached
+        assertTrue(game.hasFinished());
+        assertFalse(game.throwBall(3));
+    }
+
+    /**
+     * Skip all remaining players on the current until we reach the next round. All player will have a miss (0 points)
+     * in the meanwhile.
+     */
+    public static void skipRound(Game game) {
+        int prevRound = game.getRound();
+        //continue until we reach the next round
+        for (int round = prevRound; round == prevRound && !game.hasFinished(); round = game.getRound()) {
+            game.throwBall(0);
+        }
+    }
+
+    /**
+     * Shortcut for {@link #skipRound(Game)} until we reach the final round
+     */
+    public static void skipToLastRound(Game game) {
+        while (game.getRound() <= game.getRoundCount() && !game.hasFinished()) {
+            skipRound(game);
+        }
     }
 }

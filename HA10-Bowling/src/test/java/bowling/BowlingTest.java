@@ -53,7 +53,7 @@ public class BowlingTest {
         assertTrue(bowling.throwBall(5));
         assertTrue(bowling.throwBall(5));
 
-        skipRound();
+        GameTest.skipRound(bowling);
         bowling.throwBall(3);
         bowling.throwBall(2);
 
@@ -67,7 +67,7 @@ public class BowlingTest {
     public void testStrike() {
         assertTrue(bowling.throwBall(10));
 
-        skipRound();
+        GameTest.skipRound(bowling);
         bowling.throwBall(3);
         bowling.throwBall(2);
 
@@ -79,7 +79,7 @@ public class BowlingTest {
 
     @Test
     public void testLastRoundNormal() {
-        skipToLastRound();
+        GameTest.skipToLastRound(bowling);
 
         //test normal for the first player
         assertTrue(bowling.throwBall(3));
@@ -92,7 +92,7 @@ public class BowlingTest {
 
     @Test
     public void lastRoundSpare() {
-        skipToLastRound();
+        GameTest.skipToLastRound(bowling);
 
         assertTrue(bowling.throwBall(5));
         assertTrue(bowling.throwBall(5));
@@ -107,7 +107,7 @@ public class BowlingTest {
 
     @Test
     public void lastRoundStrike() {
-        skipToLastRound();
+        GameTest.skipToLastRound(bowling);
 
         assertTrue(bowling.throwBall(10));
         assertTrue(bowling.throwBall(10));
@@ -140,7 +140,7 @@ public class BowlingTest {
             }
 
             //always skip the third player with zero points
-            skipRound();
+            GameTest.skipRound(bowling);
         }
 
         assertEquals("Player2", bowling.getWinner().getName());
@@ -156,26 +156,5 @@ public class BowlingTest {
 
         //same points it should return the first player
         assertEquals("Player1", bowling.getWinner().getName());
-    }
-
-    /**
-     * Skip all remaining players on the current until we reach the next round. All player will have a miss (0 points)
-     * in the meanwhile.
-     */
-    private void skipRound() {
-        int prevRound = bowling.getRound();
-        //continue until we reach the next round
-        for (int round = prevRound; round == prevRound && !bowling.hasFinished(); round = bowling.getRound()) {
-            bowling.throwBall(0);
-        }
-    }
-
-    /**
-     * Shortcut for {@link #skipRound()} until we reach the final round
-     */
-    private void skipToLastRound() {
-        while (bowling.getRound() < bowling.getRoundCount()) {
-            skipRound();
-        }
     }
 }

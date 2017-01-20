@@ -48,8 +48,10 @@ public class TannenbaumKegeln extends Game {
         if (currentThrow == 2 || pinsLeft == 0) {
             updateScore(count);
 
-            if (this.checkFirTree(this.getActivePlayer()))
+            if (this.checkFirTree(this.getActivePlayer())) {
                 finished = true;
+                winner = findWinner();
+            }
         }
     }
 

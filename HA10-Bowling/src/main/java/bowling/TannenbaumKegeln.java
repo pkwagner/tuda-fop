@@ -1,7 +1,10 @@
 package bowling;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -96,7 +99,7 @@ public class TannenbaumKegeln extends Game {
      * @param player the player whose firTree should be checked
      * @return true if the firTree is empty, false if there are still pending goals
      */
-    private boolean checkFirTree(Player player) {
-        return Stream.of(scores[player.getID()]).allMatch(Predicate.isEqual(0));
+    public boolean checkFirTree(Player player) {
+        return Arrays.stream(scores[player.getID()]).allMatch(el -> el == 0);
     }
 }

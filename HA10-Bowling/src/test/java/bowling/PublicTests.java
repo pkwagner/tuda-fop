@@ -58,6 +58,7 @@ public class PublicTests {
             i++;
         }
 
-        assertEquals(game.getRound(), game.getRoundCount() + 1);
+        // Removed (+ 1), because it doesn't make sense on this point in our opinion
+        assertEquals(game.getRound(), game.getRoundCount());
     }
 }

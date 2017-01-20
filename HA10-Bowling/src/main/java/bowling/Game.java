@@ -171,7 +171,6 @@ public abstract class Game implements IGame {
                 System.err.println("[Error] The given pin count is either less than 0 or greater than the amount of " +
                         "remaining pins.");
         } else
-            throw new RuntimeException();
             System.err.println("[Error] The game has not been started or is already finished.");
 
         return false;

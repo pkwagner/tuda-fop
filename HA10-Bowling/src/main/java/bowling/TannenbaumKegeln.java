@@ -45,10 +45,13 @@ public class TannenbaumKegeln extends Game {
 
     @Override
     protected void onThrow(int count) {
+        // Only execute after the player finished the round (either after 2 throws or a strike)
         if (currentThrow == 2 || pinsLeft == 0) {
             updateScore(count);
 
+            // Has this player already finished the game?
             if (this.checkFirTree(this.getActivePlayer())) {
+                // Set game as finished and define winner
                 finished = true;
                 winner = findWinner();
             }
@@ -59,8 +62,10 @@ public class TannenbaumKegeln extends Game {
     public Player findWinner() {
         int bestPlayerId = 0, bestPlayerScore = -1;
         for (int i = 0; i < scores.length; i++) {
+            // Total amount of remaining goals
             int playerScore = Arrays.stream(scores[i]).sum();
 
+            // Did this player crack the highscore?
             if ((playerScore < bestPlayerScore) || (bestPlayerScore == -1)) {
                 bestPlayerId = i;
                 bestPlayerScore = playerScore;
@@ -70,9 +75,17 @@ public class TannenbaumKegeln extends Game {
         return this.getPlayer(bestPlayerId);
     }
 
+    /**
+     * Updates the player's score when going forward to the next player
+     *
+     * @param pinsHit The total amount of pins hit by this player
+     */
     protected void updateScore(int pinsHit) {
         int count = this.scores[this.getActivePlayer().getID()][this.getThrownPins()];
+
+        // Only decrease if there is at least one needed throw for this goal remaining
         if (count >= 1) {
+            // Decrease from goal!
             this.scores[this.getActivePlayer().getID()][this.getThrownPins()]--;
         }
     }

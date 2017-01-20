@@ -156,11 +156,14 @@ public abstract class Game implements IGame {
 
     @Override
     public boolean throwBall(int count) {
+        // Is the game still running?
         if (this.started && !this.finished) {
             if (count >= 0 && count <= this.pinsLeft) {
+                // Subtract count from remaining pins
                 this.pinsLeft -= count;
 
                 onThrow(count);
+                // Increment current throw by 1 and check if the max rounds is reached
                 if (currentThrow++ >= getMaxThrows(count) || pinsLeft == 0) {
                     nextPlayer();
                 }
@@ -189,6 +192,7 @@ public abstract class Game implements IGame {
      * @return the amount of maximum throws for this round
      */
     protected int getMaxThrows(int pinsHit) {
+        // If a strike was thrown, return the current throw amount as maximum value
         if (pinsLeft == 0) {
             return currentThrow;
         }
@@ -241,9 +245,11 @@ public abstract class Game implements IGame {
      * Increases the round counter
      */
     private void nextRound() {
+        // Check if this was the last round
         if (this.round < this.maxRounds) {
             this.round++;
         } else {
+            // Get winner and set game as finished
             this.finished = true;
             winner = findWinner();
         }
